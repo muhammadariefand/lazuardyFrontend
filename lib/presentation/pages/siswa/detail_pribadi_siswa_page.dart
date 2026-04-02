@@ -76,7 +76,7 @@ class _DetailPribadiSiswaPageState extends State<DetailPribadiSiswaPage> {
       await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
         setState(() => _isLoading = false);
-        Navigator.of(context).pushNamed('/home');
+        Navigator.of(context).pushNamed('/siswa/detail-alamat');
       }
     }
   }

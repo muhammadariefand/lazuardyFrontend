@@ -20,6 +20,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/forgot_password_sisw
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/reset_password_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/detail_pribadi_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/detail_alamat_siswa_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/beranda_siswa_page.dart';
 
 // ── Tutor ──────────────────────────────────────────────────────────
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/register_tutor_page.dart';
@@ -101,7 +102,7 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/reset-password': (_) => const ResetPasswordSiswaPage(),
 
           // ── Siswa: Home ────────────────────────────────────────
-          // '/siswa/beranda': (_) => const BerandaSiswaPage(),
+          '/siswa/beranda': (_) => const DummyBerandaPage(roleTitle: 'Siswa'),
 
           // ── Tutor: Register flow ───────────────────────────────
           '/tutor/register': (_) => const RegisterTutorPage(),

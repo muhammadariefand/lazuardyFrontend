@@ -77,7 +77,7 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
       await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
         setState(() => _isLoading = false);
-        Navigator.of(context).pushNamed('/otp');
+        Navigator.of(context).pushNamed('/siswa/beranda');
       }
     }
   }

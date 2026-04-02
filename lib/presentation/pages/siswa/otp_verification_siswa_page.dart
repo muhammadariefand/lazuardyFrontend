@@ -32,6 +32,7 @@ class _OtpVerificationSiswaPageState extends State<OtpVerificationSiswaPage> {
   final List<FocusNode> _focusNodes =
       List.generate(4, (_) => FocusNode());
 
+
   // Countdown timer: 55 menit = 3300 detik
   static const _initialSeconds = 3300;
   int _remainingSeconds = _initialSeconds;
@@ -125,7 +126,7 @@ class _OtpVerificationSiswaPageState extends State<OtpVerificationSiswaPage> {
       if (widget.context == 'forgot_password') {
         Navigator.of(context).pushNamed('/reset-password');
       } else {
-        Navigator.of(context).pushNamed('/register/address');
+        Navigator.of(context).pushNamed('/siswa/detail-pribadi');
       }
     }
   }
