@@ -220,7 +220,7 @@ class _LoginTutorPageState extends State<LoginTutorPage> {
                             style: AppTextStyles.bodySecondary),
                         GestureDetector(
                           onTap: () =>
-                              Navigator.of(context).pushNamed('/register'),
+                              Navigator.of(context).pushNamed('/tutor/register'),
                           child: const Text('Daftar',
                               style: AppTextStyles.linkTeal),
                         ),

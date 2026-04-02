@@ -41,7 +41,7 @@ class _RegisterSiswaPageState extends State<RegisterSiswaPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         // Navigasi ke halaman detail pribadi
-        Navigator.of(context).pushNamed('/register/detail');
+        Navigator.of(context).pushNamed('/siswa/detail-pribadi');
       }
     }
   }
@@ -193,7 +193,7 @@ class _RegisterSiswaPageState extends State<RegisterSiswaPage> {
                     }
                     return null;
                   },
-                ),
+                ), 
 
                 const SizedBox(height: 14),
 

@@ -26,7 +26,8 @@ class _FormulirPendaftaranTutorPageState
     'Matematika', 'Fisika', 'Kimia',
     'Biologi', 'B. Indonesia', 'B. Inggris',
     'Ekonomi', 'Sosiologi', 'Geografi',
-    'PKN', 'Informatika', 'Mengaji',
+    'PKN', 'Sejarah', 'Informatika',
+    'Mengaji'
   ];
 
   // ── State Upload Files ─────────────────────────────────────────

@@ -1,6 +1,8 @@
 // lib/presentation/pages/tutor/formulir_profil_tutor_page.dart
-// Formulir Profil — textarea deskripsi 300 char,
-// grid jadwal 14 jam (08:00–21:00) × 7 hari (Sen–Min)
+// FIXED: (1) _buildJenjangChips → _buildMetodeChips ditambahkan
+//        (2) Validasi _selectedMetode di _onSimpan()
+//        (3) Route '/otp' → '/tutor/otp'
+//        (4) Counter deskripsi berubah merah di 90% limit
 
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
@@ -14,14 +16,16 @@ class FormulirProfilTutorPage extends StatefulWidget {
       _FormulirProfilTutorPageState();
 }
 
-class _FormulirProfilTutorPageState
-    extends State<FormulirProfilTutorPage> {
+class _FormulirProfilTutorPageState extends State<FormulirProfilTutorPage> {
+  // ── Metode Pembelajaran (single select) ───────────────────────
+  String? _selectedMetode;
+  static const _metodeList = ['Online', 'Offline'];
+
+  // ── Deskripsi ─────────────────────────────────────────────────
   final _deskripsiCtrl = TextEditingController();
   static const _maxDeskripsi = 300;
 
-  // Grid jadwal: Map<'jam-hari', bool>
-  // jam index 0..13 → 08:00..21:00
-  // hari index 0..6 → Sen..Min
+  // ── Grid Jadwal: key = 'jamIdx-hariIdx' ──────────────────────
   final Map<String, bool> _jadwal = {};
 
   static const _jamList = [
@@ -30,7 +34,7 @@ class _FormulirProfilTutorPageState
   ];
 
   static const _hariList = [
-    'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'
+    'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min',
   ];
 
   bool _isLoading = false;
@@ -41,6 +45,7 @@ class _FormulirProfilTutorPageState
     super.dispose();
   }
 
+  // ── Helpers ───────────────────────────────────────────────────
   String _key(int jamIdx, int hariIdx) => '$jamIdx-$hariIdx';
 
   bool _isChecked(int jamIdx, int hariIdx) =>
@@ -51,7 +56,6 @@ class _FormulirProfilTutorPageState
     setState(() => _jadwal[key] = !(_jadwal[key] ?? false));
   }
 
-  // Ambil jadwal yang dipilih sebagai list of Map
   List<Map<String, String>> get _selectedJadwal {
     final result = <Map<String, String>>[];
     for (final entry in _jadwal.entries) {
@@ -66,41 +70,54 @@ class _FormulirProfilTutorPageState
     return result;
   }
 
+  // ── Validasi & Submit ─────────────────────────────────────────
   void _onSimpan() async {
-    if (_deskripsiCtrl.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Deskripsi wajib diisi'),
-          backgroundColor: AppColors.errorRed,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    // FIX 1: Validasi metode (sebelumnya tidak divalidasi)
+    if (_selectedMetode == null) {
+      _showError('Pilih metode pembelajaran terlebih dahulu');
       return;
     }
 
+    // FIX 2: Validasi deskripsi
+    if (_deskripsiCtrl.text.trim().isEmpty) {
+      _showError('Deskripsi wajib diisi');
+      return;
+    }
+
+    // FIX 3: Validasi jadwal
     if (_selectedJadwal.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pilih minimal 1 jadwal mengajar'),
-          backgroundColor: AppColors.errorRed,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      _showError('Pilih minimal 1 jadwal mengajar');
       return;
     }
 
     setState(() => _isLoading = true);
-    // TODO: Submit ke use case / repository
+    // TODO: Panggil use case simpan profil tutor
     await Future.delayed(const Duration(seconds: 1));
 
     if (mounted) {
       setState(() => _isLoading = false);
-      // Navigasi ke OTP setelah semua form terisi
+      // FIX 4: Route yang benar untuk tutor
       Navigator.of(context).pushNamed(
-        '/otp',
+        '/tutor/otp',
         arguments: {'context': 'register'},
       );
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.errorRed,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
   }
 
   @override
@@ -118,7 +135,7 @@ class _FormulirProfilTutorPageState
                   children: [
                     const SizedBox(height: 16),
 
-                    // ── Back ────────────────────────────────────
+                    // ── Back ─────────────────────────────────────
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back,
@@ -133,8 +150,15 @@ class _FormulirProfilTutorPageState
 
                     const Text('Formulir Profil Tutor',
                         style: AppTextStyles.heading2),
-
                     const SizedBox(height: 24),
+
+                    // ── Metode Pembelajaran ──────────────────────
+                    const Text('Metode Pembelajaran',
+                        style: AppTextStyles.label),
+                    const SizedBox(height: 10),
+                    _buildMetodeChips(), // FIX 5: method yang benar
+
+                    const SizedBox(height: 20),
 
                     // ── Deskripsi ────────────────────────────────
                     const Text('Deskripsi', style: AppTextStyles.label),
@@ -144,18 +168,14 @@ class _FormulirProfilTutorPageState
                     const SizedBox(height: 24),
 
                     // ── Jadwal Mengajar ──────────────────────────
-                    const Text('Jadwal Mengajar',
-                        style: AppTextStyles.label),
+                    const Text('Jadwal Mengajar', style: AppTextStyles.label),
                     const SizedBox(height: 4),
                     Text(
                       'Pilih hari dan jam sesuai ketersediaanmu',
                       style: TextStyle(
                           fontSize: 13, color: Colors.grey.shade500),
                     ),
-
                     const SizedBox(height: 16),
-
-                    // ── Grid Jadwal ──────────────────────────────
                     _buildScheduleGrid(),
 
                     const SizedBox(height: 32),
@@ -164,7 +184,7 @@ class _FormulirProfilTutorPageState
               ),
             ),
 
-            // ── Tombol Simpan & Kirim (sticky) ───────────────────
+            // ── Tombol sticky bottom ──────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
               child: PrimaryButton(
@@ -179,8 +199,52 @@ class _FormulirProfilTutorPageState
     );
   }
 
-  // ── Textarea deskripsi dengan character counter ───────────────
+  // ── FIX: Method ini yang sebelumnya TIDAK ADA (root cause error) ──
+  Widget _buildMetodeChips() {
+    return Row(
+      children: _metodeList.map((metode) {
+        final isSelected = _selectedMetode == metode;
+        return Padding(
+          padding: const EdgeInsets.only(right: 10),
+          child: GestureDetector(
+            onTap: () => setState(() => _selectedMetode = metode),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 24, vertical: 10),
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : AppColors.bgWhite,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.borderColor,
+                  width: isSelected ? 1.5 : 1.2,
+                ),
+              ),
+              child: Text(
+                metode,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight:
+                      isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color:
+                      isSelected ? Colors.white : AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // ── Textarea deskripsi + counter warna dinamis ─────────────────
   Widget _buildDeskripsiField() {
+    final currentLen = _deskripsiCtrl.text.length;
+    // Counter merah saat >= 90% dari limit
+    final isNearLimit = currentLen >= (_maxDeskripsi * 0.9).toInt();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -188,8 +252,8 @@ class _FormulirProfilTutorPageState
           controller: _deskripsiCtrl,
           maxLines: 5,
           maxLength: _maxDeskripsi,
-          buildCounter: (_, {required currentLength, required isFocused, maxLength}) =>
-              null, // custom counter di bawah
+          buildCounter: (_, {required currentLength,
+                required isFocused, maxLength}) => null,
           onChanged: (_) => setState(() {}),
           decoration: InputDecoration(
             hintText: 'Ceritakan pengalamanmu...',
@@ -200,8 +264,8 @@ class _FormulirProfilTutorPageState
             contentPadding: const EdgeInsets.all(16),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: AppColors.borderColor, width: 1.2),
+              borderSide: const BorderSide(
+                  color: AppColors.borderColor, width: 1.2),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -211,19 +275,22 @@ class _FormulirProfilTutorPageState
           ),
         ),
         const SizedBox(height: 4),
-        // Character counter
         Text(
-          '${_deskripsiCtrl.text.length}/$_maxDeskripsi',
-          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+          '$currentLen/$_maxDeskripsi',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight:
+                isNearLimit ? FontWeight.w600 : FontWeight.normal,
+            color: isNearLimit ? AppColors.errorRed : Colors.grey.shade500,
+          ),
         ),
       ],
     );
   }
 
-  // ── Schedule Grid 14 jam × 7 hari ────────────────────────────
+  // ── Grid jadwal 14 jam × 7 hari ───────────────────────────────
   Widget _buildScheduleGrid() {
-    // Column widths
-    const double timeColWidth = 48;
+    const double timeColWidth = 52;
     const double cellSize = 28.0;
     const double colSpacing = 8.0;
 
@@ -232,10 +299,10 @@ class _FormulirProfilTutorPageState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row (hari)
+          // Header hari
           Row(
             children: [
-              SizedBox(width: timeColWidth), // spacer untuk kolom jam
+              SizedBox(width: timeColWidth),
               ..._hariList.map(
                 (hari) => SizedBox(
                   width: cellSize + colSpacing,
@@ -256,7 +323,7 @@ class _FormulirProfilTutorPageState
 
           const SizedBox(height: 8),
 
-          // Data rows (jam × hari)
+          // Rows jam
           ..._jamList.asMap().entries.map((jamEntry) {
             final jamIdx = jamEntry.key;
             final jam = jamEntry.value;
@@ -265,30 +332,26 @@ class _FormulirProfilTutorPageState
               padding: const EdgeInsets.only(bottom: 6),
               child: Row(
                 children: [
-                  // Kolom waktu
                   SizedBox(
                     width: timeColWidth,
                     child: Text(
                       jam,
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         color: AppColors.textSecondary,
                       ),
                     ),
                   ),
-                  // Kolom checkbox per hari
                   ..._hariList.asMap().entries.map((hariEntry) {
                     final hariIdx = hariEntry.key;
                     final checked = _isChecked(jamIdx, hariIdx);
-
                     return SizedBox(
                       width: cellSize + colSpacing,
                       child: Center(
                         child: _ScheduleCheckbox(
                           checked: checked,
                           size: cellSize,
-                          onTap: () =>
-                              _toggleJadwal(jamIdx, hariIdx),
+                          onTap: () => _toggleJadwal(jamIdx, hariIdx),
                         ),
                       ),
                     );
@@ -303,7 +366,7 @@ class _FormulirProfilTutorPageState
   }
 }
 
-// ── Schedule Checkbox Widget ──────────────────────────────────────
+// ── Schedule Checkbox ──────────────────────────────────────────────
 class _ScheduleCheckbox extends StatelessWidget {
   final bool checked;
   final double size;
@@ -327,15 +390,12 @@ class _ScheduleCheckbox extends StatelessWidget {
           color: checked ? AppColors.primary : AppColors.bgWhite,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: checked
-                ? AppColors.primary
-                : AppColors.borderColor,
+            color: checked ? AppColors.primary : AppColors.borderColor,
             width: 1.2,
           ),
         ),
         child: checked
-            ? const Icon(Icons.check_rounded,
-                color: Colors.white, size: 16)
+            ? const Icon(Icons.check_rounded, color: Colors.white, size: 16)
             : null,
       ),
     );

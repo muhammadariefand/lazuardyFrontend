@@ -1,5 +1,9 @@
-// lib/presentation/pages/siswa/login_siswa_page.dart
-// Login — tab Siswa/Tutor/Orang Tua, form, ingat saya, OAuth
+// lib/presentation/pages/login_page.dart
+// Halaman Login terpadu — tab Siswa / Tutor / Orang Tua
+// Routing:
+// Siswa     --> login: /siswa/beranda  | daftar: /siswa/register
+// Tutor     --> login: /tutor/beranda  | daftar: /tutor/register
+// Orang Tua --> login saja (tidak ada daftar, gunakan akun anak)
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,17 +12,16 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
 
-// Tipe role user
 enum UserRole { siswa, tutor, orangTua }
 
-class LoginSiswaPage extends StatefulWidget {
-  const LoginSiswaPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<LoginSiswaPage> createState() => _LoginSiswaPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginSiswaPageState extends State<LoginSiswaPage> {
+class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
@@ -34,12 +37,60 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
     super.dispose();
   }
 
+  void _onRoleChanged(UserRole role) {
+    setState(() {
+      _selectedRole = role;
+      _emailCtrl.clear();
+      _passwordCtrl.clear();
+      _formKey.currentState?.reset();
+    });
+  }
+
   void _onLogin() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthCubit>().login(
-            _emailCtrl.text,
+            _emailCtrl.text.trim(),
             _passwordCtrl.text,
           );
+    }
+  }
+
+  // Navigasi beranda sesuai role setelah login sukses
+  void _navigateAfterLogin() {
+    switch (_selectedRole) {
+      case UserRole.siswa:
+        Navigator.of(context).pushReplacementNamed('/siswa/beranda');
+        break;
+      case UserRole.tutor:
+        Navigator.of(context).pushReplacementNamed('/tutor/beranda');
+        break;
+      case UserRole.orangTua:
+        Navigator.of(context).pushReplacementNamed('/orang-tua/beranda');
+        break;
+    }
+  }
+
+  // Navigasi daftar sesuai role (tidak dipanggil untuk Orang Tua)
+  void _navigateToRegister() {
+    switch (_selectedRole) {
+      case UserRole.siswa:
+        Navigator.of(context).pushNamed('/siswa/register');
+        break;
+      case UserRole.tutor:
+        Navigator.of(context).pushNamed('/tutor/register');
+        break;
+      case UserRole.orangTua:
+        break; // tidak akan terjadi
+    }
+  }
+
+  String get _forgotPasswordRoute {
+    switch (_selectedRole) {
+      case UserRole.siswa:
+      case UserRole.orangTua:
+        return '/siswa/forgot-password';
+      case UserRole.tutor:
+        return '/tutor/forgot-password';
     }
   }
 
@@ -49,17 +100,18 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
       backgroundColor: AppColors.bgWhite,
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
-          if (state is AuthSuccess) {
-            Navigator.of(context).pushReplacementNamed('/home');
-          }
+          if (state is AuthSuccess) _navigateAfterLogin();
           if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(
                 content: Text(state.message),
                 backgroundColor: AppColors.errorRed,
                 behavior: SnackBarBehavior.floating,
-              ),
-            );
+                margin: const EdgeInsets.all(16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ));
           }
         },
         builder: (context, state) {
@@ -73,37 +125,31 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 16),
-
-                    // ── Back Button ───────────────────────────
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back,
-                          color: AppColors.textPrimary),
+                      icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
+                    const SizedBox(height: 20),
+                    const BimbelLogo(size: 80),
+                    const SizedBox(height: 16),
+                    const Text('Masuk', style: AppTextStyles.heading1),
+                    const SizedBox(height: 16),
 
+                    // Tab role
+                    _RoleTabSelector(selected: _selectedRole, onChanged: _onRoleChanged),
                     const SizedBox(height: 20),
 
-                    // ── Logo ──────────────────────────────────
-                    const BimbelLogo(size: 80),
+                    // Info banner khusus Orang Tua
+                    if (_selectedRole == UserRole.orangTua) ...[
+                      const _InfoBanner(
+                        message: 'Gunakan email dan password akun anak Anda untuk masuk sebagai orang tua.',
+                      ),
+                      const SizedBox(height: 16),
+                    ],
 
-                    const SizedBox(height: 16),
-
-                    // ── Judul "Masuk" ─────────────────────────
-                    const Text('Masuk', style: AppTextStyles.heading1),
-
-                    const SizedBox(height: 16),
-
-                    // ── Tab Siswa / Tutor / Orang Tua ─────────
-                    _RoleTabSelector(
-                      selectedRole: _selectedRole,
-                      onChanged: (role) => setState(() => _selectedRole = role),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // ── Email Field ───────────────────────────
+                    // Email
                     const Text('Email', style: AppTextStyles.label),
                     const SizedBox(height: 8),
                     TextFormField(
@@ -116,9 +162,7 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
                             color: AppColors.textSecondary, size: 20),
                       ),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Email wajib diisi';
-                        }
+                        if (v == null || v.trim().isEmpty) return 'Email wajib diisi';
                         if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(v)) {
                           return 'Format email tidak valid';
                         }
@@ -128,7 +172,7 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
 
                     const SizedBox(height: 16),
 
-                    // ── Password Field ────────────────────────
+                    // Kata Sandi
                     const Text('Kata Sandi', style: AppTextStyles.label),
                     const SizedBox(height: 8),
                     TextFormField(
@@ -144,8 +188,7 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
                             _obscurePassword
                                 ? Icons.visibility_outlined
                                 : Icons.visibility_off_outlined,
-                            color: AppColors.textSecondary,
-                            size: 20,
+                            color: AppColors.textSecondary, size: 20,
                           ),
                           onPressed: () => setState(
                               () => _obscurePassword = !_obscurePassword),
@@ -160,19 +203,17 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
 
                     const SizedBox(height: 12),
 
-                    // ── Ingat Saya + Lupa Password ────────────
+                    // Ingat saya + Lupa password
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         RememberMeCheckbox(
                           value: _rememberMe,
-                          onChanged: (v) =>
-                              setState(() => _rememberMe = v ?? false),
+                          onChanged: (v) => setState(() => _rememberMe = v ?? false),
                         ),
                         TextButton(
-                          onPressed: () {
-                            // TODO: navigasi lupa password
-                          },
+                          onPressed: () =>
+                              Navigator.of(context).pushNamed(_forgotPasswordRoute),
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
                             minimumSize: const Size(0, 36),
@@ -190,42 +231,28 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
                     ),
 
                     const SizedBox(height: 24),
-
-                    // ── Tombol Masuk ──────────────────────────
-                    PrimaryButton(
-                      label: 'Masuk',
-                      onPressed: _onLogin,
-                      isLoading: isLoading,
-                    ),
-
+                    PrimaryButton(label: 'Masuk', onPressed: _onLogin, isLoading: isLoading),
                     const SizedBox(height: 24),
-
-                    // ── Divider ───────────────────────────────
                     const OrDivider(),
-
                     const SizedBox(height: 20),
-
-                    // ── OAuth ─────────────────────────────────
                     GoogleSignInButton(onPressed: () {}),
                     const SizedBox(height: 12),
                     FacebookSignInButton(onPressed: () {}),
-
                     const SizedBox(height: 20),
 
-                    // ── Daftar Link ───────────────────────────
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Belum Punya Akun? ',
-                            style: AppTextStyles.bodySecondary),
-                        GestureDetector(
-                          onTap: () =>
-                              Navigator.of(context).pushNamed('/siswa/register'),
-                          child: const Text('Daftar',
-                              style: AppTextStyles.linkTeal),
-                        ),
-                      ],
-                    ),
+                    // Daftar — HANYA untuk Siswa & Tutor, Orang Tua tidak muncul
+                    if (_selectedRole != UserRole.orangTua)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Belum Punya Akun? ',
+                              style: AppTextStyles.bodySecondary),
+                          GestureDetector(
+                            onTap: _navigateToRegister,
+                            child: const Text('Daftar', style: AppTextStyles.linkTeal),
+                          ),
+                        ],
+                      ),
 
                     const SizedBox(height: 32),
                   ],
@@ -239,15 +266,11 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
   }
 }
 
-// ── Role Tab Selector Widget ─────────────────────────────────────
+// ── Tab Selector ───────────────────────────────────────────────────
 class _RoleTabSelector extends StatelessWidget {
-  final UserRole selectedRole;
+  final UserRole selected;
   final ValueChanged<UserRole> onChanged;
-
-  const _RoleTabSelector({
-    required this.selectedRole,
-    required this.onChanged,
-  });
+  const _RoleTabSelector({required this.selected, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -259,7 +282,7 @@ class _RoleTabSelector extends StatelessWidget {
       ),
       child: Row(
         children: UserRole.values.map((role) {
-          final isSelected = selectedRole == role;
+          final isSelected = selected == role;
           return Expanded(
             child: GestureDetector(
               onTap: () => onChanged(role),
@@ -272,15 +295,11 @@ class _RoleTabSelector extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  _roleLabel(role),
+                  _label(role),
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.w400,
-                    color: isSelected
-                        ? Colors.white
-                        : AppColors.textSecondary,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: isSelected ? Colors.white : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -291,14 +310,47 @@ class _RoleTabSelector extends StatelessWidget {
     );
   }
 
-  String _roleLabel(UserRole role) {
+  String _label(UserRole role) {
     switch (role) {
-      case UserRole.siswa:
-        return 'Siswa';
-      case UserRole.tutor:
-        return 'Tutor';
-      case UserRole.orangTua:
-        return 'Orang Tua';
+      case UserRole.siswa: return 'Siswa';
+      case UserRole.tutor: return 'Tutor';
+      case UserRole.orangTua: return 'Orang Tua';
     }
+  }
+}
+
+// ── Info Banner kuning ─────────────────────────────────────────────
+class _InfoBanner extends StatelessWidget {
+  final String message;
+  const _InfoBanner({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFFFE082), width: 1),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline_rounded,
+              color: Color(0xFFF59E0B), size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Color(0xFF92400E),
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

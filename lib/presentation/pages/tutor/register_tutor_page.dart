@@ -77,7 +77,7 @@ class _RegisterTutorPageState extends State<RegisterTutorPage> {
                 const SizedBox(height: 16),
 
                 // ── Judul ─────────────────────────────────────
-                const Text('Daftar sebagai siswa',
+                const Text('Daftar sebagai tutor',
                     style: AppTextStyles.heading1),
 
                 const SizedBox(height: 6),
