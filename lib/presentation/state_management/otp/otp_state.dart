@@ -5,8 +5,8 @@ class OtpLoading extends OtpState {}
 
 // Gunakan nama yang spesifik agar tidak tabrakan dengan Entity
 class OtpSendSuccess extends OtpState {
-  final String message;
-  OtpSendSuccess(this.message);
+  final String status;
+  OtpSendSuccess(this.status);
 }
 
 class OtpSendError extends OtpState {

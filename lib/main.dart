@@ -3,7 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/otp_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/dependency_injection.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 
@@ -30,6 +32,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/tutor/reset_password_tutor
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/detail_pribadi_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/formulir_pendaftaran_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/formulir_profil_tutor_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/otp/otp_cubit.dart';
 
 // ── Orang Tua ──────────────────────────────────────────────────────
 
@@ -85,17 +88,21 @@ class LazuardyApp extends StatelessWidget {
           '/login': (_) => const LoginPage(),
 
           // ── Siswa: Register flow ───────────────────────────────
-          '/siswa/register': (_) => const RegisterSiswaPage(),
+          '/siswa/register': (_) => BlocProvider(
+              create: (context) => OtpCubit(OtpRepositoryImpl(ApiClient())),
+              child: const RegisterSiswaPage(),
+            ),
           '/siswa/detail-pribadi': (_) => const DetailPribadiSiswaPage(),
           '/siswa/detail-alamat': (_) => const DetailAlamatSiswaPage(),
-          '/siswa/otp-verification': (ctx) {
-            final args = ModalRoute.of(ctx)?.settings.arguments
-                as Map<String, String>?;
-            return OtpVerificationSiswaPage(
-              email: args?['email'],
-              context: args?['context'] ?? 'register',
-            );
-          },
+          '/siswa/otp-verification': (context) => const OtpVerificationSiswaPage(),
+          // '/siswa/otp-verification': (ctx) {
+          //   final args = ModalRoute.of(ctx)?.settings.arguments
+          //       as Map<String, String>?;
+          //   return OtpVerificationSiswaPage(
+          //     email: args?['email'],
+          //     context: args?['context'] ?? 'register',
+          //   );
+          
 
           // ── Siswa: Auth flow ───────────────────────────────────
           '/siswa/forgot-password': (_) => const ForgotPasswordSiswaPage(),
