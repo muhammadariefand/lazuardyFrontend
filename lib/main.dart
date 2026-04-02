@@ -88,7 +88,7 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/register': (_) => const RegisterSiswaPage(),
           '/siswa/detail-pribadi': (_) => const DetailPribadiSiswaPage(),
           '/siswa/detail-alamat': (_) => const DetailAlamatSiswaPage(),
-          '/siswa/otp': (ctx) {
+          '/siswa/otp-verification': (ctx) {
             final args = ModalRoute.of(ctx)?.settings.arguments
                 as Map<String, String>?;
             return OtpVerificationSiswaPage(
