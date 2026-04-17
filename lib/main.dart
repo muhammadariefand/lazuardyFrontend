@@ -149,8 +149,7 @@ class LazuardyApp extends StatelessWidget {
           // ── Tutor: Register flow ───────────────────────────────
           '/tutor/register': (_) => const RegisterTutorPage(),
           '/tutor/detail-pribadi': (_) => const DetailPribadiTutorPage(),
-          '/tutor/formulir-pendaftaran': (_) =>
-              const FormulirPendaftaranTutorPage(),
+          '/tutor/formulir-pendaftaran': (_) => const FormulirPendaftaranTutorPage(),
           '/tutor/formulir-profil': (_) => const FormulirProfilTutorPage(),
           '/tutor/otp': (ctx) {
             final args = ModalRoute.of(ctx)?.settings.arguments
