@@ -10,7 +10,8 @@ class KonfirmasiPembatalanPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, String>?;
+    final settingsArgs = ModalRoute.of(context)?.settings.arguments;
+    final args = settingsArgs is Map ? settingsArgs.cast<String, String>() : null;
     final alasan = args?['alasan'] ?? 'Lainnya';
 
     return Scaffold(

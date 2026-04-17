@@ -38,8 +38,18 @@ class _BatalkanSesiPageState extends State<BatalkanSesiPage> {
       ));
       return;
     }
-    Navigator.pushNamed(context, '/siswa/konfirmasi-pembatalan',
-      arguments: {'alasan': _selectedAlasan});
+
+    // LOGIKA BARU: Jika pilih 'Lainnya', ambil teks dari controller
+    String alasanFinal = _selectedAlasan!;
+    if (_selectedAlasan == 'Lainnya' && _lainnyaCtrl.text.isNotEmpty) {
+      alasanFinal = _lainnyaCtrl.text;
+    }
+
+    Navigator.pushNamed(
+      context, 
+      '/siswa/konfirmasi-pembatalan',
+      arguments: {'alasan': alasanFinal}, // Mengirim Map<String, String>
+    );
   }
 
   @override

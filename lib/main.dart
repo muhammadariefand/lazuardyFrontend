@@ -7,6 +7,14 @@ import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/otp_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/dependency_injection.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/batalkan_sesi_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/detail_sesi_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/edit_profil_siswa_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/jadwal_siswa_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/konfirmasi_pembatalan_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/laporan_siswa_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/profil_siswa_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/sesi_dibatalkan_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 
 // ── Shared ─────────────────────────────────────────────────────────
@@ -110,6 +118,15 @@ class LazuardyApp extends StatelessWidget {
 
           // ── Siswa: Home ────────────────────────────────────────
           '/siswa/beranda': (_) => const BerandaSiswaPage(),
+          '/siswa/jadwal': (_) => const JadwalSiswaPage(),
+          '/siswa/detail-sesi': (_) => const DetailSesiPage(),
+          '/siswa/batalkan-sesi': (_) => const BatalkanSesiPage(),
+          '/siswa/konfirmasi-pembatalan': (_) => const KonfirmasiPembatalanPage(),
+          '/siswa/sesi-dibatalkan': (_) => const SesiDibatalkanPage(),
+          '/siswa/laporan': (_) => const LaporanSiswaPage(),
+          '/siswa/profil': (_) => const ProfilSiswaPage(),
+          '/siswa/edit-profil': (_) => const EditProfilSiswaPage(),
+
 
           // ── Tutor: Register flow ───────────────────────────────
           '/tutor/register': (_) => const RegisterTutorPage(),

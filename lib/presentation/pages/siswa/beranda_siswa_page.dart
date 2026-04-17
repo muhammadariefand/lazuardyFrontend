@@ -14,14 +14,13 @@ class BerandaSiswaPage extends StatefulWidget {
 }
 
 class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
-  // Data dummy — ganti dengan Cubit state
   static const _nama = 'Mardhika Murni';
   static const _sesiTersisa = 5;
   static const _sesiTotal = 8;
   static const _sesiDigunakan = 3;
-  static const _hasWarning = true;
-  static const _warningCount = 1;
-  static const _warningMax = 3;
+  // static const _hasWarning = true;
+  // static const _warningCount = 1;
+  // static const _warningMax = 3;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +38,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
             physics: const BouncingScrollPhysics(),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const SizedBox(height: 16),
-              if (_hasWarning) ...[_buildWarningBanner(), const SizedBox(height: 12)],
+              // if (_hasWarning) ...[_buildWarningBanner(), const SizedBox(height: 12)],
               _buildKartuSesi(),
               const SizedBox(height: 20),
               _buildMenuGrid(),
@@ -73,28 +72,28 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
     ]),
   );
 
-  Widget _buildWarningBanner() => Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16),
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: const Color(0xFFFFF8E1),
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: const Color(0xFFFFE082)),
-    ),
-    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('⚠️', style: TextStyle(fontSize: 18)),
-      const SizedBox(width: 10),
-      Expanded(child: RichText(text: TextSpan(
-        style: const TextStyle(fontSize: 13, color: Color(0xFF92400E), height: 1.5),
-        children: [
-          TextSpan(text: 'Peringatan ($_warningCount/$_warningMax)\n', style: const TextStyle(fontWeight: FontWeight.w700)),
-          const TextSpan(text: 'Anda telah menerima 1 peringatan.\nJika mencapai 3 peringatan, akun akan '),
-          const TextSpan(text: 'disuspend selama 7 hari', style: TextStyle(fontWeight: FontWeight.w700)),
-          const TextSpan(text: '.\nMohon gunakan platform sesuai ketentuan.'),
-        ],
-      ))),
-    ]),
-  );
+  // Widget _buildWarningBanner() => Container(
+  //   margin: const EdgeInsets.symmetric(horizontal: 16),
+  //   padding: const EdgeInsets.all(16),
+  //   decoration: BoxDecoration(
+  //     color: const Color(0xFFFFF8E1),
+  //     borderRadius: BorderRadius.circular(14),
+  //     border: Border.all(color: const Color(0xFFFFE082)),
+  //   ),
+  //   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+  //     const Text('⚠️', style: TextStyle(fontSize: 18)),
+  //     const SizedBox(width: 10),
+  //     Expanded(child: RichText(text: TextSpan(
+  //       style: const TextStyle(fontSize: 13, color: Color(0xFF92400E), height: 1.5),
+  //       children: [
+  //         TextSpan(text: 'Peringatan ($_warningCount/$_warningMax)\n', style: const TextStyle(fontWeight: FontWeight.w700)),
+  //         const TextSpan(text: 'Anda telah menerima 1 peringatan.\nJika mencapai 3 peringatan, akun akan '),
+  //         const TextSpan(text: 'disuspend selama 7 hari', style: TextStyle(fontWeight: FontWeight.w700)),
+  //         const TextSpan(text: '.\nMohon gunakan platform sesuai ketentuan.'),
+  //       ],
+  //     ))),
+  //   ]),
+  // );
 
   Widget _buildKartuSesi() {
     final progress = _sesiDigunakan / _sesiTotal;
