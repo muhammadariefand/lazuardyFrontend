@@ -109,7 +109,7 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/reset-password': (_) => const ResetPasswordSiswaPage(),
 
           // ── Siswa: Home ────────────────────────────────────────
-          '/siswa/beranda': (_) => const DummyBerandaPage(roleTitle: 'Siswa'),
+          '/siswa/beranda': (_) => const BerandaSiswaPage(),
 
           // ── Tutor: Register flow ───────────────────────────────
           '/tutor/register': (_) => const RegisterTutorPage(),
