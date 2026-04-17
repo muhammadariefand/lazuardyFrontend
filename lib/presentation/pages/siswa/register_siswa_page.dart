@@ -250,6 +250,3 @@ class _RegisterSiswaPageState extends State<RegisterSiswaPage> {
     );
   }
 }
-            
-            
-            
