@@ -39,7 +39,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const SizedBox(height: 16),
               // if (_hasWarning) ...[_buildWarningBanner(), const SizedBox(height: 12)],
-              _buildKartuSesi(),
+              _buildKartuSesi(context),
               const SizedBox(height: 20),
               _buildMenuGrid(),
               const SizedBox(height: 24),
@@ -95,34 +95,57 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
   //   ]),
   // );
 
-  Widget _buildKartuSesi() {
+  Widget _buildKartuSesi(BuildContext context) {
     final progress = _sesiDigunakan / _sesiTotal;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 10, offset: const Offset(0, 4))]),
+      decoration: BoxDecoration(
+        color: Colors.white, 
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.07), 
+            blurRadius: 10, 
+            offset: const Offset(0, 4)
+          )
+        ]
+      ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text('Paket Tersisa', style: TextStyle(fontSize: 13, color: AppColors.textPrimary)),
         const SizedBox(height: 4),
         Row(crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
-          const Text('$_sesiTersisa', style: TextStyle(fontSize: 40, fontWeight: FontWeight.w800, color: AppColors.textPrimary, height: 1)),
+          Text('$_sesiTersisa', style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w800, color: AppColors.textPrimary, height: 1)),
           const SizedBox(width: 4),
           Text('/$_sesiTotal', style: const TextStyle(fontSize: 18, color: AppColors.textSecondary)),
         ]),
         Align(alignment: Alignment.centerRight, child: Text('Total: $_sesiTotal', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary))),
         const SizedBox(height: 6),
         ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(
-          value: progress, minHeight: 10,
+          value: progress, 
+          minHeight: 10,
           backgroundColor: Colors.grey.shade200,
           valueColor: const AlwaysStoppedAnimation<Color>(_navy),
         )),
         const SizedBox(height: 14),
-        SizedBox(width: double.infinity, height: 46, child: ElevatedButton(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(backgroundColor: _navy, foregroundColor: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-          child: const Text('Beli Paket', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-        )),
+        
+        // TOMBOL DENGAN NAVIGASI
+        SizedBox(
+          width: double.infinity, 
+          height: 46, 
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/siswa/beli-paket');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _navy, 
+              foregroundColor: Colors.white, 
+              elevation: 0, 
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+            ),
+            child: const Text('Beli Paket', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          ),
+        ),
       ]),
     );
   }
