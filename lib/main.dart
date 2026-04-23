@@ -8,6 +8,11 @@ import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/otp_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/dependency_injection.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/batalkan_sesi_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/booking/booking_berhasil_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/booking/konfirmasi_booking_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/booking/pilih_jadwal_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/booking/pilih_kategori_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/booking/pilih_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/detail_sesi_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/edit_profil_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/jadwal_siswa_page.dart';
@@ -145,6 +150,13 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/pembayaran': (_) => PembayaranPage(),
           '/siswa/kode-pembayaran': (_) => KodePembayaranPage(),
           '/siswa/pembayaran-berhasil': (_) => PembayaranBerhasilPage(),
+
+          // ── Siswa: Booking ────────────────────────────────────────
+          '/siswa/booking/pilih-kategori': (_) => const PilihKategoriPage(),
+          '/siswa/booking/pilih-tutor': (_) => const PilihTutorPage(),
+          '/siswa/booking/pilih-jadwal': (_) => const PilihJadwalPage(),
+          '/siswa/booking/konfirmasi': (_) => const KonfirmasiBookingPage(),
+          '/siswa/booking/berhasil': (_) => const BookingBerhasilPage(),
 
           // ── Tutor: Register flow ───────────────────────────────
           '/tutor/register': (_) => const RegisterTutorPage(),

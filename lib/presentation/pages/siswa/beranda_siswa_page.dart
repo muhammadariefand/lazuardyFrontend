@@ -152,7 +152,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
 
   Widget _buildMenuGrid() {
     final items = [
-      ('📚', 'Booking\n  ', '/siswa/booking'),
+      ('📚', 'Booking\n  ', '/siswa/booking/pilih-kategori'),
       ('🕐', 'Riwayat\nSesi', '/siswa/riwayat-sesi'),
       ('⭐', 'Riwayat\nUlasan Tutor', '/siswa/ulasan'),
       ('💳', 'Riwayat\nPembayaran', '/siswa/pembayaran'),
