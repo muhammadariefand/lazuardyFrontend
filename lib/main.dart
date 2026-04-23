@@ -19,6 +19,9 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/jadwal_siswa_page.da
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/konfirmasi_pembatalan_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/laporan_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/profil_siswa_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/detail_riwayat_sesi_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/rating_tutor_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/riwayat_sesi_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/sesi_dibatalkan_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 
@@ -157,6 +160,11 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/booking/pilih-jadwal': (_) => const PilihJadwalPage(),
           '/siswa/booking/konfirmasi': (_) => const KonfirmasiBookingPage(),
           '/siswa/booking/berhasil': (_) => const BookingBerhasilPage(),
+
+          // ── Siswa: Riwayat Sesi ────────────────────────────────────────
+          '/siswa/riwayat-sesi': (_) => const RiwayatSesiPage(),
+          '/siswa/riwayat-sesi/detail': (_) => const DetailRiwayatSesiPage(),
+          '/siswa/riwayat-sesi/rating': (_) => const RatingTutorPage(),
 
           // ── Tutor: Register flow ───────────────────────────────
           '/tutor/register': (_) => const RegisterTutorPage(),
