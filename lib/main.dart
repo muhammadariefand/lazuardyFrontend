@@ -47,10 +47,10 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/konfirmasi_pembatala
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/laporan_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/profil_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/sesi_dibatalkan_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/beli_paket_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/pembayaran_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/kode_pembayaran_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/pembayaran_berhasil_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/beli_paket/beli_paket_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/beli_paket/pembayaran_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/beli_paket/kode_pembayaran_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/beli_paket/pembayaran_berhasil_page.dart';
 
 
 // ── Tutor ──────────────────────────────────────────────────────────
@@ -83,33 +83,6 @@ class LazuardyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
         initialRoute: '/',
-
-        // ════════════════════════════════════════════════════════
-        // ALUR NAVIGASI
-        //
-        // SPLASH → TAGLINE → LOGIN (tab pilih role)
-        //
-        // [LOGIN - TAB SISWA]
-        //   Masuk  → /siswa/beranda
-        //   Daftar → /siswa/register → /siswa/detail-pribadi
-        //          → /siswa/detail-alamat → /siswa/otp → /siswa/beranda
-        //   Lupa   → /siswa/forgot-password → /siswa/otp
-        //          → /siswa/reset-password → /login
-        //
-        // [LOGIN - TAB TUTOR]
-        //   Masuk  → /tutor/beranda
-        //   Daftar → /tutor/register → /tutor/detail-pribadi
-        //          → /tutor/formulir-pendaftaran → /tutor/formulir-profil
-        //          → /siswa/detail-alamat (shared) → /tutor/otp → /tutor/beranda
-        //   Lupa   → /tutor/forgot-password → /tutor/otp
-        //          → /tutor/reset-password → /login
-        //
-        // [LOGIN - TAB ORANG TUA]
-        //   Masuk  → /orang-tua/beranda
-        //   ❌ TIDAK ada tombol Daftar
-        //   ❌ TIDAK ada halaman register orang tua
-        // ════════════════════════════════════════════════════════
-
         routes: {
           // ── Entry ─────────────────────────────────────────────
           '/': (_) => const SplashPage(),
