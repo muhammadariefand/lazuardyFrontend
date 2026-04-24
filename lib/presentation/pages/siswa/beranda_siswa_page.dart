@@ -155,7 +155,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
       ('📚', 'Booking\n  ', '/siswa/booking/pilih-kategori'),
       ('🕐', 'Riwayat\nSesi', '/siswa/riwayat-sesi'),
       ('⭐', 'Riwayat\nUlasan Tutor', '/siswa/ulasan-tutor'),
-      ('💳', 'Riwayat\nPembayaran', '/siswa/pembayaran'),
+      ('💳', 'Riwayat\nPembayaran', '/siswa/riwayat-pembayaran'),
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),

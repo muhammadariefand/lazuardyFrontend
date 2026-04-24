@@ -19,6 +19,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/jadwal_siswa_page.da
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/konfirmasi_pembatalan_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/laporan_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/profil_siswa_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_pembayaran/riwayat_pembayaran_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/detail_riwayat_sesi_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/rating_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/riwayat_sesi_page.dart';
@@ -142,6 +143,9 @@ class LazuardyApp extends StatelessWidget {
 
           // ── Siswa: Riwayat Ulasan Tutor ────────────────────────────────
           '/siswa/ulasan-tutor': (_) => const UlasanTutorPage(),
+
+          // ── Siswa: Riwayat Pembayaran ────────────────────────────────
+          '/siswa/riwayat-pembayaran': (_) => const RiwayatPembayaranPage(),
 
           // ── Tutor: Register flow ───────────────────────────────
           '/tutor/register': (_) => const RegisterTutorPage(),
