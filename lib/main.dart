@@ -23,6 +23,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/detail_
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/rating_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/riwayat_sesi_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/sesi_dibatalkan_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/ulasan_tutor/ulasan_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 
 // ── Shared ─────────────────────────────────────────────────────────
@@ -138,6 +139,9 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/riwayat-sesi': (_) => const RiwayatSesiPage(),
           '/siswa/riwayat-sesi/detail': (_) => const DetailRiwayatSesiPage(),
           '/siswa/riwayat-sesi/rating': (_) => const RatingTutorPage(),
+
+          // ── Siswa: Riwayat Ulasan Tutor ────────────────────────────────
+          '/siswa/ulasan-tutor': (_) => const UlasanTutorPage(),
 
           // ── Tutor: Register flow ───────────────────────────────
           '/tutor/register': (_) => const RegisterTutorPage(),

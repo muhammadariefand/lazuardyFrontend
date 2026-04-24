@@ -154,7 +154,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
     final items = [
       ('📚', 'Booking\n  ', '/siswa/booking/pilih-kategori'),
       ('🕐', 'Riwayat\nSesi', '/siswa/riwayat-sesi'),
-      ('⭐', 'Riwayat\nUlasan Tutor', '/siswa/ulasan'),
+      ('⭐', 'Riwayat\nUlasan Tutor', '/siswa/ulasan-tutor'),
       ('💳', 'Riwayat\nPembayaran', '/siswa/pembayaran'),
     ];
     return Padding(
