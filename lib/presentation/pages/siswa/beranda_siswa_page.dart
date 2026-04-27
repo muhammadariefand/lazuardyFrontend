@@ -225,6 +225,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
     final tutors = [
       ('Ibu Sarah', 'Matematika', 4.9, 127, '"Pengajar matematika dengan pengalaman lebih dari 3 tahun, fokus pada pemahaman konsep dan latihan soal efektif."', 'S'),
       ('Ibu Dewi', 'Fisika', 4.8, 98, '"Pengajar fisika dengan pengalaman lebih dari 3 tahun, fokus pada pemahaman konsep dan latihan soal efektif."', 'D'),
+      ('Bapak Arief', 'Informatika', 4.8, 98, '"Pengajar informatika dengan pengalaman lebih dari 3 tahun, fokus pada pemahaman konsep algoritma dan latihan coding efektif."', 'D'),
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(
