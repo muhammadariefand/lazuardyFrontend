@@ -77,9 +77,9 @@ class _BatalkanSesiPageState extends State<BatalkanSesiPage> {
           _buildSesiSummary(),
           const SizedBox(height: 16),
 
-          // Warning peringatan
-          _buildWarning(),
-          const SizedBox(height: 16),
+          // // Warning peringatan
+          // _buildWarning(),
+          // const SizedBox(height: 16),
 
           // Kebijakan pembatalan
           _buildKebijakan(),
@@ -136,23 +136,23 @@ class _BatalkanSesiPageState extends State<BatalkanSesiPage> {
       Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: textColor)),
     ]));
 
-  Widget _buildWarning() => Container(
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(color: const Color(0xFFFFF8E1), borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: const Color(0xFFFFE082))),
-    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('⚠️', style: TextStyle(fontSize: 16)),
-      const SizedBox(width: 8),
-      const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Peringatan (1/3)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF92400E))),
-        SizedBox(height: 4),
-        Text('Anda akan menerima 1 peringatan.\nJika mencapai 3 peringatan, akun akan ',
-          style: TextStyle(fontSize: 12, color: Color(0xFF92400E), height: 1.4)),
-        Text('disuspend selama 7 hari', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF92400E))),
-        Text('.\nMohon gunakan platform sesuai ketentuan.', style: TextStyle(fontSize: 12, color: Color(0xFF92400E), height: 1.4)),
-      ])),
-    ]),
-  );
+  // Widget _buildWarning() => Container(
+  //   padding: const EdgeInsets.all(14),
+  //   decoration: BoxDecoration(color: const Color(0xFFFFF8E1), borderRadius: BorderRadius.circular(12),
+  //     border: Border.all(color: const Color(0xFFFFE082))),
+  //   child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+  //     const Text('⚠️', style: TextStyle(fontSize: 16)),
+  //     const SizedBox(width: 8),
+  //     const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+  //       Text('Peringatan (1/3)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF92400E))),
+  //       SizedBox(height: 4),
+  //       Text('Anda akan menerima 1 peringatan.\nJika mencapai 3 peringatan, akun akan ',
+  //         style: TextStyle(fontSize: 12, color: Color(0xFF92400E), height: 1.4)),
+  //       Text('disuspend selama 7 hari', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF92400E))),
+  //       Text('.\nMohon gunakan platform sesuai ketentuan.', style: TextStyle(fontSize: 12, color: Color(0xFF92400E), height: 1.4)),
+  //     ])),
+  //   ]),
+  // );
 
   Widget _buildKebijakan() => Container(
     padding: const EdgeInsets.all(16),
