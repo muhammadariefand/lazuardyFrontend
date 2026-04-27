@@ -206,7 +206,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
           const Text('Notifikasi', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
-          GestureDetector(onTap: () {}, child: const Row(children: [
+          GestureDetector(onTap: () => Navigator.pushNamed(context, '/siswa/notifikasi'), child: const Row(children: [
             Text('Lihat semua', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
             Icon(Icons.chevron_right_rounded, color: Colors.white, size: 18),
           ])),
@@ -246,7 +246,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text('Rekomendasi Tutor', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
-          GestureDetector(onTap: () {}, child: const Row(children: [
+          GestureDetector(onTap: () => Navigator.pushNamed(context, '/siswa/rekomendasi-tutor'), child: const Row(children: [
             Text('Lihat semua', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
             Icon(Icons.chevron_right_rounded, color: Colors.white, size: 18),
           ])),

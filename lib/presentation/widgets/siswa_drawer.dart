@@ -93,7 +93,7 @@ class SiswaDrawer extends StatelessWidget {
                   label: 'Hubungi Kami',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/hubungi-kami');
+                    Navigator.pushNamed(context, '/siswa/hubungi-kami');
                   },
                 ),
                 const SizedBox(height: 12),
@@ -102,7 +102,7 @@ class SiswaDrawer extends StatelessWidget {
                   label: 'Tentang Kami',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/tentang-kami');
+                    Navigator.pushNamed(context, '/siswa/tentang-kami');
                   },
                 ),
                 const SizedBox(height: 12),
