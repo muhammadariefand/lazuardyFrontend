@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/siswa_bottom_nav.dart';
+import 'package:lazuadry_mobile_fe/presentation/widgets/siswa_drawer.dart';
 
 const _navy = Color(0xFF24326B);
 const _teal = Color(0xFF2C8AA4);
@@ -14,6 +15,7 @@ class BerandaSiswaPage extends StatefulWidget {
 }
 
 class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(); 
   static const _nama = 'Mardhika Murni';
   static const _sesiTersisa = 5;
   static const _sesiTotal = 8;
@@ -25,6 +27,8 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: const SiswaDrawer(nama: _nama, inisial: 'M'),
       backgroundColor: _teal,
       bottomNavigationBar: SiswaBottomNav(currentIndex: 0, onTap: (i) {
         if (i == 1) Navigator.pushReplacementNamed(context, '/siswa/jadwal');
@@ -58,9 +62,19 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
     color: Colors.white,
     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
     child: Row(children: [
-      IconButton(onPressed: () {}, icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 26), padding: EdgeInsets.zero, constraints: const BoxConstraints()),
+      IconButton(
+        onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary, size: 26),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+      ),
       const SizedBox(width: 16),
-      IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary, size: 26), padding: EdgeInsets.zero, constraints: const BoxConstraints()),
+      IconButton(
+        onPressed: () => Navigator.pushNamed(context, '/siswa/notifikasi'),
+        icon: const Icon(Icons.notifications_outlined, color: AppColors.textPrimary, size: 26),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+      ),
       const Spacer(),
       Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
         const Row(mainAxisSize: MainAxisSize.min, children: [
