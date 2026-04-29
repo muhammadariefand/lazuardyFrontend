@@ -36,10 +36,10 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
 
   void _onLogin() {
     if (_formKey.currentState?.validate() ?? false) {
-      context.read<AuthCubit>().login(
-            _emailCtrl.text,
-            _passwordCtrl.text,
-          );
+      // context.read<AuthCubit>().login(
+      //       _emailCtrl.text,
+      //       _passwordCtrl.text,
+      //     );
     }
   }
 
@@ -52,10 +52,10 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
           if (state is AuthSuccess) {
             Navigator.of(context).pushReplacementNamed('/home');
           }
-          if (state is AuthError) {
+          if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(state.error),
                 backgroundColor: AppColors.errorRed,
                 behavior: SnackBarBehavior.floating,
               ),

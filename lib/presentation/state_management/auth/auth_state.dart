@@ -1,13 +1,11 @@
-abstract class AuthState {}
+abstract class AuthState{}
 
 class AuthInitial extends AuthState {}
 class AuthLoading extends AuthState {}
-class AuthSuccess extends AuthState {
-  final dynamic user;
-  AuthSuccess(this.user);
-}
+class AuthSuccess extends AuthState {}
+class AuthFailure extends AuthState {
+  final String error;
+  final Map<String, dynamic>? errorDetails; // Tambahkan ini untuk menampung detail error
 
-class AuthError extends AuthState {
-  final String message;
-  AuthError(this.message);
+  AuthFailure(this.error, {this.errorDetails});
 }

@@ -35,12 +35,12 @@ class _LoginTutorPageState extends State<LoginTutorPage> {
   }
 
   void _onLogin() {
-    if (_formKey.currentState?.validate() ?? false) {
-      context.read<AuthCubit>().login(
-            _emailCtrl.text,
-            _passwordCtrl.text,
-          );
-    }
+    // if (_formKey.currentState?.validate() ?? false) {
+    //   context.read<AuthCubit>().login(
+    //         _emailCtrl.text,
+    //         _passwordCtrl.text,
+    //       );
+    // }
   }
 
   @override
@@ -52,10 +52,10 @@ class _LoginTutorPageState extends State<LoginTutorPage> {
           if (state is AuthSuccess) {
             Navigator.of(context).pushReplacementNamed('/home');
           }
-          if (state is AuthError) {
+          if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(state.error),
                 backgroundColor: AppColors.errorRed,
                 behavior: SnackBarBehavior.floating,
               ),

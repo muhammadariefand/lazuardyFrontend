@@ -47,12 +47,12 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onLogin() {
-    if (_formKey.currentState?.validate() ?? false) {
-      context.read<AuthCubit>().login(
-            _emailCtrl.text.trim(),
-            _passwordCtrl.text,
-          );
-    }
+    // if (_formKey.currentState?.validate() ?? false) {
+    //   context.read<AuthCubit>().login(
+    //         _emailCtrl.text.trim(),
+    //         _passwordCtrl.text,
+    //       );
+    // }
   }
 
   // Navigasi beranda sesuai role setelah login sukses
@@ -101,11 +101,11 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) _navigateAfterLogin();
-          if (state is AuthError) {
+          if (state is AuthFailure) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(SnackBar(
-                content: Text(state.message),
+                content: Text(state.error),
                 backgroundColor: AppColors.errorRed,
                 behavior: SnackBarBehavior.floating,
                 margin: const EdgeInsets.all(16),

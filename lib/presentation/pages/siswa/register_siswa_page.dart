@@ -4,8 +4,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
-import 'package:lazuadry_mobile_fe/presentation/state_management/otp/otp_cubit.dart';
-import 'package:lazuadry_mobile_fe/presentation/state_management/otp/otp_state.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
 
 class RegisterSiswaPage extends StatefulWidget {
@@ -36,16 +36,7 @@ class _RegisterSiswaPageState extends State<RegisterSiswaPage> {
 
   void _onRegister() async {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isLoading = true);
-
-      // TODO: Panggil register use case / cubit
-      await Future.delayed(const Duration(seconds: 1));
-
-      if (mounted) {
-        setState(() => _isLoading = false);
-        // Navigasi ke halaman detail pribadi
-        Navigator.of(context).pushNamed('/siswa/otp-verification');
-      }
+      context.read<AuthCubit>().studentRegisterOtpEmail(_emailCtrl.text.trim());
     }
   }
 
@@ -58,14 +49,22 @@ class _RegisterSiswaPageState extends State<RegisterSiswaPage> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Form(
             key: _formKey,
-            child: BlocConsumer<OtpCubit, OtpState>(
+            child: BlocConsumer<AuthCubit, AuthState>(
               listener: (context, state) {
-                if (state is OtpSendSuccess){
+                if (state is AuthSuccess){
                   Navigator.of(context).pushNamed('/siswa/otp-verification', arguments: _emailCtrl.text);
                 }
-                if (state is OtpSendError) {
+                if (state is AuthFailure) {
+                  final errorDetails = state.errorDetails;
+                  String errorMessage;
+
+                  if (errorDetails != null && errorDetails.containsKey('email')) {
+                    errorMessage = errorDetails['email'][0];
+                  } else {
+                    errorMessage = state.error;
+                  }
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+                    SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
                   );
                 }
               },
@@ -224,7 +223,7 @@ class _RegisterSiswaPageState extends State<RegisterSiswaPage> {
                     PrimaryButton(
                       label: 'Daftar',
                       onPressed: _onRegister,
-                      isLoading: _isLoading,
+                      isLoading: state is AuthLoading,
                     ),
 
                     const SizedBox(height: 24),

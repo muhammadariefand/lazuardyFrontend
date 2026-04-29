@@ -1,5 +1,7 @@
-import 'package:lazuadry_mobile_fe/domain/entities/user.dart';
+// import 'package:lazuadry_mobile_fe/domain/entities/student.dart';
+
+import 'package:lazuadry_mobile_fe/domain/entities/student_biodata.dart';
 
 abstract class AuthRepository {
-  Future<User> login(String email, String password);
+  Future<void> studentRegisterOtpEmail(String email);
 }
