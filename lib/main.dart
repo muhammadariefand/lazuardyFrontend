@@ -30,6 +30,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/riwayat
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/sesi_dibatalkan_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/ulasan_tutor/ulasan_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/beranda_tutor_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/tutor/jadwal/jadwal_mengajar_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 
 // ── Shared ─────────────────────────────────────────────────────────
@@ -180,6 +181,7 @@ class LazuardyApp extends StatelessWidget {
 
           // ── Tutor: Home (TODO) ─────────────────────────────────
           '/tutor/beranda': (_) => const BerandaTutorPage(),
+          '/tutor/jadwal-mengajar': (_) => const JadwalMengajarPage(),
 
           // ── Orang Tua: TIDAK ada register ─────────────────────
           // Orang Tua login memakai akun anak (email+password siswa)
