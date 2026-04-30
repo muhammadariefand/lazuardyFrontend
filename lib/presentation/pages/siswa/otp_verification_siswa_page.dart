@@ -1,18 +1,16 @@
 // lib/presentation/pages/siswa/otp_verification_siswa_page.dart
-// Verifikasi Kode OTP
-// 4 box OTP dengan auto-focus, countdown timer, kirim lagi
 
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart'; // Tambahkan ini
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart'; // Tambahkan ini
+import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_state.dart'; // Tambahkan ini
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
 
 class OtpVerificationSiswaPage extends StatefulWidget {
-  /// Email tujuan pengiriman OTP (untuk ditampilkan di deskripsi jika perlu)
   final String? email;
-
-  /// Context asal: 'register' atau 'forgot_password'
   final String context;
 
   const OtpVerificationSiswaPage({
@@ -26,25 +24,17 @@ class OtpVerificationSiswaPage extends StatefulWidget {
 }
 
 class _OtpVerificationSiswaPageState extends State<OtpVerificationSiswaPage> {
-  // 4 controller & focus node untuk tiap digit OTP
-  final List<TextEditingController> _controllers =
-      List.generate(4, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes =
-      List.generate(4, (_) => FocusNode());
+  final List<TextEditingController> _controllers = List.generate(4, (_) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
 
-
-  // Countdown timer: 55 menit = 3300 detik
   static const _initialSeconds = 3300;
   int _remainingSeconds = _initialSeconds;
   Timer? _timer;
-
-  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _startTimer();
-    // Auto-fokus ke box pertama
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNodes[0].requestFocus();
     });
@@ -58,7 +48,6 @@ class _OtpVerificationSiswaPageState extends State<OtpVerificationSiswaPage> {
     super.dispose();
   }
 
-  // ── Timer countdown ──────────────────────────────────────────
   void _startTimer() {
     _timer?.cancel();
     setState(() => _remainingSeconds = _initialSeconds);
@@ -74,243 +63,186 @@ class _OtpVerificationSiswaPageState extends State<OtpVerificationSiswaPage> {
   String get _timerText {
     final minutes = _remainingSeconds ~/ 60;
     final seconds = _remainingSeconds % 60;
-    return '${minutes.toString().padLeft(2, '0')}:'
-        '${seconds.toString().padLeft(2, '0')}';
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   bool get _timerExpired => _remainingSeconds == 0;
-
-  // ── Ambil nilai OTP lengkap ──────────────────────────────────
-  String get _otpValue =>
-      _controllers.map((c) => c.text).join();
-
+  String get _otpValue => _controllers.map((c) => c.text).join();
   bool get _isOtpComplete => _otpValue.length == 4;
 
-  // ── Handle input per digit ───────────────────────────────────
   void _onDigitChanged(int index, String value) {
-    if (value.length == 1) {
-      // Maju ke box berikutnya
-      if (index < 3) {
-        _focusNodes[index + 1].requestFocus();
-      } else {
-        _focusNodes[index].unfocus();
-      }
+    if (value.length == 1 && index < 3) {
+      _focusNodes[index + 1].requestFocus();
     } else if (value.isEmpty && index > 0) {
-      // Mundur ke box sebelumnya saat hapus
       _focusNodes[index - 1].requestFocus();
     }
     setState(() {});
   }
 
-  // ── Verifikasi OTP ───────────────────────────────────────────
-  void _onVerify() async {
+  // ── Fungsi Verifikasi Baru ───────────────────────────────────
+  void _onVerify(String email) {
     if (!_isOtpComplete) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Masukkan 4 digit kode OTP'),
-          backgroundColor: AppColors.errorRed,
-          behavior: SnackBarBehavior.floating,
-        ),
+        const SnackBar(content: Text('Masukkan 4 digit kode OTP'), backgroundColor: Colors.orange),
       );
       return;
     }
 
-    setState(() => _isLoading = true);
-
-    // TODO: Panggil use case verifikasi OTP
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      setState(() => _isLoading = false);
-      // Navigasi berdasarkan konteks asal
-      if (widget.context == 'forgot_password') {
-        Navigator.of(context).pushNamed('/reset-password');
-      } else {
-        Navigator.of(context).pushNamed('/siswa/detail-pribadi');
-      }
-    }
-  }
-
-  // ── Kirim ulang OTP ──────────────────────────────────────────
-  void _onResend() {
-    if (!_timerExpired) return;
-
-    // Reset semua field
-    for (final c in _controllers) c.clear();
-    _focusNodes[0].requestFocus();
-    _startTimer();
-
-    // TODO: Panggil use case kirim ulang OTP
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Kode OTP telah dikirim ulang'),
-        backgroundColor: AppColors.primary,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    // Panggil Cubit
+    context.read<AuthCubit>().studentVerifyOtpRegisterEmail(
+          email: email,
+          otp: _otpValue,
+        );
   }
 
   @override
   Widget build(BuildContext context) {
+    // Ambil email dari arguments jika tersedia, jika tidak pakai dari widget
+    final String emailArg = ModalRoute.of(context)?.settings.arguments as String? ?? widget.email ?? "";
+
     return Scaffold(
       backgroundColor: AppColors.bgWhite,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-
-              // ── Back button ───────────────────────────────
-              IconButton(
-                onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.arrow_back,
-                    color: AppColors.textPrimary),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-
-              const SizedBox(height: 48),
-
-              // ── Judul + Deskripsi ─────────────────────────
-              Center(
-                child: Column(
-                  children: [
-                    const Text(
-                      'Verifikasi Kode OTP',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textTeal,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Masukkan kode OTP yang telah kami\nkirim ke email Anda untuk melanjutkan',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.grey.shade600,
-                        height: 1.55,
-                      ),
-                    ),
-                  ],
+        child: BlocConsumer<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state is AuthSuccess) {
+              // Navigasi ke halaman detail pribadi sambil meneruskan email
+              Navigator.of(context).pushNamed('/siswa/detail-pribadi', arguments: emailArg);
+            }
+            if (state is AuthFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.error),
+                  backgroundColor: AppColors.errorRed,
+                  behavior: SnackBarBehavior.floating,
                 ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // ── 4 OTP Boxes ───────────────────────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(
-                  4,
-                  (i) => _OtpBox(
-                    controller: _controllers[i],
-                    focusNode: _focusNodes[i],
-                    isFilled: _controllers[i].text.isNotEmpty,
-                    onChanged: (v) => _onDigitChanged(i, v),
+              );
+            }
+          },
+          builder: (context, state) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 28),
-
-              // ── Timer ─────────────────────────────────────
-              Center(
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Kode berlaku dalam  ',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade500,
+                  const SizedBox(height: 48),
+                  Center(
+                    child: Column(
+                      children: [
+                        const Text('Verifikasi Kode OTP', style: AppTextStyles.heading1),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Masukkan kode OTP yang telah kami\nkirim ke email $emailArg',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 15, color: Colors.grey.shade600, height: 1.55),
                         ),
-                      ),
-                      TextSpan(
-                        text: _timerText,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: _timerExpired
-                              ? AppColors.errorRed
-                              : AppColors.textTeal,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // ── Tombol Verifikasi ─────────────────────────
-              PrimaryButton(
-                label: 'Verifikasi',
-                onPressed: _onVerify,
-                isLoading: _isLoading,
-              ),
-
-              const SizedBox(height: 24),
-
-              // ── Kirim Lagi ────────────────────────────────
-              Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Belum Menerima Kode? ',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
+                  const SizedBox(height: 40),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(
+                      4,
+                      (i) => _OtpBox(
+                        controller: _controllers[i],
+                        focusNode: _focusNodes[i],
+                        isFilled: _controllers[i].text.isNotEmpty,
+                        onChanged: (v) => _onDigitChanged(i, v),
+                        enabled: state is! AuthLoading, // Matikan input saat loading
                       ),
                     ),
-                    GestureDetector(
-                      onTap: _timerExpired ? _onResend : null,
-                      child: Text(
-                        'Kirim Lagi',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: _timerExpired
-                              ? AppColors.primary
-                              : Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 28),
+                  Center(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(text: 'Kode berlaku dalam  ', style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+                          TextSpan(
+                            text: _timerText,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: _timerExpired ? AppColors.errorRed : AppColors.textTeal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  PrimaryButton(
+                    label: 'Verifikasi',
+                    onPressed: () => _onVerify(emailArg),
+                    isLoading: state is AuthLoading, // Loading otomatis dari Cubit
+                  ),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Belum Menerima Kode? ', style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
+                        GestureDetector(
+                          onTap: (state is! AuthLoading && _timerExpired) ? _onResend : null,
+                          child: Text(
+                            'Kirim Lagi',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: _timerExpired ? AppColors.primary : Colors.grey.shade400,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
+
+  void _onResend() {
+    if (!_timerExpired) return;
+    for (final c in _controllers) c.clear();
+    _focusNodes[0].requestFocus();
+    _startTimer();
+    // Di sini kamu bisa memanggil lagi cubit.studentRegisterOtpEmail(email)
+  }
 }
 
-// ── OTP Single Box Widget ─────────────────────────────────────────
+// Tambahkan parameter 'enabled' di _OtpBox agar input bisa dikunci saat loading
 class _OtpBox extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final bool isFilled;
   final ValueChanged<String> onChanged;
+  final bool enabled;
 
   const _OtpBox({
     required this.controller,
     required this.focusNode,
     required this.isFilled,
     required this.onChanged,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
-      width: 68,
-      height: 68,
+      width: 68, height: 68,
       decoration: BoxDecoration(
         color: AppColors.bgWhite,
         borderRadius: BorderRadius.circular(14),
@@ -318,34 +250,17 @@ class _OtpBox extends StatelessWidget {
           color: isFilled ? AppColors.primary : AppColors.borderColor,
           width: isFilled ? 2.0 : 1.2,
         ),
-        boxShadow: isFilled
-            ? [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.15),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
       ),
       child: TextField(
         controller: controller,
         focusNode: focusNode,
+        enabled: enabled,
         textAlign: TextAlign.center,
         keyboardType: TextInputType.number,
         maxLength: 1,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        style: const TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w700,
-          color: AppColors.textTeal,
-        ),
-        decoration: const InputDecoration(
-          counterText: '', // sembunyikan counter "0/1"
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-        ),
+        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textTeal),
+        decoration: const InputDecoration(counterText: '', border: InputBorder.none),
         onChanged: onChanged,
       ),
     );

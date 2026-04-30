@@ -35,4 +35,28 @@ class AuthRemoteDataSource {
       }
     }
   }
+
+  Future<void> studentVerifyOtpRegisterEmail({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      final response = await client.dio.post('/verifyOtpRegisterEmail', data: {
+        'email': email,
+        'otp': otp,
+      });
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 422) {
+        final data = e.response?.data;
+        throw ServerException(
+          data['message'] ?? 'Validasi gagal', 
+          errors: data['errors'], 
+        );
+      } else if (e.response?.statusCode == 500) {
+        throw ServerException('Server sedang gangguan, coba lagi nanti.');
+      } else {
+        throw ServerException('Terjadi kesalahan yang tidak diketahui.');
+      }
+    }
+  }
 }
