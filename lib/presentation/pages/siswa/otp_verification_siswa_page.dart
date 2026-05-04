@@ -97,8 +97,10 @@ class _OtpVerificationSiswaPageState extends State<OtpVerificationSiswaPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Ambil email dari arguments jika tersedia, jika tidak pakai dari widget
-    final String emailArg = ModalRoute.of(context)?.settings.arguments as String? ?? widget.email ?? "";
+    // Ambil arguments sebagai Map
+    final Map<String, dynamic>? args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final String emailArg = args?['email'] as String? ?? widget.email ?? "";
+    final String passwordArg = args?['password'] as String? ?? "";
 
     return Scaffold(
       backgroundColor: AppColors.bgWhite,
@@ -106,8 +108,11 @@ class _OtpVerificationSiswaPageState extends State<OtpVerificationSiswaPage> {
         child: BlocConsumer<AuthCubit, AuthState>(
           listener: (context, state) {
             if (state is AuthSuccess) {
-              // Navigasi ke halaman detail pribadi sambil meneruskan email
-              Navigator.of(context).pushNamed('/siswa/detail-pribadi', arguments: emailArg);
+              // Navigasi ke halaman detail pribadi sambil meneruskan email dan password
+              Navigator.of(context).pushNamed('/siswa/detail-pribadi', arguments: {
+                'email': emailArg,
+                'password': passwordArg,
+              });
             }
             if (state is AuthFailure) {
               ScaffoldMessenger.of(context).showSnackBar(

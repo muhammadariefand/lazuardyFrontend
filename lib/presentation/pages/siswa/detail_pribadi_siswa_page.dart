@@ -71,13 +71,27 @@ class _DetailPribadiSiswaPageState extends State<DetailPribadiSiswaPage> {
 
   void _onSelanjutnya() async {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isLoading = true);
-      // TODO: Simpan data & navigasi ke halaman berikutnya
-      await Future.delayed(const Duration(seconds: 1));
-      if (mounted) {
-        setState(() => _isLoading = false);
-        Navigator.of(context).pushNamed('/siswa/detail-alamat');
-      }
+      // Ambil arguments sebagai Map
+      final Map<String, dynamic>? args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final String emailArg = args?['email'] as String? ?? '';
+      final String passwordArg = args?['password'] as String? ?? '';
+
+      final String genderFormatted = _selectedJenisKelamin == "Laki-laki" ? "male" : "female";
+      final int? classId = int.tryParse(_selectedKelas?.replaceAll(RegExp(r'[^0-9]'), '')??'0') ?? 0;
+      final parts = _tglLahirCtrl.text.split('/');
+      final String formattedDate = '20${parts[2]}-${parts[1]}-${parts[0]}';
+      final Map<String, dynamic> dataPribadi = {
+        "email": emailArg,
+        "password": passwordArg,
+        "name": _namaCtrl.text.trim(),
+        "classId": classId,
+        "gender": genderFormatted,
+        "date_of_birth": formattedDate,
+        "telephone_number": _waCtrl.text.trim(),
+      };
+
+      // Navigasi ke halaman detail alamat dengan data pribadi
+      Navigator.of(context).pushNamed('/siswa/detail-alamat', arguments: dataPribadi);
     }
   }
 

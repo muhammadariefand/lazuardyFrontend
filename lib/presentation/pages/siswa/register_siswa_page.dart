@@ -52,7 +52,10 @@ class _RegisterSiswaPageState extends State<RegisterSiswaPage> {
             child: BlocConsumer<AuthCubit, AuthState>(
               listener: (context, state) {
                 if (state is AuthSuccess){
-                  Navigator.of(context).pushNamed('/siswa/otp-verification', arguments: _emailCtrl.text);
+                  Navigator.of(context).pushNamed('/siswa/otp-verification', arguments: {
+                    'email': _emailCtrl.text.trim(),
+                    'password': _passwordCtrl.text,
+                  });
                 }
                 if (state is AuthFailure) {
                   final errorDetails = state.errorDetails;

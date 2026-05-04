@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
+import 'package:lazuadry_mobile_fe/data/models/auth/register_student_request.dart';
 import 'package:lazuadry_mobile_fe/data/models/student_model.dart';
 import 'package:lazuadry_mobile_fe/data/models/user_model.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/server_exception.dart';
@@ -58,5 +59,9 @@ class AuthRemoteDataSource {
         throw ServerException('Terjadi kesalahan yang tidak diketahui.');
       }
     }
+  }
+
+  Future<void> studentRgister(RegisterStudentRequest request) async {
+    await client.dio.post('/studentRegister', data: request.toJson());
   }
 }

@@ -4,6 +4,7 @@ import 'package:lazuadry_mobile_fe/data/datasources/auth_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/auth_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/auth_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_otp_email_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_register_email_usecase.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 
@@ -25,11 +26,14 @@ Future<void> initDependencies() async {
 
   sl.registerLazySingleton(() => StudentVerifyOtpRegisterEmailUsecase(repository: sl()));
 
+  sl.registerLazySingleton(() => StudentRegisterUsecase(repository: sl()));
+
   // Presentation / State Management
   sl.registerFactory(
     () => AuthCubit(
       studentRegisterOtpEmailUsecase: sl(),
       studentVerifyOtpRegisterEmailUsecase: sl(),
+      studentRegisterUsecase: sl(),
     ),
   );
 }

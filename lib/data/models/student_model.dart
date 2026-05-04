@@ -51,5 +51,4 @@ class StudentModel extends StudentBiodata {
       classId: json['classId'] is int ? json['classId'] as int : int.tryParse(json['classId']?.toString() ?? ''),
     );
   }
-
 }
