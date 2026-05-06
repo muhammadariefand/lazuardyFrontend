@@ -9,14 +9,14 @@ class AuthRemoteDataSource {
   final ApiClient client;
   AuthRemoteDataSource(this.client);
 
-  Future<UserModel> login(String email, String password) async {
-    final response = await client.dio.post('/login', data: {
-      'email': email,
-      'password': password,
-    });
+  // Future<UserModel> login(String email, String password) async {
+  //   final response = await client.dio.post('/login', data: {
+  //     'email': email,
+  //     'password': password,
+  //   });
 
-    return UserModel.fromJson(response.data['user']);
-  }
+  //   return UserModel.fromJson(response.data['user']);
+  // }
 
 
   Future<void> studentRegisterOtpEmail(String email) async {
@@ -61,7 +61,35 @@ class AuthRemoteDataSource {
     }
   }
 
-  Future<void> studentRgister(RegisterStudentRequest request) async {
+  Future<void> studentRegister(RegisterStudentRequest request) async {
     await client.dio.post('/studentRegister', data: request.toJson());
+  }
+
+  Future<Map<String, dynamic>> studentLogin(String email, String password) async {
+    try {
+      final response = await client.dio.post('/login', data: {
+        'email': email,
+        'password': password,
+      });
+
+      return response.data;
+    } on DioException catch (e) {
+      _handleDioError(e);
+      rethrow;
+    }
+  }
+
+  void _handleDioError(DioException e) {
+    if (e.response?.statusCode == 422) {
+      final data = e.response?.data;
+      throw ServerException(
+        data['message'] ?? 'Validasi gagal', 
+        errors: data['errors'], 
+      );
+    } else if (e.response?.statusCode == 500) {
+      throw ServerException('Server sedang gangguan, coba lagi nanti.');
+    } else {
+      throw ServerException('Terjadi kesalahan yang tidak diketahui.');
+    }
   }
 }

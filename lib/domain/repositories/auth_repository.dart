@@ -12,4 +12,6 @@ abstract class AuthRepository {
   });
 
   Future<void> studentRegister(RegisterStudentRequest request);
+
+  Future<void> studentLogin(String email, String password);
 }

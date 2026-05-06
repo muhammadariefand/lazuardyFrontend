@@ -36,10 +36,10 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
 
   void _onLogin() {
     if (_formKey.currentState?.validate() ?? false) {
-      // context.read<AuthCubit>().login(
-      //       _emailCtrl.text,
-      //       _passwordCtrl.text,
-      //     );
+      context.read<AuthCubit>().studentLogin(
+            _emailCtrl.text,
+            _passwordCtrl.text,
+          );
     }
   }
 
@@ -50,7 +50,7 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            Navigator.of(context).pushReplacementNamed('/home');
+            Navigator.of(context).pushReplacementNamed('/siswa/beranda');
           }
           if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(

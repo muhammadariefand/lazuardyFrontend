@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/data/models/auth/register_student_request.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/server_exception.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_login_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_otp_email_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_register_email_usecase.dart';
@@ -10,11 +11,13 @@ class AuthCubit extends Cubit<AuthState> {
   final StudentRegisterOtpEmailUsecase studentRegisterOtpEmailUsecase;
   final StudentVerifyOtpRegisterEmailUsecase studentVerifyOtpRegisterEmailUsecase;
   final StudentRegisterUsecase studentRegisterUsecase;
+  final StudentLoginUsecase studentLoginUsecase;
 
   AuthCubit({
     required this.studentRegisterOtpEmailUsecase,
     required this.studentVerifyOtpRegisterEmailUsecase,
     required this.studentRegisterUsecase,
+    required this.studentLoginUsecase,
   }) : super(AuthInitial());
 
   Future<void> studentRegisterOtpEmail(String email) async {
@@ -47,6 +50,18 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthSuccess());
     } on ServerException catch (e) {
       emit(AuthFailure(e.message));
+    }
+  }
+
+  Future<void> studentLogin(String email, String password) async {
+    emit(AuthLoading());
+    try {
+      await studentLoginUsecase.execute(email, password);
+      emit(AuthSuccess());
+    } on ServerException catch (e) {
+      emit(AuthFailure(e.message));
+    } catch (e) {
+      emit (AuthFailure(e.toString()));
     }
   }
 }
