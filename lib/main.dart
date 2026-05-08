@@ -29,6 +29,9 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/riwayat
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/sesi_dibatalkan_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/ulasan_tutor/ulasan_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/beranda_tutor_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/manajemen_sesi/laporan_sesi_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/manajemen_sesi/manajemen_sesi_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/manajemen_sesi/riwayat_sesi_detail_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/booking/form_link_meeting_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/booking/konfirmasi_booking_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/detail_alamat_tutor_page.dart';
@@ -189,6 +192,9 @@ class LazuardyApp extends StatelessWidget {
           '/tutor/form-link-meeting': (_) => const FormLinkMeetingPage(),
           '/tutor/profil': (_) => const ProfilTutorPage(),
           '/tutor/edit-profil': (_) => const EditProfilTutorPage(),
+
+          // ── Tutor: Manajemen Sesi ─────────────────────────────
+          '/tutor/manajemen-sesi': (_) => const ManajemenSesiPage(),
 
           // ── Orang Tua: TIDAK ada register ─────────────────────
           // Orang Tua login memakai akun anak (email+password siswa)
