@@ -180,7 +180,7 @@ class LazuardyApp extends StatelessWidget {
 
           // ── Tutor: Home (TODO) ─────────────────────────────────
           '/tutor/beranda': (_) => const BerandaTutorPage(),
-          '/tutor/jadwal-mengajar': (_) => const JadwalMengajarPage(),
+          '/tutor/jadwal': (_) => const JadwalMengajarPage(),
 
           // ── Orang Tua: TIDAK ada register ─────────────────────
           // Orang Tua login memakai akun anak (email+password siswa)
