@@ -1,5 +1,5 @@
 // lib/presentation/pages/tutor/ulasan_siswa_page.dart
-// Image 1: Ulasan Siswa
+// Ulasan Siswa
 // - AppBar teal "Ulasan Siswa"
 // - Subtitle "Lihat Feedback dari siswa Anda"
 // - Card rating besar: angka 4.8, bintang, "Dari N ulasan siswa"
