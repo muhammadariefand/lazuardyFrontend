@@ -41,7 +41,7 @@ class _RegisterTutorPageState extends State<RegisterTutorPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         // Navigasi ke halaman detail pribadi
-        Navigator.of(context).pushNamed('/register/detail');
+        Navigator.of(context).pushNamed('/tutor/otp');
       }
     }
   }

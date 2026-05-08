@@ -125,7 +125,7 @@ class _OtpVerificationTutorPageState extends State<OtpVerificationTutorPage> {
       if (widget.context == 'forgot_password') {
         Navigator.of(context).pushNamed('/reset-password');
       } else {
-        Navigator.of(context).pushNamed('/register/address');
+        Navigator.of(context).pushNamed('/tutor/detail-pribadi');
       }
     }
   }
