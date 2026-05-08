@@ -1,5 +1,4 @@
 // lib/presentation/pages/tutor/konfirmasi_booking_tutor_page.dart
-// Image 1, 2 & 5:
 // - Tab Pending / Semua
 // - Kartu booking: Online (tanpa alamat) & Offline (+ kotak alamat+maps)
 // - Tombol Terima (teal) → push Form Link Meeting jika Online, langsung terima jika Offline

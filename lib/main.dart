@@ -29,6 +29,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/riwayat
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/sesi_dibatalkan_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/ulasan_tutor/ulasan_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/beranda_tutor_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/tutor/booking/form_link_meeting_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/booking/konfirmasi_booking_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/detail_alamat_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/jadwal/jadwal_mengajar_page.dart';
@@ -183,6 +184,7 @@ class LazuardyApp extends StatelessWidget {
           '/tutor/beranda': (_) => const BerandaTutorPage(),
           '/tutor/jadwal': (_) => const JadwalMengajarPage(),
           '/tutor/konfirmasi-booking': (_) => const KonfirmasiBookingTutorPage(),
+          '/tutor/form-link-meeting': (_) => const FormLinkMeetingPage(),
 
           // ── Orang Tua: TIDAK ada register ─────────────────────
           // Orang Tua login memakai akun anak (email+password siswa)
