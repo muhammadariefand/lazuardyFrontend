@@ -1,4 +1,4 @@
-// lib/presentation/widgets/siswa_drawer.dart
+// lib/presentation/widgets/tutor_drawer.dart
 // Drawer kiri — avatar, nama, 3 menu, footer versi
 // + Dialog konfirmasi keluar
 
@@ -10,14 +10,14 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit
 const _teal = Color(0xFF3AAFA9);
 const _navy = Color(0xFF1E2D7D);
 
-class SiswaDrawer extends StatelessWidget {
+class TutorDrawer extends StatelessWidget {
   final String nama;
   final String inisial;
 
-  const SiswaDrawer({
+  const TutorDrawer({
     super.key,
-    this.nama = 'Mardhika Murni Pramestika',
-    this.inisial = 'M',
+    this.nama = 'Ibu Sarah',
+    this.inisial = 'S',
   });
 
   @override
@@ -93,7 +93,7 @@ class SiswaDrawer extends StatelessWidget {
                   label: 'Hubungi Kami',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/siswa/hubungi-kami');
+                    Navigator.pushNamed(context, '/tutor/hubungi-kami');
                   },
                 ),
                 const SizedBox(height: 12),
@@ -102,7 +102,7 @@ class SiswaDrawer extends StatelessWidget {
                   label: 'Tentang Kami',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/siswa/tentang-kami');
+                    Navigator.pushNamed(context, '/tutor/tentang-kami');
                   },
                 ),
                 const SizedBox(height: 12),

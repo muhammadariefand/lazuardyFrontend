@@ -9,6 +9,7 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_buttom_nav.dart';
+import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_drawer.dart';
 
 const _teal = Color(0xFF3AAFA9);
 
@@ -63,6 +64,7 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      drawer: const TutorDrawer(nama: _nama, inisial: 'S',),
       backgroundColor: _teal,
       bottomNavigationBar: TutorBottomNav(
         currentIndex: 0,

@@ -197,6 +197,10 @@ class LazuardyApp extends StatelessWidget {
           '/tutor/profil': (_) => const ProfilTutorPage(),
           '/tutor/edit-profil': (_) => const EditProfilTutorPage(),
 
+          // ── Siswa: Menu Sidebar ────────────────────────────────────
+          '/tutor/hubungi-kami': (_) => const HubungiKamiPage(),
+          '/tutor/tentang-kami': (_) => const TentangKamiPage(),
+
           // ── Tutor: Notifikasi ────────────────────────────────────────
           '/tutor/notifikasi': (_) => const NotifikasiTutorPage(),
 
