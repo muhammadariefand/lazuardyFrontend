@@ -98,7 +98,7 @@ class _FormulirProfilTutorPageState extends State<FormulirProfilTutorPage> {
       setState(() => _isLoading = false);
       // FIX 4: Route yang benar untuk tutor
       Navigator.of(context).pushNamed(
-        '/tutor/menunggu-verifikasi',
+        '/tutor/beranda',
         arguments: {'context': 'register'},
       );
     }
