@@ -19,7 +19,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/konfirmasi_pembatala
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/laporan_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/menu_sidebar/hubungi_kami_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/menu_sidebar/tentang_kami_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/notifikasi/notifikasi_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/notifikasi/notifikasi_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/profil_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/rekomendasi_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_pembayaran/riwayat_pembayaran_page.dart';
@@ -39,6 +39,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/tutor/booking/form_link_me
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/booking/konfirmasi_booking_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/detail_alamat_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/jadwal/jadwal_mengajar_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/tutor/notifikasi/notifikasi_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/profil/edit_profil_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/profil/profil_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/verifikasi_tutor_page.dart';
@@ -130,7 +131,7 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/tentang-kami': (_) => const TentangKamiPage(),
 
           // ── Siswa: Notifikasi ────────────────────────────────────────
-          '/siswa/notifikasi': (_) => const NotifikasiPage(),
+          '/siswa/notifikasi': (_) => const NotifikasiSiswaPage(),
 
           // ── Siswa: Dashboard ────────────────────────────────────────
           '/siswa/beranda': (_) => const BerandaSiswaPage(),
@@ -195,6 +196,9 @@ class LazuardyApp extends StatelessWidget {
           '/tutor/form-link-meeting': (_) => const FormLinkMeetingPage(),
           '/tutor/profil': (_) => const ProfilTutorPage(),
           '/tutor/edit-profil': (_) => const EditProfilTutorPage(),
+
+          // ── Tutor: Notifikasi ────────────────────────────────────────
+          '/tutor/notifikasi': (_) => const NotifikasiTutorPage(),
 
           // ── Tutor: Manajemen Sesi ─────────────────────────────
           '/tutor/manajemen-sesi': (_) => const ManajemenSesiPage(),

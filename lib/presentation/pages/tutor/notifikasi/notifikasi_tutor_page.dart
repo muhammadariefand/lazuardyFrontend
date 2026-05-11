@@ -20,14 +20,14 @@ class _NotifItem {
   });
 }
 
-class NotifikasiPage extends StatelessWidget {
-  const NotifikasiPage({super.key});
+class NotifikasiTutorPage extends StatelessWidget {
+  const NotifikasiTutorPage({super.key});
 
   static const _notifList = [
     _NotifItem(
       type: _NotifType.sesiMulai,
-      judul: 'Sesi dimulai 1 jam lagi',
-      subjudul: 'Matematika dengan Ibu Sarah pukul 14:00',
+      judul: 'Penarikan Dissetujui',
+      subjudul: 'Penarikan dana sebesar Rp 500.000 telah disetujui',
       waktu: 'Hari ini,  13:00',
     ),
     _NotifItem(
@@ -62,7 +62,7 @@ class NotifikasiPage extends StatelessWidget {
         leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context)),
-        title: const Text('Notifkasi',
+        title: const Text('Notifikasi',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
       ),
       body: _notifList.isEmpty
