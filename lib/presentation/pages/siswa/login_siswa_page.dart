@@ -40,7 +40,7 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
             _emailCtrl.text,
             _passwordCtrl.text,
           );
-    }
+    } 
   }
 
   @override

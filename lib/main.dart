@@ -17,6 +17,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/edit_profil_siswa_pa
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/jadwal_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/konfirmasi_pembatalan_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/laporan_siswa_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/login_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/menu_sidebar/hubungi_kami_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/menu_sidebar/tentang_kami_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/notifikasi/notifikasi_siswa_page.dart';
@@ -106,7 +107,7 @@ class LazuardyApp extends StatelessWidget {
           // ── Entry ─────────────────────────────────────────────
           '/': (_) => const SplashPage(),
           '/tagline': (_) => const TaglinePage(),
-          '/login': (_) => const LoginPage(),
+          '/siswa/login': (_) => const LoginSiswaPage(),
 
           // ── Siswa: Register flow ───────────────────────────────
           '/siswa/register': (_) => const RegisterSiswaPage(),
