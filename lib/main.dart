@@ -6,7 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/dependency_injection.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/beranda/beranda_orangtua_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/jadwal/jadwal_orangtua_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/laporan/laporan_orangtua_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/login_orang_tua_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/profil/profil_anak_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/register_orang_tua_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/tautkan_akun_anak_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/verifikasi_otp_tautkan_page.dart';
@@ -222,16 +226,30 @@ class LazuardyApp extends StatelessWidget {
           '/tutor/tarik-saldo': (_) => const TarikSaldoPage(),
 
           // ── Orang Tua ─────────────────────
-          '/orang_tua/register': (_) => const RegisterOrangTuaPage(),
-          '/orang_tua/login': (_) => const LoginOrangTuaPage(),
-          '/orang_tua/otp-verification': (_) => const OtpVerificationTutorPage(),
-          '/orang_tua/forgot-password': (_) => const ForgotPasswordTutorPage(),
-          '/orang_tua/reset-password': (_) => const ResetPasswordTutorPage(),
-          '/orang_tua/tautkan-akun-anak': (_) => const TautkanAkunAnakPage(),
+          '/orang-tua/register': (_) => const RegisterOrangTuaPage(),
+          '/orang-tua/login': (_) => const LoginOrangTuaPage(),
+          '/orang-tua/otp-verification': (_) => const OtpVerificationTutorPage(),
+          '/orang-tua/forgot-password': (_) => const ForgotPasswordTutorPage(),
+          '/orang-tua/reset-password': (_) => const ResetPasswordTutorPage(),
+          '/orang-tua/tautkan-akun-anak': (_) => const TautkanAkunAnakPage(),
 
 
-          // ── Orang Tua: Home (TODO) ─────────────────────────────
-          // '/orang-tua/beranda': (_) => const BerandaOrtuPage(),
+          // ── Orang Tua: Home ─────────────────────────────
+          '/orang-tua/beranda': (_) => const BerandaOrangtuaPage(),
+
+          // ── Orang Tua: Menu Sidebar ────────────────────────────────────
+          '/orang-tua/hubungi-kami': (_) => const HubungiKamiPage(),
+          '/orang-tua/tentang-kami': (_) => const TentangKamiPage(),
+          '/orang-tua/notifikasi': (_) => const NotifikasiTutorPage(),
+
+          // ── Orang Tua: Jadwal ─────────────────────────────
+          '/orang-tua/jadwal-anak': (_) => const JadwalOrangtuaPage(),
+
+          // ── Orang Tua: Laporan ─────────────────────────────
+          '/orang-tua/laporan-anak': (_) => const LaporanOrangtuaPage(),
+
+          // ── Orang Tua: Profil Anak ─────────────────────────────
+          '/orang-tua/profil-anak': (_) => const ProfilAnakPage(),
         },
       ),
     );
