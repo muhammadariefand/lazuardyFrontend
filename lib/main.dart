@@ -6,6 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/dependency_injection.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/login_orang_tua_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/register_orang_tua_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/tautkan_akun_anak_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/verifikasi_otp_tautkan_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/batalkan_sesi_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/booking/booking_berhasil_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/booking/konfirmasi_booking_page.dart';
@@ -43,7 +47,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/tutor/jadwal/jadwal_mengaj
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/notifikasi/notifikasi_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/profil/edit_profil_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/profil/profil_tutor_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/tutor/verifikasi_tutor_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/tutor/menunggu_verifikasi_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 
 // ── Shared ─────────────────────────────────────────────────────────
@@ -217,11 +221,14 @@ class LazuardyApp extends StatelessWidget {
           // ── Tutor: Tarik Saldo ─────────────────────────────
           '/tutor/tarik-saldo': (_) => const TarikSaldoPage(),
 
-          // ── Orang Tua: TIDAK ada register ─────────────────────
-          // Orang Tua login memakai akun anak (email+password siswa)
-          // Setelah login berhasil diarahkan ke beranda orang tua
-          // '/orang-tua/detail-pribadi': (_) => const DetailPribadiOrtuPage(),
-          // '/orang-tua/detail-anak': (_) => const DetailAnakPage(),
+          // ── Orang Tua ─────────────────────
+          '/orang_tua/register': (_) => const RegisterOrangTuaPage(),
+          '/orang_tua/login': (_) => const LoginOrangTuaPage(),
+          '/orang_tua/otp-verification': (_) => const OtpVerificationTutorPage(),
+          '/orang_tua/forgot-password': (_) => const ForgotPasswordTutorPage(),
+          '/orang_tua/reset-password': (_) => const ResetPasswordTutorPage(),
+          '/orang_tua/tautkan-akun-anak': (_) => const TautkanAkunAnakPage(),
+
 
           // ── Orang Tua: Home (TODO) ─────────────────────────────
           // '/orang-tua/beranda': (_) => const BerandaOrtuPage(),
