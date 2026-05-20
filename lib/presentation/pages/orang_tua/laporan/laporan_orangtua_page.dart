@@ -73,9 +73,9 @@ class LaporanOrangtuaPage extends StatelessWidget {
       bottomNavigationBar: OrangTuaBottomNav(
         currentIndex: 2,
         onTap: (i) {
-          if (i == 0) Navigator.pushReplacementNamed(context, '/orangtua/beranda');
-          if (i == 1) Navigator.pushReplacementNamed(context, '/orangtua/jadwal');
-          if (i == 3) Navigator.pushReplacementNamed(context, '/orangtua/profil');
+          if (i == 0) Navigator.pushReplacementNamed(context, '/orang-tua/beranda');
+          if (i == 1) Navigator.pushReplacementNamed(context, '/orang-tua/jadwal-anak');
+          if (i == 3) Navigator.pushReplacementNamed(context, '/orang-tua/profil-anak');
         },
       ),
       body: Column(

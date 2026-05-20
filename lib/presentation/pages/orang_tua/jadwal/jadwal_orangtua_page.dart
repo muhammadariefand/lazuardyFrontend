@@ -106,9 +106,9 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
       bottomNavigationBar: OrangTuaBottomNav(
         currentIndex: 1,
         onTap: (i) {
-          if (i == 0) Navigator.pushReplacementNamed(context, '/orangtua/beranda');
-          if (i == 2) Navigator.pushReplacementNamed(context, '/orangtua/laporan');
-          if (i == 3) Navigator.pushReplacementNamed(context, '/orangtua/profil');
+          if (i == 0) Navigator.pushReplacementNamed(context, '/orang-tua/beranda');
+          if (i == 2) Navigator.pushReplacementNamed(context, '/orang-tua/laporan-anak');
+          if (i == 3) Navigator.pushReplacementNamed(context, '/orang-tua/profil-anak');
         },
       ),
       body: Column(

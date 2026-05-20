@@ -338,7 +338,7 @@ class _BerandaOrangtuaPageState extends State<BerandaOrangtuaPage> {
                       color: Colors.white)),
               GestureDetector(
                 onTap: () =>
-                    Navigator.pushNamed(context, '/orangtua/notifikasi'),
+                    Navigator.pushNamed(context, '/orang-tua/notifikasi'),
                 child: const Row(children: [
                   Text('Lihat semua',
                       style: TextStyle(

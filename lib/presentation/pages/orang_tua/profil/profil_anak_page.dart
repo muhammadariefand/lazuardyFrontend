@@ -36,9 +36,9 @@ class ProfilAnakPage extends StatelessWidget {
       bottomNavigationBar: OrangTuaBottomNav(
         currentIndex: 3,
         onTap: (i) {
-          if (i == 0) Navigator.pushReplacementNamed(context, '/orangtua/beranda');
-          if (i == 1) Navigator.pushReplacementNamed(context, '/orangtua/jadwal');
-          if (i == 2) Navigator.pushReplacementNamed(context, '/orangtua/laporan');
+          if (i == 0) Navigator.pushReplacementNamed(context, '/orang-tua/beranda');
+          if (i == 1) Navigator.pushReplacementNamed(context, '/orang-tua/jadwal-anak');
+          if (i == 2) Navigator.pushReplacementNamed(context, '/orang-tua/laporan-anak');
         },
       ),
       body: Column(
