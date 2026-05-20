@@ -4,6 +4,9 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_state.dart';
 
 class ForgotPasswordSiswaPage extends StatefulWidget {
   const ForgotPasswordSiswaPage({super.key});
@@ -26,27 +29,39 @@ class _ForgotPasswordSiswaPageState extends State<ForgotPasswordSiswaPage> {
   void _onSelanjutnya() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isLoading = true);
-
-      // TODO: Panggil use case kirim email reset password
-      await Future.delayed(const Duration(seconds: 1));
-
-      if (mounted) {
+      // Panggil cubit untuk mengirim OTP
+      try {
+        context.read<AuthCubit>().studentRequestOtp(_emailCtrl.text);
+      } catch (e) {
         setState(() => _isLoading = false);
-        // Navigasi ke OTP dengan konteks forgot_password
-        Navigator.of(context).pushNamed(
-          '/otp',
-          arguments: {
-            'email': _emailCtrl.text,
-            'context': 'forgot_password',
-          },
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal mengirim OTP: $e')));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is OtpSentSuccess) {
+          if (mounted) {
+            setState(() => _isLoading = false);
+            Navigator.of(context).pushNamed(
+              '/siswa/otp-verification-forgot-password',
+              arguments: {
+                'email': _emailCtrl.text,
+                'context': 'forgot_password',
+              },
+            );
+          }
+        } else if (state is AuthFailure) {
+          if (mounted) {
+            setState(() => _isLoading = false);
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error)));
+          }
+        }
+      },
+      child: Scaffold(
       backgroundColor: AppColors.bgWhite,
       body: SafeArea(
         child: Padding(
@@ -143,6 +158,6 @@ class _ForgotPasswordSiswaPageState extends State<ForgotPasswordSiswaPage> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

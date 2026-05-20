@@ -9,3 +9,10 @@ class AuthFailure extends AuthState {
 
   AuthFailure(this.error, {this.errorDetails});
 }
+
+class OtpSentSuccess extends AuthState {}
+class OtpVerifiedSuccess extends AuthState {
+  final String resetToken;
+  OtpVerifiedSuccess(this.resetToken);
+}
+class ResetPasswordSuccess extends AuthState {}

@@ -60,4 +60,48 @@ class AuthRepositoryImpl implements AuthRepository {
       throw ServerException('Gagal melakukan login');
     }
   }
+
+  @override
+  Future<void> studentForgotPasswordRequest(String email) async {
+    try {
+      await remoteDataSource.studentForgotPasswordRequest(email);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal mengirim permintaan OTP');
+    }
+  }
+
+  @override
+  Future<String> studentForgotPasswordVerify(String email, String otp) async {
+    try {
+      final token = await remoteDataSource.studentForgotPasswordVerify(email, otp);
+      return token;
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal memverifikasi OTP');
+    }
+  }
+
+  @override
+  Future<void> studentForgotPasswordReset({
+    required String email,
+    required String resetToken,
+    required String password,
+    required String confirmPassword,
+  }) async {
+    try {
+      await remoteDataSource.studentForgotPasswordReset(
+        email: email,
+        resetToken: resetToken,
+        password: password,
+        confirmPassword: confirmPassword,
+      );
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal mereset password');
+    }
+  }
 }

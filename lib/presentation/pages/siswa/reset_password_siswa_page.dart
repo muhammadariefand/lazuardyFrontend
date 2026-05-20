@@ -2,7 +2,10 @@
 // Buat Kata Sandi Baru — password baru + konfirmasi, tombol Perbarui
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
 
 class ResetPasswordSiswaPage extends StatefulWidget {
@@ -19,7 +22,6 @@ class _ResetPasswordSiswaPageState extends State<ResetPasswordSiswaPage> {
 
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -28,19 +30,15 @@ class _ResetPasswordSiswaPageState extends State<ResetPasswordSiswaPage> {
     super.dispose();
   }
 
-  void _onUpdate() async {
+  void _onUpdate(String email, String resetToken) async {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isLoading = true);
-
-      // TODO: Panggil use case reset password
-      await Future.delayed(const Duration(seconds: 1));
-
-      if (mounted) {
-        setState(() => _isLoading = false);
-
-        // Tampilkan dialog sukses lalu ke login
-        _showSuccessDialog();
-      }
+      // Panggil cubit untuk reset password dengan parameter yang benar
+      context.read<AuthCubit>().studentResetPassword(
+        email: email,
+        token: resetToken,
+        password: _passwordCtrl.text,
+        confirmPassword: _confirmCtrl.text,
+      );
     }
   }
 
@@ -94,7 +92,6 @@ class _ResetPasswordSiswaPageState extends State<ResetPasswordSiswaPage> {
               PrimaryButton(
                 label: 'Masuk Sekarang',
                 onPressed: () {
-                  // Bersihkan semua route hingga ke login
                   Navigator.of(ctx).pop();
                   Navigator.of(context).pushNamedAndRemoveUntil(
                     '/login',
@@ -111,144 +108,171 @@ class _ResetPasswordSiswaPageState extends State<ResetPasswordSiswaPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Ambil email dan resetToken dari route arguments
+    final Map<String, dynamic>? args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final String email = args?['email'] as String? ?? '';
+    final String resetToken = args?['resetToken'] as String? ?? '';
+
     return Scaffold(
       backgroundColor: AppColors.bgWhite,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
+      body: BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is ResetPasswordSuccess) {
+            _showSuccessDialog();
+          } else if (state is AuthFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error),
+                backgroundColor: AppColors.errorRed,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
+        child: SafeArea(
+          child: BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, state) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Form(
+                  key: _formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
 
-                // ── Back Button ───────────────────────────────
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back,
-                      color: AppColors.textPrimary),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-
-                const SizedBox(height: 56),
-
-                // ── Judul + Deskripsi (center) ────────────────
-                Center(
-                  child: Column(
-                    children: [
-                      const Text(
-                        'Buat Kata Sandi Baru',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textTeal,
+                        // ── Back Button ───────────────────────────────
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: const Icon(Icons.arrow_back,
+                              color: AppColors.textPrimary),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         ),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        'Masukkan kata sandi baru Anda, lalu\n'
-                        'konfirmasi untuk menyelesaikan proses\n'
-                        'reset',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.grey.shade600,
-                          height: 1.6,
+
+                        const SizedBox(height: 56),
+
+                        // ── Judul + Deskripsi (center) ────────────────
+                        Center(
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Buat Kata Sandi Baru',
+                                style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textTeal,
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              Text(
+                                'Masukkan kata sandi baru Anda, lalu\n'
+                                'konfirmasi untuk menyelesaikan proses\n'
+                                'reset',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.grey.shade600,
+                                  height: 1.6,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+
+                        const SizedBox(height: 36),
+
+                        // ── Kata Sandi ────────────────────────────────
+                        const Text('Kata Sandi', style: AppTextStyles.label),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _passwordCtrl,
+                          enabled: state is! AuthLoading,
+                          obscureText: _obscurePassword,
+                          decoration: AppTheme.inputDecoration(
+                            hint: 'Masukan Kata Sandi',
+                            prefixIcon: const Icon(
+                              Icons.lock_outline,
+                              color: AppColors.textSecondary,
+                              size: 20,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: AppColors.textSecondary,
+                                size: 20,
+                              ),
+                              onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword),
+                            ),
+                          ),
+                          validator: (v) {
+                            if (v == null || v.isEmpty) return 'Password wajib diisi';
+                            if (v.length < 8) return 'Minimal 8 karakter';
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // ── Konfirmasi Kata Sandi ─────────────────────
+                        const Text('Konfirmasi Kata Sandi',
+                            style: AppTextStyles.label),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _confirmCtrl,
+                          enabled: state is! AuthLoading,
+                          obscureText: _obscureConfirm,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _onUpdate(email, resetToken),
+                          decoration: AppTheme.inputDecoration(
+                            hint: 'Masukkan Konfirmasi Kata Sandi',
+                            prefixIcon: const Icon(
+                              Icons.lock_outline,
+                              color: AppColors.textSecondary,
+                              size: 20,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirm
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: AppColors.textSecondary,
+                                size: 20,
+                              ),
+                              onPressed: () =>
+                                  setState(() => _obscureConfirm = !_obscureConfirm),
+                            ),
+                          ),
+                          validator: (v) {
+                            if (v == null || v.isEmpty) {
+                              return 'Konfirmasi password wajib diisi';
+                            }
+                            if (v != _passwordCtrl.text) {
+                              return 'Password tidak sama';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 48),
+
+                        // ── Tombol Perbarui ───────────────────────────
+                        PrimaryButton(
+                          label: 'Perbarui Kata Sandi',
+                          onPressed: () => _onUpdate(email, resetToken),
+                          isLoading: state is AuthLoading,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-
-                const SizedBox(height: 36),
-
-                // ── Kata Sandi ────────────────────────────────
-                const Text('Kata Sandi', style: AppTextStyles.label),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _passwordCtrl,
-                  enabled: !_isLoading,
-                  obscureText: _obscurePassword,
-                  decoration: AppTheme.inputDecoration(
-                    hint: 'Masukan Kata Sandi',
-                    prefixIcon: const Icon(
-                      Icons.lock_outline,
-                      color: AppColors.textSecondary,
-                      size: 20,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: AppColors.textSecondary,
-                        size: 20,
-                      ),
-                      onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword),
-                    ),
-                  ),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) return 'Password wajib diisi';
-                    if (v.length < 8) return 'Minimal 8 karakter';
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                // ── Konfirmasi Kata Sandi ─────────────────────
-                const Text('Konfirmasi Kata Sandi',
-                    style: AppTextStyles.label),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _confirmCtrl,
-                  enabled: !_isLoading,
-                  obscureText: _obscureConfirm,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _onUpdate(),
-                  decoration: AppTheme.inputDecoration(
-                    hint: 'Masukkan Konfirmasi Kata Sandi',
-                    prefixIcon: const Icon(
-                      Icons.lock_outline,
-                      color: AppColors.textSecondary,
-                      size: 20,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirm
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: AppColors.textSecondary,
-                        size: 20,
-                      ),
-                      onPressed: () =>
-                          setState(() => _obscureConfirm = !_obscureConfirm),
-                    ),
-                  ),
-                  validator: (v) {
-                    if (v == null || v.isEmpty) {
-                      return 'Konfirmasi password wajib diisi';
-                    }
-                    if (v != _passwordCtrl.text) {
-                      return 'Password tidak sama';
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 48),
-
-                // ── Tombol Perbarui ───────────────────────────
-                PrimaryButton(
-                  label: 'Perbarui Kata Sandi',
-                  onPressed: _onUpdate,
-                  isLoading: _isLoading,
-                ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

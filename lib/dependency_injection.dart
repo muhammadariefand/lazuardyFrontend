@@ -1,4 +1,7 @@
 import 'package:get_it/get_it.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/request_otp_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/reset_password_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/auth_local_ds.dart';
@@ -53,6 +56,15 @@ Future<void> initDependencies() async {
   // Usecase untuk login mahasiswa
   sl.registerLazySingleton(() => StudentLoginUsecase(repository: sl()));
 
+  // Usecase untuk mengirim OTP
+  sl.registerLazySingleton(() => StudentRequestOtpUsecase(sl()));
+
+  // Usecase untuk verifikasi OTP
+  sl.registerLazySingleton(() => StudentVerifyOtpUsecase(sl()));
+
+  // Usecase untuk mereset password
+  sl.registerLazySingleton(() => StudentResetPasswordUsecase(sl()));
+
   // ── PRESENTATION / STATE MANAGEMENT ─────────────────────────
   sl.registerFactory(
     () => AuthCubit(
@@ -60,6 +72,9 @@ Future<void> initDependencies() async {
       studentVerifyOtpRegisterEmailUsecase: sl(),
       studentRegisterUsecase: sl(),
       studentLoginUsecase: sl(),
+      studentRequestOtpUsecase: sl(),
+      studentVerifyOtpUsecase: sl(),
+      studentResetPasswordUsecase: sl(),
     ),
   );
 }

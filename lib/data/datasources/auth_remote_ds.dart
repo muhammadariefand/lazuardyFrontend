@@ -79,6 +79,48 @@ class AuthRemoteDataSource {
     }
   }
 
+  // Forgot password: request OTP
+  Future<void> studentForgotPasswordRequest(String email) async {
+    try {
+      final response = await client.dio.post('/forgotPasswordOtpEmail', data: {'email': email});
+    } on DioException catch (e) {
+      _handleDioError(e);
+    }
+  }
+
+  // Verify OTP for forgot password, return reset token from server
+  Future<String> studentForgotPasswordVerify(String email, String otp) async {
+    try {
+      final response = await client.dio.post('/forgotPasswordVerifyOtpEmail', data: {
+        'email': email,
+        'otp': otp,
+      });
+      return response.data['reset_token'] ?? '';
+    } on DioException catch (e) {
+      _handleDioError(e);
+      rethrow;
+    }
+  }
+
+  // Reset password using reset token
+  Future<void> studentForgotPasswordReset({
+    required String email,
+    required String resetToken,
+    required String password,
+    required String confirmPassword,
+  }) async {
+    try {
+      await client.dio.post('/forgotPasswordResetPassword', data: {
+        'email': email,
+        'reset_token': resetToken,
+        'password': password,
+        'confirm_password': confirmPassword,
+      });
+    } on DioException catch (e) {
+      _handleDioError(e);
+    }
+  }
+
   void _handleDioError(DioException e) {
     if (e.response?.statusCode == 422) {
       final data = e.response?.data;

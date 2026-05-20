@@ -29,6 +29,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/login_siswa_page.dar
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/menu_sidebar/hubungi_kami_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/menu_sidebar/tentang_kami_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/notifikasi/notifikasi_siswa_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/siswa/otp_verification_forgot_password_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/profil_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/rekomendasi_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_pembayaran/riwayat_pembayaran_page.dart';
@@ -133,6 +134,7 @@ class LazuardyApp extends StatelessWidget {
 
           // ── Siswa: Auth flow ───────────────────────────────────
           '/siswa/forgot-password': (_) => const ForgotPasswordSiswaPage(),
+          '/siswa/otp-verification-forgot-password': (_) => const OtpVerificationForgotPasswordPage(),
           '/siswa/reset-password': (_) => const ResetPasswordSiswaPage(),
 
           // ── Siswa: Menu Sidebar ────────────────────────────────────

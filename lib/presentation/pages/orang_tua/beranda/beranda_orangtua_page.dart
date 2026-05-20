@@ -9,6 +9,7 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/orangtua_bottom_nav.dart';
+import 'package:lazuadry_mobile_fe/presentation/widgets/orangtua_drawer.dart';
 
 const _teal = Color(0xFF3AAFA9);
 
@@ -109,6 +110,7 @@ class _BerandaOrangtuaPageState extends State<BerandaOrangtuaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
+      drawer: const OrangtuaDrawer(nama: _namaOrangTua, inisial: 'O'),
       backgroundColor: _teal,
       bottomNavigationBar: OrangTuaBottomNav(
         currentIndex: 0,
