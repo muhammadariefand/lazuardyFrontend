@@ -6,12 +6,12 @@ class OtpModel {
   static OtpResult fromJson(Map<String, dynamic> json, int statusCode) {
     if (statusCode == 200 || statusCode == 201) {
       return OtpSuccess(
-        status: json['status'],
+        status: json['status']?.toString() ?? '',
       );
     } else {
       return OtpFailure(
-        status: json['status'],
-        message: json['message'] ?? 'Terjadi kesalahan',
+        status: json['status']?.toString() ?? '',
+        message: json['message']?.toString() ?? 'Terjadi kesalahan',
       );
     }
   }

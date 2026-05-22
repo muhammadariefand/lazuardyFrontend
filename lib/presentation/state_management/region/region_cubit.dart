@@ -12,12 +12,12 @@ class RegionCubit extends Cubit<RegionState> {
   final GetDistrictsUseCase getDistrictsUseCase;
   final GetSubdistrictsUseCase getSubdistrictsUseCase;
 
-  RegionCubit({
-    required this.getProvincesUseCase,
-    required this.getRegenciesUseCase,
-    required this.getDistrictsUseCase,
-    required this.getSubdistrictsUseCase,
-  }) : super(RegionState());
+  RegionCubit(
+    this.getProvincesUseCase,
+    this.getRegenciesUseCase,
+    this.getDistrictsUseCase,
+    this.getSubdistrictsUseCase,
+  ) : super(RegionState());
 
   void fetchProvinces() async {
     print("DEBUG: Memanggil fetchProvinces..."); // Tambahkan ini

@@ -1,15 +1,20 @@
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
+import 'package:lazuadry_mobile_fe/data/datasources/dashboard_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/region_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/dashboard_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/region_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/dashboard_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/region_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/request_otp_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/reset_password_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/get_dashboard_data_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_districts_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_provinces_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_regencies_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_subdistricts_usecase.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
@@ -47,14 +52,22 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => AuthRemoteDataSource(sl()));
 
   // Remote untuk region
-  sl.registerLazySingleton<RegionRemoteDataSource>(() => RegionRemoteDataSourceImpl(client: sl()));
+  sl.registerLazySingleton<RegionRemoteDataSource>(
+    () => RegionRemoteDataSourceImpl(client: sl())
+  );
 
-  // Local
+  // Local untuk auth (penyimpanan token, dsb)
   sl.registerLazySingleton<AuthLocalDataSource>(
     () => AuthLocalDataSourceImpl(sl()),
   );
 
+  // Remote untuk dashboard
+  sl.registerLazySingleton<DashboardRemoteDataSource>(
+    () => DashboardRemoteDataSourceImpl(dio: sl()),
+  );
+
   // REPOSITORIES ───────────────────────────────────────────────  
+  // Repository untuk auth
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
       remoteDataSource: sl(), 
@@ -62,9 +75,18 @@ Future<void> initDependencies() async {
     ),
   );
 
-  // Repository untuk region
-  sl.registerLazySingleton<RegionRepository>(() => RegionRepositoryImpl(remoteDataSource: sl()));
+  // Repository untuk dashboard
+  sl.registerLazySingleton<DashboardRepository>(
+    () => DashboardRepositoryImpl(
+      remoteDataSource: sl()),
+  );
 
+  // Repository untuk region
+  sl.registerLazySingleton<RegionRepository>(
+    () => RegionRepositoryImpl(remoteDataSource: sl())
+  );  
+
+  // USECASES ───────────────────────────────────────────────
   // Usecases untuk mengirim OTP email saat registrasi
   sl.registerLazySingleton(() => StudentRegisterOtpEmailUsecase(repository: sl()));
 
@@ -98,24 +120,31 @@ Future<void> initDependencies() async {
   // Usecase untuk mendapatkan daftar kelurahan/desa berdasarkan kecamatan
   sl.registerLazySingleton(() => GetSubdistrictsUseCase(sl()));
 
+  // Usecase untuk mendapatkan data dashboard
+  sl.registerLazySingleton(() => GetDashboardDataUseCase(sl()));
+
 
   // ── PRESENTATION / STATE MANAGEMENT ─────────────────────────
-  sl.registerFactory(
-    () => AuthCubit(
-      studentRegisterOtpEmailUsecase: sl(),
-      studentVerifyOtpRegisterEmailUsecase: sl(),
-      studentRegisterUsecase: sl(),
-      studentLoginUsecase: sl(),
-      studentRequestOtpUsecase: sl(),
-      studentVerifyOtpUsecase: sl(),
-      studentResetPasswordUsecase: sl(),
+  sl.registerFactory(() => AuthCubit(
+    studentRegisterOtpEmailUsecase: sl(),
+    studentVerifyOtpRegisterEmailUsecase: sl(),
+    studentRegisterUsecase: sl(),
+    studentLoginUsecase: sl(),
+    studentRequestOtpUsecase: sl(),
+    studentVerifyOtpUsecase: sl(),
+    studentResetPasswordUsecase: sl(),
     ),
   );
 
   sl.registerFactory(() => RegionCubit(
-  getProvincesUseCase: sl(),
-  getRegenciesUseCase: sl(),
-  getDistrictsUseCase: sl(),
-  getSubdistrictsUseCase: sl(),
-));
+    sl(),
+    sl(),
+    sl(),
+    sl(),
+  ));
+
+  sl.registerFactory(() => DashboardCubit(
+    getDashboardDataUseCase: sl()
+    ),
+  );
 }

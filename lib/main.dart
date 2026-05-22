@@ -91,6 +91,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/tutor/reset_password_tutor
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/detail_pribadi_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/formulir_pendaftaran_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/formulir_profil_tutor_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
 
 // ── Orang Tua ──────────────────────────────────────────────────────
@@ -149,7 +150,10 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/notifikasi': (_) => const NotifikasiSiswaPage(),
 
           // ── Siswa: Dashboard ────────────────────────────────────────
-          '/siswa/beranda': (_) => const BerandaSiswaPage(),
+          '/siswa/beranda': (context) => BlocProvider<DashboardCubit>(
+            create: (context) => sl<DashboardCubit>(),
+            child: const BerandaSiswaPage(),
+          ),
           '/siswa/jadwal': (_) => const JadwalSiswaPage(),
           '/siswa/detail-sesi': (_) => const DetailSesiPage(),
           '/siswa/batalkan-sesi': (_) => const BatalkanSesiPage(),
