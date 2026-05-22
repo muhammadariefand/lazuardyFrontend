@@ -1,7 +1,16 @@
 import 'package:get_it/get_it.dart';
+import 'package:dio/dio.dart';
+import 'package:lazuadry_mobile_fe/data/datasources/region_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/region_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/region_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/request_otp_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/reset_password_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/region/get_districts_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/region/get_provinces_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/region/get_regencies_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/region/get_subdistricts_usecase.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/auth_local_ds.dart';
@@ -22,6 +31,12 @@ Future<void> initDependencies() async {
   // Shared Preferences
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
+  
+  // Dio HTTP Client
+  sl.registerLazySingleton<Dio>(() {
+    final dio = Dio();
+    return dio;
+  });
 
   // ── CORE ────────────────────────────────────────────────
   // API Client
@@ -30,6 +45,9 @@ Future<void> initDependencies() async {
   // ── DATA SOURCES ────────────────────────────────────────────────
   // Remote 
   sl.registerLazySingleton(() => AuthRemoteDataSource(sl()));
+
+  // Remote untuk region
+  sl.registerLazySingleton<RegionRemoteDataSource>(() => RegionRemoteDataSourceImpl(client: sl()));
 
   // Local
   sl.registerLazySingleton<AuthLocalDataSource>(
@@ -43,6 +61,9 @@ Future<void> initDependencies() async {
       localDataSource: sl()
     ),
   );
+
+  // Repository untuk region
+  sl.registerLazySingleton<RegionRepository>(() => RegionRepositoryImpl(remoteDataSource: sl()));
 
   // Usecases untuk mengirim OTP email saat registrasi
   sl.registerLazySingleton(() => StudentRegisterOtpEmailUsecase(repository: sl()));
@@ -65,6 +86,19 @@ Future<void> initDependencies() async {
   // Usecase untuk mereset password
   sl.registerLazySingleton(() => StudentResetPasswordUsecase(sl()));
 
+  // Usecase untuk mendapatkan daftar provinsi
+  sl.registerLazySingleton(() => GetProvincesUseCase(sl()));
+
+  // Usecase untuk mendapatkan daftar kabupaten/kota berdasarkan provinsi
+  sl.registerLazySingleton(() => GetRegenciesUseCase(sl()));
+
+  // Usecase untuk mendapatkan daftar kecamatan berdasarkan kabupaten/kota
+  sl.registerLazySingleton(() => GetDistrictsUseCase(sl()));
+
+  // Usecase untuk mendapatkan daftar kelurahan/desa berdasarkan kecamatan
+  sl.registerLazySingleton(() => GetSubdistrictsUseCase(sl()));
+
+
   // ── PRESENTATION / STATE MANAGEMENT ─────────────────────────
   sl.registerFactory(
     () => AuthCubit(
@@ -77,4 +111,11 @@ Future<void> initDependencies() async {
       studentResetPasswordUsecase: sl(),
     ),
   );
+
+  sl.registerFactory(() => RegionCubit(
+  getProvincesUseCase: sl(),
+  getRegenciesUseCase: sl(),
+  getDistrictsUseCase: sl(),
+  getSubdistrictsUseCase: sl(),
+));
 }

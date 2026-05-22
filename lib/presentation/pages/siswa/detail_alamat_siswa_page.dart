@@ -1,14 +1,13 @@
-// lib/presentation/pages/siswa/detail_alamat_siswa_page.dart
-// Detail Alamat — 4 dropdown bertingkat Provinsi→Kota→Kecamatan→Desa
-// Dropdown bawah dikunci sampai dropdown atasnya dipilih (cascading)
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_state.dart';
 import 'package:lazuadry_mobile_fe/data/models/auth/register_student_request.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_state.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/region_entity.dart';
 
 class DetailAlamatSiswaPage extends StatefulWidget {
   const DetailAlamatSiswaPage({super.key});
@@ -20,61 +19,19 @@ class DetailAlamatSiswaPage extends StatefulWidget {
 class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // State pilihan
-  String? _selectedProvinsi;
-  String? _selectedKota;
-  String? _selectedKecamatan;
-  String? _selectedDesa;
-
-  // ── Data statis (ganti dengan API call nyata) ──────────────────
-  static const _provinsiList = [
-    'DI Yogyakarta', 'DKI Jakarta', 'Jawa Barat', 'Jawa Tengah',
-    'Jawa Timur', 'Banten', 'Bali', 'Sumatera Utara',
-    'Sumatera Selatan', 'Kalimantan Timur',
-  ];
-
-  static const Map<String, List<String>> _kotaByProvinsi = {
-    'DI Yogyakarta': ['Kota Yogyakarta', 'Sleman', 'Bantul', 'Kulon Progo', 'Gunungkidul'],
-    'DKI Jakarta': ['Jakarta Pusat', 'Jakarta Utara', 'Jakarta Barat', 'Jakarta Selatan', 'Jakarta Timur'],
-    'Jawa Barat': ['Kota Bandung', 'Kota Bogor', 'Kota Bekasi', 'Depok', 'Cimahi'],
-    'Jawa Tengah': ['Kota Semarang', 'Kota Solo', 'Kota Magelang', 'Cilacap', 'Purwokerto'],
-    'Jawa Timur': ['Kota Surabaya', 'Kota Malang', 'Kota Kediri', 'Sidoarjo', 'Gresik'],
-  };
-
-  static const Map<String, List<String>> _kecamatanByKota = {
-    'Kota Yogyakarta': ['Danurejan', 'Gedongtengen', 'Gondokusuman', 'Gondomanan', 'Jetis'],
-    'Sleman': ['Depok', 'Mlati', 'Gamping', 'Godean', 'Moyudan'],
-    'Bantul': ['Bantul', 'Sewon', 'Kasihan', 'Pajangan', 'Pandak'],
-    'Kota Bandung': ['Coblong', 'Sukasari', 'Sukajadi', 'Cidadap', 'Cibeunying'],
-    'Kota Surabaya': ['Gubeng', 'Wonokromo', 'Rungkut', 'Sukolilo', 'Tambaksari'],
-  };
-
-  static const Map<String, List<String>> _desaByKecamatan = {
-    'Danurejan': ['Bausasran', 'Suryatmajan', 'Tegalpanggung'],
-    'Depok': ['Catur Tunggal', 'Condong Catur', 'Maguwoharjo', 'Sariharjo'],
-    'Bantul': ['Bantul', 'Ringinharjo', 'Trirenggo', 'Palbapang'],
-    'Coblong': ['Cipaganti', 'Dago', 'Lebak Gede', 'Lebak Siliwangi'],
-    'Gubeng': ['Airlangga', 'Baratajaya', 'Gubeng', 'Kertajaya'],
-  };
-
-  // Helper: ambil list berdasarkan pilihan level atas
-  List<String> get _kotaList =>
-      _selectedProvinsi != null
-          ? (_kotaByProvinsi[_selectedProvinsi] ?? [])
-          : [];
-
-  List<String> get _kecamatanList =>
-      _selectedKota != null
-          ? (_kecamatanByKota[_selectedKota] ?? [])
-          : [];
-
-  List<String> get _desaList =>
-      _selectedKecamatan != null
-          ? (_desaByKecamatan[_selectedKecamatan] ?? [])
-          : [];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<RegionCubit>().fetchProvinces();
+    });
+  }
 
   void _onDaftar(Map<String, dynamic> dataPribadi) {
     if (_formKey.currentState?.validate() ?? false) {
+      // Ambil state terkini dari RegionCubit
+      final regionState = context.read<RegionCubit>().state;
+
       // Validasi data pribadi yang diperlukan
       final email = dataPribadi['email'] as String?;
       final password = dataPribadi['password'] as String?;
@@ -109,6 +66,21 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
         return;
       }
 
+      // Pastikan semua wilayah sudah terpilih
+      if (regionState.selectedProvince == null ||
+          regionState.selectedRegency == null ||
+          regionState.selectedDistrict == null ||
+          regionState.selectedSubdistrict == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Harap lengkapi semua pilihan wilayah alamat Anda.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Request API dengan mengirim 'name' wilayahnya saja sesuai kontrak JSON
       final request = RegisterStudentRequest(
         email: email,
         password: password,
@@ -117,10 +89,10 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
         gender: gender,
         dateOfBirth: dateOfBirth,
         telephoneNumber: telephoneNumber,
-        province: _selectedProvinsi ?? '',
-        regency: _selectedKota ?? '',
-        district: _selectedKecamatan ?? '',
-        subdistrict: _selectedDesa ?? '',
+        province: regionState.selectedProvince!.name,
+        regency: regionState.selectedRegency!.name,
+        district: regionState.selectedDistrict!.name,
+        subdistrict: regionState.selectedSubdistrict!.name,
       );
 
       context.read<AuthCubit>().studentRegister(request);
@@ -134,20 +106,20 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
     return Scaffold(
       backgroundColor: AppColors.bgWhite,
       body: BlocConsumer<AuthCubit, AuthState>(
-        listener: (context, state) {
-          if (state is AuthSuccess) {
+        listener: (context, authState) {
+          if (authState is AuthSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Registrasi Berhasil!'), backgroundColor: Colors.green),
             );
             Navigator.of(context).pushNamedAndRemoveUntil('/siswa/beranda', (route) => false);
           }
-          if (state is AuthFailure) {
+          if (authState is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error), backgroundColor: AppColors.errorRed),
+              SnackBar(content: Text(authState.error), backgroundColor: AppColors.errorRed),
             );
           }
         },
-        builder: (context, state) {
+        builder: (context, authState) {
           return SafeArea(
             child: Form(
               key: _formKey,
@@ -164,8 +136,7 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
                           // ── Back Button ─────────────────────────
                           IconButton(
                             onPressed: () => Navigator.of(context).pop(),
-                            icon: const Icon(Icons.arrow_back,
-                                color: AppColors.textPrimary),
+                            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                           ),
@@ -178,77 +149,88 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
                           const SizedBox(height: 28),
 
                           // ── Judul ────────────────────────────────
-                          const Text('Detail Alamat',
-                              style: AppTextStyles.heading2),
+                          const Text('Detail Alamat', style: AppTextStyles.heading2),
 
                           const SizedBox(height: 20),
 
-                          // ── Provinsi ─────────────────────────────
-                          _buildDropdownSection(
-                            label: 'Provinsi',
-                            hint: 'Pilih Provinsi',
-                            value: _selectedProvinsi,
-                            items: _provinsiList,
-                            isEnabled: true,
-                            onChanged: (v) => setState(() {
-                              _selectedProvinsi = v;
-                              // Reset pilihan bawah
-                              _selectedKota = null;
-                              _selectedKecamatan = null;
-                              _selectedDesa = null;
-                            }),
-                            validator: (v) =>
-                                v == null ? 'Provinsi wajib dipilih' : null,
-                          ),
+                          // ── Dropdown Wilayah (Dibungkus RegionCubit) ──
+                          BlocBuilder<RegionCubit, RegionState>(
+                            builder: (context, regionState) {
+                              return Column(
+                                children: [
+                                  // ── Provinsi ──
+                                  _buildDropdownSection(
+                                    label: 'Provinsi',
+                                    hint: regionState.isLoading 
+                                        ? 'Sedang memuat...' 
+                                        : (regionState.provinces.isEmpty ? 'Gagal memuat data / Kosong' : 'Pilih Provinsi'),
+                                    value: regionState.selectedProvince,
+                                    items: regionState.provinces,
+                                    // Tetap aktifkan jika sedang loading agar user bisa melihat hint "Sedang memuat"
+                                    isEnabled: !regionState.isLoading && regionState.provinces.isNotEmpty, 
+                                    onChanged: (v) {
+                                      if (v != null) {
+                                        context.read<RegionCubit>().selectProvince(v);
+                                      }
+                                    },
+                                    validator: (v) => v == null ? 'Provinsi wajib dipilih' : null,
+                                  ),
 
-                          const SizedBox(height: 16),
+                                  const SizedBox(height: 16),
 
-                          // ── Kota/Kabupaten ────────────────────────
-                          _buildDropdownSection(
-                            label: 'Kota/Kabupaten',
-                            hint: 'Pilih Kota/Kabupaten',
-                            value: _selectedKota,
-                            items: _kotaList,
-                            isEnabled: _selectedProvinsi != null,
-                            onChanged: (v) => setState(() {
-                              _selectedKota = v;
-                              _selectedKecamatan = null;
-                              _selectedDesa = null;
-                            }),
-                            validator: (v) =>
-                                v == null ? 'Kota/Kabupaten wajib dipilih' : null,
-                          ),
+                                  // ── Kota/Kabupaten ──
+                                  _buildDropdownSection(
+                                    label: 'Kota/Kabupaten',
+                                    hint: 'Pilih Kota/Kabupaten',
+                                    value: regionState.selectedRegency,
+                                    items: regionState.regencies,
+                                    isEnabled: regionState.regencies.isNotEmpty,
+                                    onChanged: (v) {
+                                      if (v != null) {
+                                        // Cukup panggil ini, Cubitmu akan otomatis ambil data Kecamatan
+                                        context.read<RegionCubit>().selectRegency(v);
+                                      }
+                                    },
+                                    validator: (v) => v == null ? 'Kota/Kabupaten wajib dipilih' : null,
+                                  ),
 
-                          const SizedBox(height: 16),
+                                  const SizedBox(height: 16),
 
-                          // ── Kecamatan ─────────────────────────────
-                          _buildDropdownSection(
-                            label: 'Kecamatan',
-                            hint: 'Pilih Kecamatan',
-                            value: _selectedKecamatan,
-                            items: _kecamatanList,
-                            isEnabled: _selectedKota != null,
-                            onChanged: (v) => setState(() {
-                              _selectedKecamatan = v;
-                              _selectedDesa = null;
-                            }),
-                            validator: (v) =>
-                                v == null ? 'Kecamatan wajib dipilih' : null,
-                          ),
+                                  // ── Kecamatan ──
+                                  _buildDropdownSection(
+                                    label: 'Kecamatan',
+                                    hint: 'Pilih Kecamatan',
+                                    value: regionState.selectedDistrict,
+                                    items: regionState.districts,
+                                    isEnabled: regionState.districts.isNotEmpty,
+                                    onChanged: (v) {
+                                      if (v != null) {
+                                        // Cukup panggil ini, Cubitmu akan otomatis ambil data Desa
+                                        context.read<RegionCubit>().selectDistrict(v);
+                                      }
+                                    },
+                                    validator: (v) => v == null ? 'Kecamatan wajib dipilih' : null,
+                                  ),
 
-                          const SizedBox(height: 16),
+                                  const SizedBox(height: 16),
 
-                          // ── Desa/Kelurahan ────────────────────────
-                          _buildDropdownSection(
-                            label: 'Desa/Kelurahan',
-                            hint: 'Pilih Desa/Kelurahan',
-                            value: _selectedDesa,
-                            items: _desaList,
-                            isEnabled: _selectedKecamatan != null,
-                            onChanged: (v) =>
-                                setState(() => _selectedDesa = v),
-                            validator: (v) =>
-                                v == null ? 'Desa/Kelurahan wajib dipilih' : null,
+                                  // ── Desa/Kelurahan ──
+                                  _buildDropdownSection(
+                                    label: 'Desa/Kelurahan',
+                                    hint: 'Pilih Desa/Kelurahan',
+                                    value: regionState.selectedSubdistrict,
+                                    items: regionState.subdistricts,
+                                    isEnabled: regionState.subdistricts.isNotEmpty,
+                                    onChanged: (v) {
+                                      if (v != null) {
+                                        context.read<RegionCubit>().selectSubdistrict(v);
+                                      }
+                                    },
+                                    validator: (v) => v == null ? 'Desa/Kelurahan wajib dipilih' : null,
+                                  ),
+                                ],
+                              );
+                            },
                           ),
 
                           const SizedBox(height: 32),
@@ -263,7 +245,7 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
                     child: PrimaryButton(
                       label: 'Daftar Sekarang',
                       onPressed: () => _onDaftar(dataPribadi),
-                      isLoading: state is AuthLoading,
+                      isLoading: authState is AuthLoading,
                     ),
                   ),
                 ],
@@ -275,15 +257,15 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
     );
   }
 
-  // ── Helper: satu blok label + dropdown ──────────────────────
+  // ── Helper: satu blok label + dropdown yang diubah menerima RegionEntity ──
   Widget _buildDropdownSection({
     required String label,
     required String hint,
-    required String? value,
-    required List<String> items,
+    required RegionEntity? value,
+    required List<RegionEntity> items,
     required bool isEnabled,
-    required ValueChanged<String?> onChanged,
-    required FormFieldValidator<String>? validator,
+    required ValueChanged<RegionEntity?> onChanged,
+    required FormFieldValidator<RegionEntity>? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,8 +276,8 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
           opacity: isEnabled ? 1.0 : 0.45,
           child: IgnorePointer(
             ignoring: !isEnabled,
-            child: DropdownButtonFormField<String>(
-              value: value,
+            child: DropdownButtonFormField<RegionEntity>(
+              value: items.contains(value) ? value : null, // Mencegah crash jika value tidak ada di dalam list (saat reset)
               onChanged: onChanged,
               validator: validator,
               icon: const Icon(
@@ -305,8 +287,7 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
               decoration: AppTheme.inputDecoration(hint: hint),
               hint: Text(
                 hint,
-                style: const TextStyle(
-                    fontSize: 14, color: AppColors.textSecondary),
+                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
               style: const TextStyle(
                 fontSize: 14,
@@ -315,12 +296,12 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
               dropdownColor: AppColors.bgWhite,
               borderRadius: BorderRadius.circular(12),
               isExpanded: true,
-              items: items
-                  .map((item) => DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(item),
-                      ))
-                  .toList(),
+              items: items.map((item) {
+                return DropdownMenuItem<RegionEntity>(
+                  value: item,
+                  child: Text(item.name), // Menampilkan string .name ke user
+                );
+              }).toList(),
             ),
           ),
         ),

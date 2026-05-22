@@ -91,6 +91,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/tutor/reset_password_tutor
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/detail_pribadi_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/formulir_pendaftaran_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/formulir_profil_tutor_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
 
 // ── Orang Tua ──────────────────────────────────────────────────────
 
@@ -121,7 +122,10 @@ class LazuardyApp extends StatelessWidget {
           // ── Siswa: Register flow ───────────────────────────────
           '/siswa/register': (_) => const RegisterSiswaPage(),
           '/siswa/detail-pribadi': (_) => const DetailPribadiSiswaPage(),
-          '/siswa/detail-alamat': (_) => const DetailAlamatSiswaPage(),
+          '/siswa/detail-alamat': (context) => BlocProvider<RegionCubit>(
+            create: (context) => sl<RegionCubit>(), 
+            child: const DetailAlamatSiswaPage(),
+          ),
           '/siswa/otp-verification': (context) => const OtpVerificationSiswaPage(),
           // '/siswa/otp-verification': (ctx) {
           //   final args = ModalRoute.of(ctx)?.settings.arguments
