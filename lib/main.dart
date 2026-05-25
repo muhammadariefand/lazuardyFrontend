@@ -250,7 +250,7 @@ class LazuardyApp extends StatelessWidget {
           // ── Orang Tua: Menu Sidebar ────────────────────────────────────
           '/orang-tua/hubungi-kami': (_) => const HubungiKamiPage(),
           '/orang-tua/tentang-kami': (_) => const TentangKamiPage(),
-          '/orang-tua/notifikasi': (_) => const NotifikasiTutorPage(),
+          '/orang-tua/notifikasi': (_) => const NotifikasiSiswaPage(),
 
           // ── Orang Tua: Jadwal ─────────────────────────────
           '/orang-tua/jadwal-anak': (_) => const JadwalOrangtuaPage(),
