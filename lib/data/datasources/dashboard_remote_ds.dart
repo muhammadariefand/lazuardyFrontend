@@ -17,65 +17,42 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
     try {
       final response = await dio.get(
         '/student/dashboard/homepage',
-        queryParameters: {'page': page},
+        queryParameters: {
+          'page': page,
+          'notification_paginate': 5, // Mengatur limit data notifikasi yang muncul di beranda (misal: 5)
+          'tutor_paginate': 5,        // Mengatur limit data tutor yang muncul di beranda (misal: 5)
+        },
       );
 
-      // Normalisasi: response.data bisa berupa Map, List, atau String.
-      Map<String, dynamic>? responseData;
+      // 1. Jika API mengirimkan List secara langsung
+      if (response.data is List) {
+        return DashboardModel.fromJson({'data': response.data});
+      }
 
+      // 2. Jika API mengirimkan Map (Object)
       if (response.data is Map<String, dynamic>) {
-        responseData = response.data as Map<String, dynamic>;
-      } else if (response.data is String) {
-        // Jika server mengembalikan JSON string, coba decode
-        try {
-          final decoded = jsonDecode(response.data as String);
-          if (decoded is Map<String, dynamic>) responseData = decoded;
-        } catch (_) {
-          // ignore JSON decode errors
+        final responseData = response.data as Map<String, dynamic>;
+
+        final status = responseData['status']?.toString().toLowerCase();
+        if (status == 'success' || responseData['success'] == true || responseData['data'] != null) {
+          final actualData = responseData['data'] ?? responseData;
+          return DashboardModel.fromJson(actualData as Map<String, dynamic>);
         }
-      } else if (response.data is List) {
-        // Jika server mengembalikan List, coba cari elemen Map yang relevan
-        final list = response.data as List;
-        for (final item in list) {
-          if (item is Map<String, dynamic>) {
-            // pilih item yang terlihat seperti payload (memiliki user_name atau notification)
-            if (item.containsKey('user_name') || item.containsKey('notification')) {
-              responseData = item;
-              break;
-            }
-          }
-        }
+        
+        return DashboardModel.fromJson(responseData);
       }
 
-      // Jika tidak berhasil dinormalisasi, fallback ke objek kosong agar UI tidak crash
-      if (responseData == null) {
-        // Log untuk debugging, tapi kembalikan DashboardModel default
-        // (DashboardModel.fromJson({}) akan menghasilkan nilai default yang aman)
-        return DashboardModel.fromJson({});
-      }
-
-      // Cek status dengan konversi ke String secara aman
-      if (response.statusCode == 200 && responseData['status']?.toString() == 'success') {
-        // Pastikan key 'data' ada dan merupakan Map sebelum di-parse ke Model
-        if (responseData['data'] is Map<String, dynamic>) {
-          return DashboardModel.fromJson(responseData['data'] as Map<String, dynamic>);
-        } else {
-          // fallback: jika data tidak ada atau bukan Map, kembalikan default
-          return DashboardModel.fromJson({});
+      throw Exception("Format respon tidak didukung: ${response.data.runtimeType}");
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.data is Map) {
+        final serverMessage = e.response?.data['message'] ?? e.response?.data['error'];
+        if (serverMessage != null) {
+          throw Exception(serverMessage);
         }
-      } else {
-        // Jika backend mengembalikan error status, lempar sebagai DioException agar caller bisa menanganinya
-        throw DioException(
-          requestOptions: response.requestOptions,
-          response: response,
-          message: responseData['message']?.toString() ?? 'Gagal memuat data dashboard',
-        );
       }
-    } on DioException {
       rethrow;
     } catch (e) {
-      // Menangkap error tak terduga (seperti error parsing di Model)
-      throw Exception("Terjadi kesalahan saat memproses data: $e");
+      throw Exception("Gagal memproses data dashboard: $e");
     }
   }
 }

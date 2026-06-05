@@ -1,11 +1,25 @@
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Core & Network
+import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
+
+// Data Sources
+import 'package:lazuadry_mobile_fe/data/datasources/auth_local_ds.dart';
+import 'package:lazuadry_mobile_fe/data/datasources/auth_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/dashboard_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/region_remote_ds.dart';
+
+// Repositories
+import 'package:lazuadry_mobile_fe/data/repositories/auth_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/dashboard_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/region_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/auth_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/dashboard_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/region_repository.dart';
+
+// Usecases
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/request_otp_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/reset_password_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_usecase.dart';
@@ -14,18 +28,14 @@ import 'package:lazuadry_mobile_fe/domain/usecases/region/get_districts_usecase.
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_provinces_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_regencies_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_subdistricts_usecase.dart';
-import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
-import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
-import 'package:lazuadry_mobile_fe/data/datasources/auth_local_ds.dart';
-import 'package:lazuadry_mobile_fe/data/datasources/auth_remote_ds.dart';
-import 'package:lazuadry_mobile_fe/data/repositories/auth_repository_impl.dart';
-import 'package:lazuadry_mobile_fe/domain/repositories/auth_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_login_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_otp_email_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_register_email_usecase.dart';
+
+// State Management / Cubit
+import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 
 final sl = GetIt.instance;
@@ -33,99 +43,104 @@ final sl = GetIt.instance;
 Future<void> initDependencies() async {
 
   // ── EXTERNAL ────────────────────────────────────────────────
-  // Shared Preferences
+  // Shared Preferences (di-instansiasi di awal secara async)
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
   
-  // Dio HTTP Client (diambil dari ApiClient agar terintegrasi base URL & interceptor)
-  sl.registerLazySingleton<Dio>(() => sl<ApiClient>().dio);
-
-  // ── CORE ────────────────────────────────────────────────
-  // API Client
+  // ── CORE & NETWORK ──────────────────────────────────────────
+  // 1. Daftarkan ApiClient terlebih dahulu agar dependensinya tersedia
   sl.registerLazySingleton(() => ApiClient(
-    getToken: () => sl<AuthLocalDataSource>().getUserToken(),
+    getToken: () async {
+      try {
+        // Mengambil token auth lokal secara aman
+        return await sl<AuthLocalDataSource>().getUserToken();
+      } catch (_) {
+        return null;
+      }
+    },
   ));
 
-  // ── DATA SOURCES ────────────────────────────────────────────────
-  // Remote 
-  sl.registerLazySingleton(() => AuthRemoteDataSource(sl()));
+  // 2. Registrasi Dio HTTP Client dengan memanfaatkan instance dari ApiClient
+  sl.registerLazySingleton<Dio>(() {
+    final dioInstance = sl<ApiClient>().dio;
+    
+    // Hapus interceptor lama jika ada, lalu pasang pengaman multi-domain yang kebal typo
+    dioInstance.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        // Cek secara pintar: Jika path TIDAK dimulai dengan 'http', atau path-nya mengandung backend Lazuardy
+        final isBackendRequest = !options.path.startsWith('http') || 
+                                 options.path.contains('lazuardybackend-hexa.onrender.com');
 
-  // Remote untuk region
-  sl.registerLazySingleton<RegionRemoteDataSource>(
-    () => RegionRemoteDataSourceImpl(client: sl())
-  );
+        if (!isBackendRequest) {
+          // Jika menembak ke API luar (seperti Emsifa), bersihkan header agar tidak memicu error jembatan
+          options.headers.remove('Authorization');
+        }
+        
+        return handler.next(options);
+      },
+    ));
+    
+    return dioInstance;
+  });
 
-  // Local untuk auth (penyimpanan token, dsb)
+  // ── DATA SOURCES ────────────────────────────────────────────
+  // Local Data Source untuk Auth
   sl.registerLazySingleton<AuthLocalDataSource>(
     () => AuthLocalDataSourceImpl(sl()),
   );
 
-  // Remote untuk dashboard
+  // Remote Data Source untuk Auth
+  sl.registerLazySingleton(() => AuthRemoteDataSource(sl()));
+
+  // Remote Data Source untuk Wilayah/Region
+  sl.registerLazySingleton<RegionRemoteDataSource>(
+    () => RegionRemoteDataSourceImpl(client: sl())
+  );
+
+  // Remote Data Source untuk Dashboard
   sl.registerLazySingleton<DashboardRemoteDataSource>(
     () => DashboardRemoteDataSourceImpl(dio: sl()),
   );
 
-  // REPOSITORIES ───────────────────────────────────────────────  
-  // Repository untuk auth
+  // ── REPOSITORIES ──────────────────────────────────────────── 	
+  // Repository untuk Auth
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
       remoteDataSource: sl(), 
-      localDataSource: sl()
+      localDataSource: sl(),
     ),
   );
 
-  // Repository untuk dashboard
+  // Repository untuk Dashboard
   sl.registerLazySingleton<DashboardRepository>(
-    () => DashboardRepositoryImpl(
-      remoteDataSource: sl()),
+    () => DashboardRepositoryImpl(remoteDataSource: sl()),
   );
 
-  // Repository untuk region
+  // Repository untuk Wilayah/Region
   sl.registerLazySingleton<RegionRepository>(
-    () => RegionRepositoryImpl(remoteDataSource: sl())
-  );  
+    () => RegionRepositoryImpl(remoteDataSource: sl()),
+  );   
 
-
-
-  // USECASES ───────────────────────────────────────────────
-  // Usecases untuk mengirim OTP email saat registrasi
+  // ── USECASES ────────────────────────────────────────────────
+  // Auth Usecases
   sl.registerLazySingleton(() => StudentRegisterOtpEmailUsecase(repository: sl()));
-
-  // Usecase untuk verifikasi OTP email saat registrasi
   sl.registerLazySingleton(() => StudentVerifyOtpRegisterEmailUsecase(repository: sl()));
-
-  // Usecase untuk registrasi mahasiswa
   sl.registerLazySingleton(() => StudentRegisterUsecase(repository: sl()));
-
-  // Usecase untuk login mahasiswa
   sl.registerLazySingleton(() => StudentLoginUsecase(repository: sl()));
-
-  // Usecase untuk mengirim OTP
   sl.registerLazySingleton(() => StudentRequestOtpUsecase(sl()));
-
-  // Usecase untuk verifikasi OTP
   sl.registerLazySingleton(() => StudentVerifyOtpUsecase(sl()));
-
-  // Usecase untuk mereset password
   sl.registerLazySingleton(() => StudentResetPasswordUsecase(sl()));
 
-  // Usecase untuk mendapatkan daftar provinsi
+  // Region/Wilayah Usecases
   sl.registerLazySingleton(() => GetProvincesUseCase(sl()));
-
-  // Usecase untuk mendapatkan daftar kabupaten/kota berdasarkan provinsi
   sl.registerLazySingleton(() => GetRegenciesUseCase(sl()));
-
-  // Usecase untuk mendapatkan daftar kecamatan berdasarkan kabupaten/kota
   sl.registerLazySingleton(() => GetDistrictsUseCase(sl()));
-
-  // Usecase untuk mendapatkan daftar kelurahan/desa berdasarkan kecamatan
   sl.registerLazySingleton(() => GetSubdistrictsUseCase(sl()));
 
-  // Usecase untuk mendapatkan data dashboard
+  // Dashboard Usecases
   sl.registerLazySingleton(() => GetDashboardDataUseCase(sl()));
 
-
-  // ── PRESENTATION / STATE MANAGEMENT ─────────────────────────
+  // ── PRESENTATION / STATE MANAGEMENT (CUBIT) ──────────────────
   sl.registerFactory(() => AuthCubit(
     studentRegisterOtpEmailUsecase: sl(),
     studentVerifyOtpRegisterEmailUsecase: sl(),
@@ -138,14 +153,14 @@ Future<void> initDependencies() async {
   );
 
   sl.registerFactory(() => RegionCubit(
-    sl(),
-    sl(),
-    sl(),
-    sl(),
+    sl(), // getProvincesUseCase
+    sl(), // getRegenciesUseCase
+    sl(), // getDistrictsUseCase
+    sl(), // getSubdistrictsUseCase
   ));
 
   sl.registerFactory(() => DashboardCubit(
-    getDashboardDataUseCase: sl()
+    getDashboardDataUseCase: sl(),
     ),
   );
 }

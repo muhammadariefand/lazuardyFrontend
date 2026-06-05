@@ -51,7 +51,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
           child: BlocConsumer<DashboardCubit, DashboardState>(
             listener: (context, state) {
               if (state is DashboardError && 
-                  (state.message.contains('Unauthorized') || state.message.contains('401'))) {
+                  (state.message.contains('Gagal memuat data, silakan coba lagi') || state.message.contains('401'))) {
                 Navigator.of(context).pushReplacementNamed('/siswa/login');
               }
             },
