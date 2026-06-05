@@ -51,7 +51,8 @@ class _RegisterSiswaPageState extends State<RegisterSiswaPage> {
             key: _formKey,
             child: BlocConsumer<AuthCubit, AuthState>(
               listener: (context, state) {
-                if (state is AuthSuccess){
+                if (state is RegisterOtpEmailSuccess) {
+                  // Navigasi ke OTP verification page setelah OTP terkirim
                   Navigator.of(context).pushNamed('/siswa/otp-verification', arguments: {
                     'email': _emailCtrl.text.trim(),
                     'password': _passwordCtrl.text,

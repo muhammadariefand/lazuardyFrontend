@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/auth_local_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/auth_remote_ds.dart';
-import 'package:lazuadry_mobile_fe/data/models/auth/register_student_request.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/auth/register_student_request.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/server_exception.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/auth_repository.dart';
 
@@ -32,19 +32,18 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> studentRegister(RegisterStudentRequest request) async {
     try {
-      await remoteDataSource.studentRegister(request);
-    } on DioException catch (e) {
-      if (e.response?.statusCode == 422) {
-        final data = e.response?.data;
-        throw ServerException(
-          data['message'] ?? 'Validasi gagal', 
-          errors: data['errors'], 
-        );
-      } else if (e.response?.statusCode == 500) {
-        throw ServerException('Server sedang gangguan, coba lagi nanti.');
-      } else {
-        throw ServerException('Terjadi kesalahan yang tidak diketahui.');
-      }
+      final response = await remoteDataSource.studentRegister(request);
+      
+      final token = response['access_token'] 
+          ?? response['token']
+          ?? response['data']?['token']
+          ?? response['data']?['access_token'];
+      
+      await localDataSource.saveUserToken(token);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal melakukan registrasi');
     }
   }
 
@@ -52,7 +51,13 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> studentLogin(String email, String password) async {
     try {
       final response = await remoteDataSource.studentLogin(email, password);
-      final token = response['access_token'];
+
+      // Coba semua kemungkinan key yang biasa dipakai backend
+      final token = response['access_token'] 
+          ?? response['token']
+          ?? response['data']?['token']
+          ?? response['data']?['access_token'];
+      
       await localDataSource.saveUserToken(token);
     } on ServerException {
       rethrow;

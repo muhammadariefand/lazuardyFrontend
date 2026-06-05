@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class AuthLocalDataSource {
-  Future<void> saveUserToken(String token);
+  Future<void> saveUserToken(String? token);
   Future<String?> getUserToken();
   Future<void> clearUserToken();
 }
@@ -14,7 +14,10 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   static const String _tokenKey = 'CACHED_AUTH_TOKEN';
 
   @override
-  Future<void> saveUserToken(String token) async {
+  Future<void> saveUserToken(String? token) async {
+    if (token == null || token.isEmpty) {
+      return;
+    }
     await sharedPreferences.setString(_tokenKey, token);
   }
 

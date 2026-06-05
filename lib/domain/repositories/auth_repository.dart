@@ -1,6 +1,6 @@
 // import 'package:lazuadry_mobile_fe/domain/entities/student.dart';
 
-import 'package:lazuadry_mobile_fe/data/models/auth/register_student_request.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/auth/register_student_request.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/student_biodata.dart';
 
 abstract class AuthRepository {

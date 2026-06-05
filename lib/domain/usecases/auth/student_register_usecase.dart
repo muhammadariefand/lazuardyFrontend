@@ -1,4 +1,4 @@
-import 'package:lazuadry_mobile_fe/data/models/auth/register_student_request.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/auth/register_student_request.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/auth_repository.dart';
 
 class StudentRegisterUsecase {

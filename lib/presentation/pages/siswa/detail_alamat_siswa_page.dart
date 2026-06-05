@@ -4,7 +4,7 @@ import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_state.dart';
-import 'package:lazuadry_mobile_fe/data/models/auth/register_student_request.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/auth/register_student_request.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_state.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/region_entity.dart';

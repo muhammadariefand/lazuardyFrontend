@@ -48,7 +48,13 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
             // Memungkinkan user menarik layar ke bawah untuk refresh data
             await context.read<DashboardCubit>().loadDashboard();
           },
-          child: BlocBuilder<DashboardCubit, DashboardState>(
+          child: BlocConsumer<DashboardCubit, DashboardState>(
+            listener: (context, state) {
+              if (state is DashboardError && 
+                  (state.message.contains('Unauthorized') || state.message.contains('401'))) {
+                Navigator.of(context).pushReplacementNamed('/siswa/login');
+              }
+            },
             builder: (context, state) {
               if (state is DashboardLoading || state is DashboardInitial) {
                 return const Center(

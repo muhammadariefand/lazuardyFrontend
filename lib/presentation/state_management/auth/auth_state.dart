@@ -16,3 +16,8 @@ class OtpVerifiedSuccess extends AuthState {
   OtpVerifiedSuccess(this.resetToken);
 }
 class ResetPasswordSuccess extends AuthState {}
+
+// States untuk langkah-langkah registrasi siswa
+class RegisterOtpEmailSuccess extends AuthState {}
+class VerifyOtpRegisterEmailSuccess extends AuthState {}
+class RegisterStudentSuccess extends AuthState {}

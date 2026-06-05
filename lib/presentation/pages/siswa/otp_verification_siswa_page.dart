@@ -107,13 +107,13 @@ class _OtpVerificationSiswaPageState extends State<OtpVerificationSiswaPage> {
       body: SafeArea(
         child: BlocConsumer<AuthCubit, AuthState>(
           listener: (context, state) {
-            if (state is AuthSuccess) {
-              // Navigasi ke halaman detail pribadi sambil meneruskan email dan password
-              Navigator.of(context).pushNamed('/siswa/detail-pribadi', arguments: {
-                'email': emailArg,
-                'password': passwordArg,
-              });
-            }
+            if (state is VerifyOtpRegisterEmailSuccess) {
+                // Navigasi ke halaman detail pribadi sambil meneruskan email dan password
+                Navigator.of(context).pushNamed('/siswa/detail-pribadi', arguments: {
+                  'email': emailArg,
+                  'password': passwordArg,
+                });
+              }
             if (state is AuthFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

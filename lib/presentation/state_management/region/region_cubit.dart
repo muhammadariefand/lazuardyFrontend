@@ -20,14 +20,11 @@ class RegionCubit extends Cubit<RegionState> {
   ) : super(RegionState());
 
   void fetchProvinces() async {
-    print("DEBUG: Memanggil fetchProvinces..."); // Tambahkan ini
     emit(state.copyWith(isLoading: true));
     try {
       final data = await getProvincesUseCase.execute();
-      print("DEBUG: Data Provinsi Berhasil: ${data.length} item"); // Tambahkan ini
       emit(state.copyWith(isLoading: false, provinces: data));
     } catch (e) {
-      print("DEBUG: Error fetchProvinces: $e"); // Cek error di console!
       emit(state.copyWith(isLoading: false));
     }
   }

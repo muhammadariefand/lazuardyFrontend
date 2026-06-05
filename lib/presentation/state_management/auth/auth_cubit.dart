@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lazuadry_mobile_fe/data/models/auth/register_student_request.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/auth/register_student_request.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/server_exception.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/request_otp_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/reset_password_usecase.dart';
@@ -33,11 +33,11 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       await studentRegisterOtpEmailUsecase.execute(email);
-      emit(AuthSuccess());
+      emit(RegisterOtpEmailSuccess()); // State spesifik, bukan AuthSuccess
     } on ServerException catch (e) {
-    emit(AuthFailure(e.message, errorDetails: e.errors)); // UI menampilkan error
-  } catch (e) {
-    emit(AuthFailure("Terjadi kesalahan yang tidak diketahui"));
+      emit(AuthFailure(e.message, errorDetails: e.errors));
+    } catch (e) {
+      emit(AuthFailure("Terjadi kesalahan yang tidak diketahui"));
     }
   }
 
@@ -45,9 +45,9 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       await studentVerifyOtpRegisterEmailUsecase.execute(email, otp);
-      emit(AuthSuccess());
+      emit(VerifyOtpRegisterEmailSuccess()); // State spesifik, bukan AuthSuccess
     } on ServerException catch (e) {
-      emit(AuthFailure(e.message, errorDetails: e.errors)); // UI menampilkan error  
+      emit(AuthFailure(e.message, errorDetails: e.errors));
     } catch (e) {
       emit(AuthFailure("Terjadi kesalahan sistem"));
     }
@@ -56,9 +56,11 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       await studentRegisterUsecase.execute(request);
-      emit(AuthSuccess());
+      emit(RegisterStudentSuccess()); // State spesifik, bukan AuthSuccess
     } on ServerException catch (e) {
       emit(AuthFailure(e.message));
+    } catch (e) {
+      emit(AuthFailure("Terjadi kesalahan yang tidak diketahui"));
     }
   }
 

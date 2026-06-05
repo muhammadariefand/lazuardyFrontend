@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
-import 'package:lazuadry_mobile_fe/data/models/auth/register_student_request.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/auth/register_student_request.dart';
 import 'package:lazuadry_mobile_fe/data/models/student_model.dart';
 import 'package:lazuadry_mobile_fe/data/models/user_model.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/server_exception.dart';
@@ -61,8 +61,14 @@ class AuthRemoteDataSource {
     }
   }
 
-  Future<void> studentRegister(RegisterStudentRequest request) async {
-    await client.dio.post('/studentRegister', data: request.toJson());
+  Future<Map<String, dynamic>> studentRegister(RegisterStudentRequest request) async {
+    try {
+      final response = await client.dio.post('/studentRegister', data: request.toJson());
+      return response.data;
+    } on DioException catch (e) {
+      _handleDioError(e);
+      rethrow;
+    }
   }
 
   Future<Map<String, dynamic>> studentLogin(String email, String password) async {

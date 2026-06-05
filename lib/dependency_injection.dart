@@ -37,15 +37,14 @@ Future<void> initDependencies() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
   
-  // Dio HTTP Client
-  sl.registerLazySingleton<Dio>(() {
-    final dio = Dio();
-    return dio;
-  });
+  // Dio HTTP Client (diambil dari ApiClient agar terintegrasi base URL & interceptor)
+  sl.registerLazySingleton<Dio>(() => sl<ApiClient>().dio);
 
   // ── CORE ────────────────────────────────────────────────
   // API Client
-  sl.registerLazySingleton(() => ApiClient());
+  sl.registerLazySingleton(() => ApiClient(
+    getToken: () => sl<AuthLocalDataSource>().getUserToken(),
+  ));
 
   // ── DATA SOURCES ────────────────────────────────────────────────
   // Remote 
@@ -85,6 +84,8 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<RegionRepository>(
     () => RegionRepositoryImpl(remoteDataSource: sl())
   );  
+
+
 
   // USECASES ───────────────────────────────────────────────
   // Usecases untuk mengirim OTP email saat registrasi
