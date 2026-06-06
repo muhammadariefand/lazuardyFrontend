@@ -92,7 +92,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/tutor/detail_pribadi_tutor
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/formulir_pendaftaran_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/formulir_profil_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
-import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_cubit.dart';import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_cubit.dart';
 
 // ── Orang Tua ──────────────────────────────────────────────────────
 
@@ -154,7 +154,10 @@ class LazuardyApp extends StatelessWidget {
             create: (context) => sl<DashboardCubit>(),
             child: const BerandaSiswaPage(),
           ),
-          '/siswa/jadwal': (_) => const JadwalSiswaPage(),
+          '/siswa/jadwal': (context) => BlocProvider<ScheduleCubit>(
+            create: (_) => sl<ScheduleCubit>(),
+            child: const JadwalSiswaPage(),
+          ),
           '/siswa/detail-sesi': (_) => const DetailSesiPage(),
           '/siswa/batalkan-sesi': (_) => const BatalkanSesiPage(),
           '/siswa/konfirmasi-pembatalan': (_) => const KonfirmasiPembatalanPage(),
@@ -253,7 +256,10 @@ class LazuardyApp extends StatelessWidget {
           '/orang-tua/notifikasi': (_) => const NotifikasiSiswaPage(),
 
           // ── Orang Tua: Jadwal ─────────────────────────────
-          '/orang-tua/jadwal-anak': (_) => const JadwalOrangtuaPage(),
+          '/orang-tua/jadwal-anak': (context) => BlocProvider<ScheduleCubit>(
+            create: (context) => sl<ScheduleCubit>(),
+            child: const JadwalOrangtuaPage(),
+          ),
 
           // ── Orang Tua: Laporan ─────────────────────────────
           '/orang-tua/laporan-anak': (_) => const LaporanOrangtuaPage(),

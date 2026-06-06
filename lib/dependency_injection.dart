@@ -10,20 +10,24 @@ import 'package:lazuadry_mobile_fe/data/datasources/auth_local_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/auth_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/dashboard_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/region_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/data/datasources/schedule_remote_ds.dart';
 
 // Repositories
 import 'package:lazuadry_mobile_fe/data/repositories/auth_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/dashboard_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/region_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/schedule_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/auth_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/dashboard_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/region_repository.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/schedule_repository.dart';
 
 // Usecases
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/request_otp_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/reset_password_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/get_dashboard_data_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/get_schedules_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_districts_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_provinces_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_regencies_usecase.dart';
@@ -36,6 +40,7 @@ import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_register_emai
 // State Management / Cubit
 import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 
 final sl = GetIt.instance;
@@ -102,11 +107,16 @@ Future<void> initDependencies() async {
     () => DashboardRemoteDataSourceImpl(dio: sl()),
   );
 
-  // ── REPOSITORIES ──────────────────────────────────────────── 	
+  // Remote Data Source untuk Schedule
+  sl.registerLazySingleton<ScheduleRemoteDataSource>(
+    () => ScheduleRemoteDataSourceImpl(dio: sl()),
+  );
+
+  // ── REPOSITORIES ────────────────────────────────────────────
   // Repository untuk Auth
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
-      remoteDataSource: sl(), 
+      remoteDataSource: sl(),
       localDataSource: sl(),
     ),
   );
@@ -114,6 +124,11 @@ Future<void> initDependencies() async {
   // Repository untuk Dashboard
   sl.registerLazySingleton<DashboardRepository>(
     () => DashboardRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Repository untuk Jadwal
+  sl.registerLazySingleton<ScheduleRepository>(
+    () => ScheduleRepositoryImpl(remoteDataSource: sl()),
   );
 
   // Repository untuk Wilayah/Region
@@ -139,6 +154,7 @@ Future<void> initDependencies() async {
 
   // Dashboard Usecases
   sl.registerLazySingleton(() => GetDashboardDataUseCase(sl()));
+  sl.registerLazySingleton(() => GetSchedulesUseCase(sl()));
 
   // ── PRESENTATION / STATE MANAGEMENT (CUBIT) ──────────────────
   sl.registerFactory(() => AuthCubit(
@@ -163,4 +179,8 @@ Future<void> initDependencies() async {
     getDashboardDataUseCase: sl(),
     ),
   );
+
+  sl.registerFactory(() => ScheduleCubit(
+    getSchedulesUseCase: sl(),
+  ));
 }

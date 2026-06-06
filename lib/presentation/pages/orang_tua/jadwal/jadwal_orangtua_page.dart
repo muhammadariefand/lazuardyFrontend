@@ -8,7 +8,11 @@
 //   + WhatsApp + jam + tanggal + icon edit (pensil)
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/schedule_entity.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/orangtua_bottom_nav.dart';
 import 'detail_sesi_orangtua_page.dart';
 
@@ -43,6 +47,69 @@ class SesiJadwalData {
     this.alamat,
     required this.status,
   });
+
+  factory SesiJadwalData.fromEntity(ScheduleEntity entity) {
+    final isOnline = entity.learningMethod.toLowerCase() == 'online';
+    return SesiJadwalData(
+      inisial: entity.tutorName.isNotEmpty ? entity.tutorName[0].toUpperCase() : '?',
+      namaTutor: entity.tutorName,
+      mapel: entity.subjectName,
+      isOnline: isOnline,
+      nomorWa: entity.studentTelephoneNumber?.isNotEmpty == true
+          ? entity.studentTelephoneNumber!
+          : (entity.tutorTelephoneNumber ?? '-'),
+      jamMulai: _formatTime(entity.startTime),
+      jamSelesai: _formatTime(entity.endTime),
+      tanggal: _formatLongDate(entity.date),
+      tanggalLengkap: _formatShortDate(entity.date),
+      linkMeeting: isOnline ? entity.address : null,
+      alamat: isOnline ? null : entity.address,
+      status: entity.status.isNotEmpty ? entity.status : 'Terjadwal',
+    );
+  }
+}
+
+String _formatQueryDate(DateTime date) {
+  return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+}
+
+String _formatTime(DateTime time) {
+  return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+}
+
+String _formatLongDate(DateTime date) {
+  const weekdays = [
+    'Senin',
+    'Selasa',
+    'Rabu',
+    'Kamis',
+    'Jumat',
+    'Sabtu',
+    'Minggu',
+  ];
+  return '${weekdays[date.weekday - 1]}, ${date.day} ${_monthName(date.month)} ${date.year}';
+}
+
+String _formatShortDate(DateTime date) {
+  return '${date.day} ${_monthName(date.month)} ${date.year}';
+}
+
+String _monthName(int month) {
+  const names = [
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember',
+  ];
+  return names[month - 1];
 }
 
 // ── Page ──────────────────────────────────────────────────────────
@@ -55,49 +122,97 @@ class JadwalOrangtuaPage extends StatefulWidget {
 
 class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
   int _selectedDayIdx = 2; // Rabu default
-  String _bulan = 'April';
-  int _tahun = 2026;
+  final String _bulan = 'April';
+  final int _tahun = 2026;
 
   // Hari dalam minggu yang ditampilkan
   final List<Map<String, dynamic>> _hariList = [
-    {'label': 'Sen', 'tanggal': 30},
-    {'label': 'Sel', 'tanggal': 31},
-    {'label': 'Rab', 'tanggal': 1},
-    {'label': 'Kam', 'tanggal': 2},
-    {'label': 'Jum', 'tanggal': 3},
-    {'label': 'Sab', 'tanggal': 4},
-    {'label': 'Min', 'tanggal': 5},
+    {'label': 'Sen', 'tanggal': 30, 'date': DateTime(2026, 3, 30)},
+    {'label': 'Sel', 'tanggal': 31, 'date': DateTime(2026, 3, 31)},
+    {'label': 'Rab', 'tanggal': 1, 'date': DateTime(2026, 4, 1)},
+    {'label': 'Kam', 'tanggal': 2, 'date': DateTime(2026, 4, 2)},
+    {'label': 'Jum', 'tanggal': 3, 'date': DateTime(2026, 4, 3)},
+    {'label': 'Sab', 'tanggal': 4, 'date': DateTime(2026, 4, 4)},
+    {'label': 'Min', 'tanggal': 5, 'date': DateTime(2026, 4, 5)},
   ];
 
-  static const _sesiList = [
-    SesiJadwalData(
-      inisial: 'S',
-      namaTutor: 'Ibu Sarah',
-      mapel: 'Matematika',
-      isOnline: true,
-      nomorWa: '6281234567890',
-      jamMulai: '14:00',
-      jamSelesai: '15:00',
-      tanggal: 'Senin, 1 April 2026',
-      tanggalLengkap: '1 April 2026',
-      linkMeeting: 'https://meet.google.com/abc-defg-hij',
-      status: 'Terjadwal',
-    ),
-    SesiJadwalData(
-      inisial: 'S',
-      namaTutor: 'Ibu Rina',
-      mapel: 'B.Inggris',
-      isOnline: false,
-      nomorWa: '6285678901234',
-      jamMulai: '14:00',
-      jamSelesai: '15:00',
-      tanggal: 'Senin, 1 April 2026',
-      tanggalLengkap: '1 April 2026',
-      alamat:
-          'Jl. Melati Indah No. 24, RT 03/RW 05, Kel. Sumberrejo, Kec. Ngaglik, Kab. Sleman, DIY',
-      status: 'Terjadwal',
-    ),
-  ];
+  DateTime get _selectedDate => _hariList[_selectedDayIdx]['date'] as DateTime;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ScheduleCubit>().loadSchedules(
+            status: 'active',
+            date: _formatQueryDate(_selectedDate),
+          );
+    });
+  }
+
+  void _onSelectedDay(int index) {
+    setState(() {
+      _selectedDayIdx = index;
+    });
+    context.read<ScheduleCubit>().loadSchedules(
+          status: 'active',
+          date: _formatQueryDate(_selectedDate),
+        );
+  }
+
+  Widget _buildScheduleSection() {
+    return BlocBuilder<ScheduleCubit, ScheduleState>(
+      builder: (context, state) {
+        if (state is ScheduleLoading || state is ScheduleInitial) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (state is ScheduleError) {
+          return Column(
+            children: [
+              Text(state.message, style: const TextStyle(color: AppColors.textSecondary)),
+              const SizedBox(height: 14),
+              ElevatedButton(
+                onPressed: () => context.read<ScheduleCubit>().loadSchedules(
+                      status: 'active',
+                      date: _formatQueryDate(_selectedDate),
+                    ),
+                child: const Text('Coba Lagi'),
+              ),
+            ],
+          );
+        }
+
+        if (state is ScheduleLoaded) {
+          final schedules = state.data.data
+              .map((entity) => SesiJadwalData.fromEntity(entity))
+              .toList();
+
+          if (schedules.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Text('Tidak ada jadwal aktif untuk tanggal ini.'),
+            );
+          }
+
+          return Column(
+            children: schedules
+                .map((s) => Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: _buildSesiCard(s),
+                    ))
+                .toList(),
+          );
+        }
+
+        return const SizedBox();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,10 +250,7 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  ..._sesiList.map((s) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: _buildSesiCard(s),
-                      )),
+                  _buildScheduleSection(),
                 ],
               ),
             ),
@@ -181,7 +293,7 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
           setState(() {/* TODO: prev month */});
         }),
         Text(
-          _bulan,
+          '$_bulan $_tahun',
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -218,7 +330,7 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
         final hari = _hariList[i];
         final isSelected = _selectedDayIdx == i;
         return GestureDetector(
-          onTap: () => setState(() => _selectedDayIdx = i),
+          onTap: () => _onSelectedDay(i),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             width: (MediaQuery.of(context).size.width - 32 - 42) / 7,
