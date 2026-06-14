@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../domain/entities/server_exception.dart';
 import '../../../domain/usecases/get_reports_usecase.dart';
 import 'report_state.dart';
 
@@ -12,8 +13,10 @@ class ReportCubit extends Cubit<ReportState> {
     try {
       final data = await getReportsUseCase.execute(page: page);
       emit(ReportLoaded(data));
+    } on ServerException catch (e) {
+      emit(ReportError(e.message));
     } catch (e) {
-      emit(ReportError(e.toString()));
+      emit(ReportError('Terjadi kesalahan saat memuat laporan.'));
     }
   }
 }
