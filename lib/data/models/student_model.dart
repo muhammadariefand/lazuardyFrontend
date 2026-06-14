@@ -23,6 +23,7 @@ class StudentModel extends StudentBiodata {
     super.longitude,
     super.session,
     super.classId,
+    super.className,
   });
  
   factory StudentModel.fromJson(Map<String, dynamic> json) {
@@ -49,6 +50,7 @@ class StudentModel extends StudentBiodata {
       longitude: json['longitude'] as String?,
       session: json['session'] as String?,
       classId: json['classId'] is int ? json['classId'] as int : int.tryParse(json['classId']?.toString() ?? ''),
+      className: json['className'] as String?,
     );
   }
 }

@@ -21,6 +21,7 @@ class StudentBiodata {
   String? longitude;
   String? session;
   int? classId;
+  String? className;
 
   StudentBiodata({
     this.id,
@@ -43,5 +44,6 @@ class StudentBiodata {
     this.longitude,
     this.session,
     this.classId,
+    this.className,
   });
 }

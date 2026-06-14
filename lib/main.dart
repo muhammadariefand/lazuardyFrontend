@@ -95,6 +95,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashb
 import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_cubit.dart';
 
 // ── Orang Tua ──────────────────────────────────────────────────────
 
@@ -168,7 +169,10 @@ class LazuardyApp extends StatelessWidget {
             create: (_) => sl<ReportCubit>(),
             child: const LaporanSiswaPage(),
           ),
-          '/siswa/profil': (_) => const ProfilSiswaPage(),
+          '/siswa/profil': (context) => BlocProvider<StudentProfileCubit>(
+            create: (_) => sl<StudentProfileCubit>(),
+            child: const ProfilSiswaPage(),
+          ),
           '/siswa/edit-profil': (_) => const EditProfilSiswaPage(),
           '/siswa/rekomendasi-tutor': (_) => const RekomendasiTutorPage(),
 

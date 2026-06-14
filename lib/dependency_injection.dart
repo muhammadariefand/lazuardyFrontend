@@ -12,6 +12,7 @@ import 'package:lazuadry_mobile_fe/data/datasources/dashboard_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/region_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/schedule_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/report_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/data/datasources/student_remote_ds.dart';
 
 // Repositories
 import 'package:lazuadry_mobile_fe/data/repositories/auth_repository_impl.dart';
@@ -19,11 +20,13 @@ import 'package:lazuadry_mobile_fe/data/repositories/dashboard_repository_impl.d
 import 'package:lazuadry_mobile_fe/data/repositories/region_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/schedule_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/report_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/student_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/auth_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/dashboard_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/region_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/schedule_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/report_repository.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/student_repository.dart';
 
 // Usecases
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/request_otp_usecase.dart';
@@ -40,6 +43,7 @@ import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_login_usecase.da
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_otp_email_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_register_email_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/student/get_student_biodata_usecase.dart';
 
 // State Management / Cubit
 import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
@@ -47,6 +51,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_c
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -122,6 +127,11 @@ Future<void> initDependencies() async {
     () => ReportRemoteDataSourceImpl(dio: sl()),
   );
 
+  // Remote Data Source untuk Student
+  sl.registerLazySingleton<StudentRemoteDataSource>(
+    () => StudentRemoteDataSourceImpl(dio: sl()),
+  );
+
   // ── REPOSITORIES ────────────────────────────────────────────
   // Repository untuk Auth
   sl.registerLazySingleton<AuthRepository>(
@@ -144,6 +154,11 @@ Future<void> initDependencies() async {
   // Repository untuk Laporan
   sl.registerLazySingleton<ReportRepository>(
     () => ReportRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Repository untuk Student
+  sl.registerLazySingleton<StudentRepository>(
+    () => StudentRepositoryImpl(remoteDataSource: sl()),
   );
 
   // Repository untuk Wilayah/Region
@@ -171,6 +186,9 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetDashboardDataUseCase(sl()));
   sl.registerLazySingleton(() => GetSchedulesUseCase(sl()));
   sl.registerLazySingleton(() => GetReportsUseCase(sl()));
+
+  // Student Usecases
+  sl.registerLazySingleton(() => GetStudentBiodataUseCase(sl()));
 
   // ── PRESENTATION / STATE MANAGEMENT (CUBIT) ──────────────────
   sl.registerFactory(() => AuthCubit(
@@ -202,5 +220,9 @@ Future<void> initDependencies() async {
 
   sl.registerFactory(() => ReportCubit(
     getReportsUseCase: sl(),
+  ));
+
+  sl.registerFactory(() => StudentProfileCubit(
+    getStudentBiodataUseCase: sl(),
   ));
 }
