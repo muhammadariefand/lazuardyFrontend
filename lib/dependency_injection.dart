@@ -60,6 +60,13 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_dashboard
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/confirm_booking_usecase.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/booking_confirmation_cubit.dart';
 
+// Tutor Profile
+import 'package:lazuadry_mobile_fe/data/datasources/tutor_profile_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/tutor_profile_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/tutor_profile_repository.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_tutor_profile_usecase.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_cubit.dart';
+
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
@@ -254,5 +261,17 @@ Future<void> initDependencies() async {
 
   sl.registerFactory(() => BookingConfirmationCubit(
     confirmBookingUseCase: sl(),
+  ));
+
+  // Tutor Profile
+  sl.registerLazySingleton<TutorProfileRemoteDataSource>(
+    () => TutorProfileRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<TutorProfileRepository>(
+    () => TutorProfileRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton(() => GetTutorProfileUseCase(sl()));
+  sl.registerFactory(() => TutorProfileCubit(
+    getTutorProfileUseCase: sl(),
   ));
 }

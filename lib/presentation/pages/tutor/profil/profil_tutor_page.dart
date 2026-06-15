@@ -1,40 +1,29 @@
-// lib/presentation/pages/tutor/profil_tutor_page.dart
-// Profil Tutor — view-only
-// Perbedaan vs Profil Siswa:
-//   + Field "Pilih Bank" dan "Nomor Rekening" di Detail Pribadi
-//   - Tidak ada field "Kelas" (khusus siswa)
-
+// lib/presentation/pages/tutor/profil/profil_tutor_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_buttom_nav.dart';
 
 const _teal = Color(0xFF3AAFA9);
 const _navy = Color(0xFF1E2D7D);
 
-class ProfilTutorPage extends StatelessWidget {
+class ProfilTutorPage extends StatefulWidget {
   const ProfilTutorPage({super.key});
 
-  // ── Data dummy — ganti dengan data dari Cubit ─────────────────
-  static const _namaAkun  = 'Sarah Aulia Putri';
-  static const _email     = 'sarahauliaputri@gmail.com';
-  static const _wa        = '089505087870';
-  static const _inisial   = 'S';
+  @override
+  State<ProfilTutorPage> createState() => _ProfilTutorPageState();
+}
 
-  static const _detailPribadi = [
-    _FieldView('Nama Lengkap',  'Sarah Nur Aisyah'),
-    _FieldView('Jenis Kelamin', 'Perempuan'),
-    _FieldView('Tanggal Lahir', '25/08/1995'),
-    _FieldView('Nomor WhatsApp','089505086860'),
-    _FieldView('Pilih Bank',    'Mandiri'),
-    _FieldView('Nomor Rekening','1234567890'),
-  ];
-
-  static const _detailAlamat = [
-    _FieldView('Provinsi',        'DI Yogyakarta'),
-    _FieldView('Kota/Kabupaten',  'Kab. Sleman'),
-    _FieldView('Kecamatan',       'Depok'),
-    _FieldView('Desa/Kelurahan',  'Caturtunggal'),
-  ];
+class _ProfilTutorPageState extends State<ProfilTutorPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TutorProfileCubit>().fetchProfile();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,84 +50,136 @@ class ProfilTutorPage extends StatelessWidget {
           ),
         ),
 
-        Expanded(child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(children: [
-            const SizedBox(height: 8),
+        Expanded(
+          child: BlocBuilder<TutorProfileCubit, TutorProfileState>(
+            builder: (context, state) {
+              if (state is TutorProfileLoading || state is TutorProfileInitial) {
+                return const Center(child: CircularProgressIndicator(color: _teal));
+              }
 
-            // ── Kartu header user ────────────────────────────────
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: _teal.withOpacity(0.4)),
-                boxShadow: [BoxShadow(
-                    color: Colors.black.withOpacity(0.05), blurRadius: 8)],
-              ),
-              child: Row(children: [
-                // Avatar lingkaran
-                Container(
-                  width: 64, height: 64,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFB2EBF2), shape: BoxShape.circle),
-                  alignment: Alignment.center,
-                  child: Text(_inisial,
-                      style: const TextStyle(
-                          fontSize: 28, fontWeight: FontWeight.w700,
-                          color: _navy)),
-                ),
-                const SizedBox(width: 16),
-                Expanded(child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text(_namaAkun,
-                      style: TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary)),
-                  const Text(_email,
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  const Text(_wa,
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  const SizedBox(height: 8),
-                  // Tombol Edit Profil
-                  SizedBox(
-                    width: 110, height: 32,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pushNamed(
-                          context, '/tutor/edit-profil'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _teal,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+              if (state is TutorProfileError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(state.message, style: const TextStyle(color: Colors.red)),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        onPressed: () => context.read<TutorProfileCubit>().fetchProfile(),
+                        child: const Text('Coba Lagi'),
                       ),
-                      child: const Text('Edit Profil',
-                          style: TextStyle(fontSize: 12)),
-                    ),
+                    ],
                   ),
-                ])),
-              ]),
-            ),
+                );
+              }
 
-            const SizedBox(height: 16),
+              if (state is TutorProfileLoaded) {
+                final tutor = state.tutor;
+                final inisial = tutor.name.isNotEmpty ? tutor.name[0].toUpperCase() : '?';
 
-            // ── Detail Pribadi ───────────────────────────────────
-            _buildSection('Detail Pribadi', _detailPribadi),
-            const SizedBox(height: 16),
+                final detailPribadi = [
+                  _FieldView('Nama Lengkap', tutor.name),
+                  _FieldView('Jenis Kelamin', tutor.gender ?? '-'),
+                  _FieldView('Tanggal Lahir', tutor.dateOfBirth ?? '-'),
+                  _FieldView('Nomor WhatsApp', tutor.telephoneNumber ?? '-'),
+                  _FieldView('Pilih Bank', tutor.bankCode ?? '-'),
+                  _FieldView('Nomor Rekening', tutor.accountNumber ?? '-'),
+                ];
 
-            // ── Detail Alamat ────────────────────────────────────
-            _buildSection('Detail Alamat', _detailAlamat),
-            const SizedBox(height: 24),
-          ]),
-        )),
+                final detailAlamat = [
+                  _FieldView('Alamat Rumah', tutor.homeAddress ?? '-'),
+                ];
+
+                return RefreshIndicator(
+                  color: _teal,
+                  onRefresh: () async => context.read<TutorProfileCubit>().fetchProfile(),
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(children: [
+                      const SizedBox(height: 8),
+
+                      // ── Kartu header user ────────────────────────────────
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: _teal.withOpacity(0.4)),
+                          boxShadow: [BoxShadow(
+                              color: Colors.black.withOpacity(0.05), blurRadius: 8)],
+                        ),
+                        child: Row(children: [
+                          // Avatar lingkaran
+                          Container(
+                            width: 64, height: 64,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFB2EBF2), shape: BoxShape.circle),
+                            alignment: Alignment.center,
+                            child: Text(inisial,
+                                style: const TextStyle(
+                                    fontSize: 28, fontWeight: FontWeight.w700,
+                                    color: _navy)),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(tutor.name,
+                                style: const TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary)),
+                            Text(tutor.email ?? '-',
+                                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            Text(tutor.telephoneNumber ?? '-',
+                                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            const SizedBox(height: 8),
+                            // Tombol Edit Profil
+                            SizedBox(
+                              width: 110, height: 32,
+                              child: ElevatedButton(
+                                onPressed: () => Navigator.pushNamed(
+                                    context, '/tutor/edit-profil'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _teal,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  padding: EdgeInsets.zero,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8)),
+                                ),
+                                child: const Text('Edit Profil',
+                                    style: TextStyle(fontSize: 12)),
+                              ),
+                            ),
+                          ])),
+                        ]),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // ── Detail Pribadi ───────────────────────────────────
+                      _buildSection('Detail Pribadi', detailPribadi),
+                      const SizedBox(height: 16),
+
+                      // ── Detail Alamat ────────────────────────────────────
+                      _buildSection('Detail Alamat', detailAlamat),
+                      const SizedBox(height: 24),
+                    ]),
+                  ),
+                );
+              }
+
+              return const SizedBox();
+            },
+          ),
+        ),
       ]),
     );
   }
 
   Widget _buildSection(String title, List<_FieldView> fields) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,

@@ -12,6 +12,13 @@ class TutorModel extends TutorEntity {
     super.education,
     super.price,
     super.avgRate,
+    super.dateOfBirth,
+    super.gender,
+    super.religion,
+    super.homeAddress,
+    super.bankCode,
+    super.accountNumber,
+    super.subjects,
   });
 
   factory TutorModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +42,11 @@ class TutorModel extends TutorEntity {
       parsedEducation = List<Map<String, dynamic>>.from(json['education']);
     }
 
+    List<Map<String, dynamic>>? parsedSubjects;
+    if (json['subjects'] != null && json['subjects'] is List) {
+      parsedSubjects = List<Map<String, dynamic>>.from(json['subjects']);
+    }
+
     return TutorModel(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
@@ -46,6 +58,13 @@ class TutorModel extends TutorEntity {
       education: parsedEducation,
       price: parsedPrice,
       avgRate: parsedRate,
+      dateOfBirth: json['dateOfBirth']?.toString(),
+      gender: json['gender']?.toString(),
+      religion: json['religion']?.toString(),
+      homeAddress: json['homeAddress']?.toString(),
+      bankCode: json['bankCode']?.toString(),
+      accountNumber: json['accountNumber']?.toString(),
+      subjects: parsedSubjects,
     );
   }
 }

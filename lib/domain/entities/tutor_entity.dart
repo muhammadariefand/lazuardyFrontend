@@ -9,6 +9,13 @@ class TutorEntity {
   final List<Map<String, dynamic>>? education;
   final double? price;
   final double? avgRate;
+  final String? dateOfBirth;
+  final String? gender;
+  final String? religion;
+  final String? homeAddress;
+  final String? bankCode;
+  final String? accountNumber;
+  final List<Map<String, dynamic>>? subjects;
 
   TutorEntity({
     required this.id,
@@ -21,5 +28,12 @@ class TutorEntity {
     this.education,
     this.price,
     this.avgRate,
+    this.dateOfBirth,
+    this.gender,
+    this.religion,
+    this.homeAddress,
+    this.bankCode,
+    this.accountNumber,
+    this.subjects,
   });
 }

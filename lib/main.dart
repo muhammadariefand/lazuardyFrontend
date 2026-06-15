@@ -55,6 +55,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/tutor/profil/profil_tutor_
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/menunggu_verifikasi_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/booking_confirmation_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_cubit.dart';
 
 // ── Shared ─────────────────────────────────────────────────────────
 import 'package:lazuadry_mobile_fe/presentation/pages/splash_page.dart';
@@ -242,7 +243,10 @@ class LazuardyApp extends StatelessWidget {
             create: (_) => sl<BookingConfirmationCubit>(),
             child: const FormLinkMeetingPage(),
           ),
-          '/tutor/profil': (_) => const ProfilTutorPage(),
+          '/tutor/profil': (context) => BlocProvider<TutorProfileCubit>(
+            create: (_) => sl<TutorProfileCubit>(),
+            child: const ProfilTutorPage(),
+          ),
           '/tutor/edit-profil': (_) => const EditProfilTutorPage(),
 
           // ── Siswa: Menu Sidebar ────────────────────────────────────
