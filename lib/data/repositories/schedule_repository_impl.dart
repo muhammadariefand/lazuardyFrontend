@@ -36,4 +36,31 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
       throw ServerException('Terjadi kesalahan saat memuat jadwal');
     }
   }
+
+  @override
+  Future<void> confirmBooking({
+    required int scheduleId,
+    required String decision,
+    String? urlMeeting,
+  }) async {
+    try {
+      await remoteDataSource.confirmBooking(
+        scheduleId: scheduleId,
+        decision: decision,
+        urlMeeting: urlMeeting,
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Unauthorized');
+      }
+      final data = e.response?.data;
+      throw ServerException(
+        data is Map && data.containsKey('message')
+            ? data['message'].toString()
+            : (e.message ?? 'Gagal mengonfirmasi booking'),
+      );
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan saat mengonfirmasi booking');
+    }
+  }
 }

@@ -57,6 +57,8 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_c
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_dashboard/tutor_dashboard_cubit.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor/confirm_booking_usecase.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/booking_confirmation_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -246,5 +248,11 @@ Future<void> initDependencies() async {
 
   sl.registerFactory(() => TutorDashboardCubit(
     getTutorDashboardUseCase: sl(),
+  ));
+
+  sl.registerLazySingleton(() => ConfirmBookingUseCase(sl()));
+
+  sl.registerFactory(() => BookingConfirmationCubit(
+    confirmBookingUseCase: sl(),
   ));
 }

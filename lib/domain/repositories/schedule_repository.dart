@@ -7,4 +7,10 @@ abstract class ScheduleRepository {
     required String date,
     int page = 1,
   });
+
+  Future<void> confirmBooking({
+    required int scheduleId,
+    required String decision,
+    String? urlMeeting,
+  });
 }

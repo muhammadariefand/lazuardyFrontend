@@ -8,6 +8,13 @@ abstract class ScheduleRemoteDataSource {
     required String date,
     int page = 1,
   });
+
+  /// PATCH /tutor/schedule/booking-confirmation
+  Future<void> confirmBooking({
+    required int scheduleId,
+    required String decision,
+    String? urlMeeting,
+  });
 }
 
 class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
@@ -21,13 +28,21 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
     required String date,
     int page = 1,
   }) async {
+    final queryParams = <String, dynamic>{
+      'page': page,
+    };
+    // Hanya kirim status jika tidak kosong
+    if (status.isNotEmpty) {
+      queryParams['status'] = status;
+    }
+    // Hanya kirim date jika tidak kosong
+    if (date.isNotEmpty) {
+      queryParams['date'] = date;
+    }
+
     final response = await dio.get(
       '/schedules',
-      queryParameters: {
-        'status': status,
-        'date': date,
-        'page': page,
-      },
+      queryParameters: queryParams,
     );
 
     if (response.data is Map<String, dynamic>) {
@@ -43,5 +58,24 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
     }
 
     throw Exception('Format respon jadwal tidak valid');
+  }
+
+  @override
+  Future<void> confirmBooking({
+    required int scheduleId,
+    required String decision,
+    String? urlMeeting,
+  }) async {
+    final Map<String, dynamic> data = {
+      'schedule_id': scheduleId,
+      'decision': decision,
+    };
+    if (urlMeeting != null && urlMeeting.isNotEmpty) {
+      data['url_meeting'] = urlMeeting;
+    }
+    await dio.patch(
+      '/tutor/schedule/booking-confirmation',
+      data: data,
+    );
   }
 }

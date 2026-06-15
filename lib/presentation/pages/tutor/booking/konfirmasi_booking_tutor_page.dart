@@ -1,10 +1,15 @@
-// lib/presentation/pages/tutor/konfirmasi_booking_tutor_page.dart
+// lib/presentation/pages/tutor/booking/konfirmasi_booking_tutor_page.dart
 // - Tab Pending / Semua
 // - Kartu booking: Online (tanpa alamat) & Offline (+ kotak alamat+maps)
 // - Tombol Terima (teal) → push Form Link Meeting jika Online, langsung terima jika Offline
 // - Tombol Tolak (merah muda) → dialog konfirmasi tolak (Image 5)
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/schedule_entity.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/booking_confirmation_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_buttom_nav.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
@@ -15,40 +20,6 @@ const _green  = Color(0xFF4CAF50);
 const _red    = Color(0xFFE53E3E);
 const _orange = Color(0xFFF59E0B);
 
-// ── Status booking ────────────────────────────────────────────────
-enum _BookingStatus { pending, diterima, ditolak }
-enum _SesiMode       { online, offline }
-
-// ── Model ─────────────────────────────────────────────────────────
-class _BookingItem {
-  final String id, namaSiswa, inisial, mapel, tanggal, jam, waNumber;
-  final _SesiMode mode;
-  final _BookingStatus status;
-  final String? alamat, mapsLink;
-
-  const _BookingItem({
-    required this.id,
-    required this.namaSiswa,
-    required this.inisial,
-    required this.mapel,
-    required this.tanggal,
-    required this.jam,
-    required this.waNumber,
-    required this.mode,
-    required this.status,
-    this.alamat,
-    this.mapsLink,
-  });
-
-  _BookingItem copyWith({_BookingStatus? status}) => _BookingItem(
-    id: id, namaSiswa: namaSiswa, inisial: inisial, mapel: mapel,
-    tanggal: tanggal, jam: jam, waNumber: waNumber,
-    mode: mode, status: status ?? this.status,
-    alamat: alamat, mapsLink: mapsLink,
-  );
-}
-
-// ── Halaman ───────────────────────────────────────────────────────
 class KonfirmasiBookingTutorPage extends StatefulWidget {
   const KonfirmasiBookingTutorPage({super.key});
   @override
@@ -60,62 +31,44 @@ class _KonfirmasiBookingTutorPageState
     extends State<KonfirmasiBookingTutorPage> {
   bool _showPending = true; // true = tab Pending, false = tab Semua
 
-  // Data dummy — ganti dengan data dari Cubit
-  final List<_BookingItem> _allBooking = [
-    const _BookingItem(
-      id: 'b1', namaSiswa: 'Ahmad', inisial: 'S',
-      mapel: 'Matematika', tanggal: '1 April 2026', jam: '14:00 - 15:00',
-      waNumber: '081234567890',
-      mode: _SesiMode.online, status: _BookingStatus.pending,
-    ),
-    const _BookingItem(
-      id: 'b2', namaSiswa: 'Citra Lestari', inisial: 'C',
-      mapel: 'Matematika', tanggal: '1 April 2026', jam: '14:00 - 15:00',
-      waNumber: '081234567891',
-      mode: _SesiMode.offline, status: _BookingStatus.pending,
-      alamat: 'Jl. Melati Indah No. 24, RT 03/RW 05, Kel. Sumberrejo, Kec. Ngaglik, Kab. Sleman, DIY',
-      mapsLink: 'https://maps.google.com/?q=Jl.+Melati+Indah+Sleman',
-    ),
-    const _BookingItem(
-      id: 'b3', namaSiswa: 'Ahmad', inisial: 'S',
-      mapel: 'Matematika', tanggal: '1 April 2026', jam: '14:00 - 15:00',
-      waNumber: '081234567890',
-      mode: _SesiMode.online, status: _BookingStatus.pending,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
+  }
 
-  List<_BookingItem> get _displayList => _showPending
-      ? _allBooking.where((b) => b.status == _BookingStatus.pending).toList()
-      : _allBooking;
+  void _loadData() {
+    context.read<ScheduleCubit>().loadSchedules(
+      status: _showPending ? 'pending' : '',
+      date: '',
+    );
+  }
 
   // ── Terima booking ────────────────────────────────────────────
-  void _onTerima(_BookingItem item) {
-    if (item.mode == _SesiMode.online) {
+  void _onTerima(ScheduleEntity item) {
+    if (item.learningMethod.toLowerCase() == 'online') {
       // Online → push Form Link Meeting
-      Navigator.pushNamed(context, '/tutor/form-link-meeting',
-          arguments: {'booking': item});
+      Navigator.pushNamed(
+        context, 
+        '/tutor/form-link-meeting',
+        arguments: {'booking': item},
+      ).then((_) {
+        // Refresh data when returning from form
+        _loadData();
+      });
     } else {
       // Offline → langsung terima
-      setState(() {
-        final idx = _allBooking.indexWhere((b) => b.id == item.id);
-        if (idx != -1) {
-          _allBooking[idx] = item.copyWith(status: _BookingStatus.diterima);
-        }
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Booking ${item.namaSiswa} diterima'),
-          backgroundColor: _green,
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
+      context.read<BookingConfirmationCubit>().confirmBooking(
+        scheduleId: item.id, 
+        decision: 'accept',
       );
     }
   }
 
   // ── Dialog tolak ──────────────────────────────────────────────
-  void _showTolakDialog(_BookingItem item) {
+  void _showTolakDialog(ScheduleEntity item) {
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
@@ -135,7 +88,7 @@ class _KonfirmasiBookingTutorPageState
                     color: AppColors.textPrimary)),
             const SizedBox(height: 12),
             Text(
-              'Booking dari ${item.namaSiswa} akan ditolak dan kuota '
+              'Booking dari ${item.studentName} akan ditolak dan kuota '
               'akan dikembalikan ke siswa. Tindakan ini tidak bisa dibatalkan',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 13,
@@ -159,21 +112,9 @@ class _KonfirmasiBookingTutorPageState
               Expanded(child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(ctx);
-                  setState(() {
-                    final idx = _allBooking.indexWhere((b) => b.id == item.id);
-                    if (idx != -1) {
-                      _allBooking[idx] = item.copyWith(status: _BookingStatus.ditolak);
-                    }
-                  });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Booking ${item.namaSiswa} ditolak'),
-                      backgroundColor: _red,
-                      behavior: SnackBarBehavior.floating,
-                      margin: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                    ),
+                  context.read<BookingConfirmationCubit>().confirmBooking(
+                    scheduleId: item.id, 
+                    decision: 'reject',
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -201,71 +142,150 @@ class _KonfirmasiBookingTutorPageState
     }
   }
 
+  String _formatLongDate(DateTime d) {
+    const bulanNama = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+    ];
+    return '${d.day} ${bulanNama[d.month]} ${d.year}';
+  }
+
+  String _formatTime(DateTime t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      bottomNavigationBar: TutorBottomNav(
-        currentIndex: 2,
-        onTap: (i) {
-          if (i == 0) Navigator.pushReplacementNamed(context, '/tutor/beranda');
-          if (i == 1) Navigator.pushReplacementNamed(context, '/tutor/jadwal');
-          if (i == 3) Navigator.pushReplacementNamed(context, '/tutor/profil');
-        },
-      ),
-      body: Column(children: [
-        // ── Teal Header ──────────────────────────────────────────
-        Container(
-          color: _teal,
-          padding: const EdgeInsets.fromLTRB(20, 56, 20, 20),
-          child: const Align(
-            alignment: Alignment.centerLeft,
-            child: Text('Konfirmasi Booking',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700,
-                    color: Colors.white)),
-          ),
+    return BlocListener<BookingConfirmationCubit, BookingConfirmationState>(
+      listener: (context, state) {
+        if (state is BookingConfirmationSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: _green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          _loadData();
+        } else if (state is BookingConfirmationError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: _red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        bottomNavigationBar: TutorBottomNav(
+          currentIndex: 2,
+          onTap: (i) {
+            if (i == 0) Navigator.pushReplacementNamed(context, '/tutor/beranda');
+            if (i == 1) Navigator.pushReplacementNamed(context, '/tutor/jadwal');
+            if (i == 3) Navigator.pushReplacementNamed(context, '/tutor/profil');
+          },
         ),
+        body: Column(children: [
+          // ── Teal Header ──────────────────────────────────────────
+          Container(
+            color: _teal,
+            padding: const EdgeInsets.fromLTRB(20, 56, 20, 20),
+            child: const Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Konfirmasi Booking',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700,
+                      color: Colors.white)),
+            ),
+          ),
 
-        // ── Body ─────────────────────────────────────────────────
-        Expanded(child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const SizedBox(height: 16),
-            const Text('Terima atau tolak permintaan booking siswa',
-                style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-            const SizedBox(height: 14),
+          // ── Body ─────────────────────────────────────────────────
+          Expanded(child: RefreshIndicator(
+            color: _teal,
+            onRefresh: () async => _loadData(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const SizedBox(height: 16),
+                const Text('Terima atau tolak permintaan booking siswa',
+                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                const SizedBox(height: 14),
 
-            // ── Tab Pending / Semua ──────────────────────────────
-            _buildTabSelector(),
-            const SizedBox(height: 16),
+                // ── Tab Pending / Semua ──────────────────────────────
+                _buildTabSelector(),
+                const SizedBox(height: 16),
 
-            // ── List booking ─────────────────────────────────────
-            ..._displayList.map((item) => Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: _BookingCard(
-                item: item,
-                onTerima: () => _onTerima(item),
-                onTolak:  () => _showTolakDialog(item),
-                onOpenMaps: item.mapsLink != null
-                    ? () => _openUrl(item.mapsLink!)
-                    : null,
-                onWA: () => _openUrl('https://wa.me/${item.waNumber}'),
-              ),
-            )),
+                // ── List booking ─────────────────────────────────────
+                BlocBuilder<ScheduleCubit, ScheduleState>(
+                  builder: (context, state) {
+                    if (state is ScheduleLoading || state is ScheduleInitial) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 60),
+                        child: Center(child: CircularProgressIndicator(color: _teal)),
+                      );
+                    }
 
-            if (_displayList.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 60),
-                child: Center(child: Text('Tidak ada booking',
-                    style: TextStyle(fontSize: 14,
-                        color: AppColors.textSecondary))),
-              ),
+                    if (state is ScheduleError) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 60),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Text(state.message, style: const TextStyle(color: _red)),
+                              const SizedBox(height: 12),
+                              ElevatedButton(
+                                onPressed: _loadData,
+                                child: const Text('Coba Lagi'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
 
-            const SizedBox(height: 24),
-          ]),
-        )),
-      ]),
+                    if (state is ScheduleLoaded) {
+                      final list = state.data.data;
+                      if (list.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 60),
+                          child: Center(child: Text('Tidak ada booking',
+                              style: TextStyle(fontSize: 14,
+                                  color: AppColors.textSecondary))),
+                        );
+                      }
+
+                      return Column(
+                        children: list.map((item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: _BookingCard(
+                            item: item,
+                            tanggalFormatted: _formatLongDate(item.date),
+                            jamFormatted: '${_formatTime(item.startTime)} - ${_formatTime(item.endTime)}',
+                            onTerima: () => _onTerima(item),
+                            onTolak:  () => _showTolakDialog(item),
+                            onOpenMaps: () => _openUrl('https://maps.google.com/?q=${Uri.encodeComponent(item.address)}'),
+                            onWA: () {
+                              final number = item.studentTelephoneNumber;
+                              if (number != null && number.isNotEmpty) {
+                                _openUrl('https://wa.me/$number');
+                              }
+                            },
+                          ),
+                        )).toList(),
+                      );
+                    }
+
+                    return const SizedBox();
+                  },
+                ),
+
+                const SizedBox(height: 24),
+              ]),
+            ),
+          )),
+        ]),
+      ),
     );
   }
 
@@ -279,7 +299,10 @@ class _KonfirmasiBookingTutorPageState
       ),
       child: Row(children: [
         Expanded(child: GestureDetector(
-          onTap: () => setState(() => _showPending = true),
+          onTap: () {
+            setState(() => _showPending = true);
+            _loadData();
+          },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             margin: const EdgeInsets.all(3),
@@ -303,7 +326,10 @@ class _KonfirmasiBookingTutorPageState
           ),
         )),
         Expanded(child: GestureDetector(
-          onTap: () => setState(() => _showPending = false),
+          onTap: () {
+            setState(() => _showPending = false);
+            _loadData();
+          },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             margin: const EdgeInsets.all(3),
@@ -333,22 +359,44 @@ class _KonfirmasiBookingTutorPageState
 
 // ── Kartu Booking ─────────────────────────────────────────────────
 class _BookingCard extends StatelessWidget {
-  final _BookingItem item;
-  final VoidCallback onTerima, onTolak, onWA;
-  final VoidCallback? onOpenMaps;
+  final ScheduleEntity item;
+  final String tanggalFormatted;
+  final String jamFormatted;
+  final VoidCallback onTerima, onTolak, onWA, onOpenMaps;
 
   const _BookingCard({
     required this.item,
+    required this.tanggalFormatted,
+    required this.jamFormatted,
     required this.onTerima,
     required this.onTolak,
     required this.onWA,
-    this.onOpenMaps,
+    required this.onOpenMaps,
   });
 
-  bool get _isOffline => item.mode == _SesiMode.offline;
+  bool get _isOffline => item.learningMethod.toLowerCase() == 'offline';
 
   @override
   Widget build(BuildContext context) {
+    final inisial = item.studentName.isNotEmpty ? item.studentName[0].toUpperCase() : '?';
+
+    // Badge status mapping
+    Color statusColor = _orange;
+    String statusText = item.status;
+    if (item.status == 'accepted') {
+      statusColor = _green;
+      statusText = 'Diterima';
+    } else if (item.status == 'rejected') {
+      statusColor = _red;
+      statusText = 'Ditolak';
+    } else if (item.status == 'pending') {
+      statusColor = _orange;
+      statusText = 'Pending';
+    } else {
+      statusColor = AppColors.textSecondary;
+      statusText = item.status.toUpperCase();
+    }
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -358,7 +406,7 @@ class _BookingCard extends StatelessWidget {
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        // ── Row 1: Avatar + Info + Badge Pending ─────────────────
+        // ── Row 1: Avatar + Info + Badge Status ─────────────────
         Row(children: [
           Container(
             width: 52, height: 52,
@@ -367,28 +415,28 @@ class _BookingCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
-            child: Text(item.inisial,
+            child: Text(inisial,
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700,
                     color: _navy)),
           ),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(item.namaSiswa,
+            Text(item.studentName,
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary)),
-            Text('${item.mapel} · ${item.tanggal}',
+            Text('${item.subjectName} · $tanggalFormatted',
                 style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
           ])),
           // Status badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: _orange.withOpacity(0.1),
+              color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: _orange.withOpacity(0.3)),
+              border: Border.all(color: statusColor.withOpacity(0.3)),
             ),
-            child: const Text('Pending',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _orange)),
+            child: Text(statusText,
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: statusColor)),
           ),
         ]),
 
@@ -398,7 +446,7 @@ class _BookingCard extends StatelessWidget {
         Row(children: [
           const Icon(Icons.access_time_rounded, size: 16, color: AppColors.textSecondary),
           const SizedBox(width: 5),
-          Text(item.jam, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+          Text(jamFormatted, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
           const SizedBox(width: 10),
           // Mode badge
           Container(
@@ -415,26 +463,27 @@ class _BookingCard extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           // WA badge
-          GestureDetector(
-            onTap: onWA,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                  color: const Color(0xFF25D366),
-                  borderRadius: BorderRadius.circular(20)),
-              child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                Icon(Icons.chat_rounded, size: 12, color: Colors.white),
-                SizedBox(width: 4),
-                Text('WhatsApp',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                        color: Colors.white)),
-              ]),
+          if (item.studentTelephoneNumber != null && item.studentTelephoneNumber!.isNotEmpty)
+            GestureDetector(
+              onTap: onWA,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                    color: const Color(0xFF25D366),
+                    borderRadius: BorderRadius.circular(20)),
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.chat_rounded, size: 12, color: Colors.white),
+                  SizedBox(width: 4),
+                  Text('WhatsApp',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                          color: Colors.white)),
+                ]),
+              ),
             ),
-          ),
         ]),
 
         // ── Kotak alamat (hanya Offline) ──────────────────────────
-        if (_isOffline && item.alamat != null) ...[
+        if (_isOffline && item.address.isNotEmpty) ...[
           const SizedBox(height: 10),
           Container(
             width: double.infinity,
@@ -451,64 +500,73 @@ class _BookingCard extends StatelessWidget {
                     style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               ]),
               const SizedBox(height: 5),
-              Text(item.alamat!,
+              Text(item.address,
                   style: const TextStyle(fontSize: 12, color: AppColors.textPrimary, height: 1.4)),
-              if (onOpenMaps != null) ...[
-                const SizedBox(height: 6),
-                GestureDetector(
-                  onTap: onOpenMaps,
-                  child: const Row(children: [
-                    Icon(Icons.open_in_new_rounded, size: 13, color: _teal),
-                    SizedBox(width: 4),
-                    Text('Buka di Google Maps',
-                        style: TextStyle(fontSize: 12, color: _teal,
-                            fontWeight: FontWeight.w500)),
-                  ]),
-                ),
-              ],
+              const SizedBox(height: 6),
+              GestureDetector(
+                onTap: onOpenMaps,
+                child: const Row(children: [
+                  Icon(Icons.open_in_new_rounded, size: 13, color: _teal),
+                  SizedBox(width: 4),
+                  Text('Buka di Google Maps',
+                      style: TextStyle(fontSize: 12, color: _teal,
+                          fontWeight: FontWeight.w500)),
+                ]),
+              ),
             ]),
           ),
         ],
 
-        const SizedBox(height: 14),
+        // Tombol aksi hanya tampil jika status masih pending
+        if (item.status == 'pending') ...[
+          const SizedBox(height: 14),
 
-        // ── Tombol Terima + Tolak ──────────────────────────────
-        Row(children: [
-          Expanded(child: SizedBox(
-            height: 44,
-            child: ElevatedButton.icon(
-              onPressed: onTerima,
-              icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
-              label: const Text('Terima',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _teal,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+          // ── Tombol Terima + Tolak ──────────────────────────────
+          Row(children: [
+            Expanded(child: SizedBox(
+              height: 44,
+              child: BlocBuilder<BookingConfirmationCubit, BookingConfirmationState>(
+                builder: (context, state) {
+                  return ElevatedButton.icon(
+                    onPressed: state is BookingConfirmationLoading ? null : onTerima,
+                    icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                    label: const Text('Terima',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _teal,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  );
+                },
               ),
-            ),
-          )),
-          const SizedBox(width: 10),
-          Expanded(child: SizedBox(
-            height: 44,
-            child: ElevatedButton.icon(
-              onPressed: onTolak,
-              icon: Icon(Icons.cancel_outlined, size: 18, color: _red),
-              label: Text('Tolak',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
-                      color: _red)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _red.withOpacity(0.1),
-                foregroundColor: _red,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+            )),
+            const SizedBox(width: 10),
+            Expanded(child: SizedBox(
+              height: 44,
+              child: BlocBuilder<BookingConfirmationCubit, BookingConfirmationState>(
+                builder: (context, state) {
+                  return ElevatedButton.icon(
+                    onPressed: state is BookingConfirmationLoading ? null : onTolak,
+                    icon: Icon(Icons.cancel_outlined, size: 18, color: _red),
+                    label: Text('Tolak',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
+                            color: _red)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _red.withOpacity(0.1),
+                      foregroundColor: _red,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                  );
+                },
               ),
-            ),
-          )),
-        ]),
+            )),
+          ]),
+        ],
       ]),
     );
   }

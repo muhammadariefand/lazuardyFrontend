@@ -54,6 +54,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/tutor/profil/edit_profil_t
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/profil/profil_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/menunggu_verifikasi_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/booking_confirmation_cubit.dart';
 
 // ── Shared ─────────────────────────────────────────────────────────
 import 'package:lazuadry_mobile_fe/presentation/pages/splash_page.dart';
@@ -230,8 +231,17 @@ class LazuardyApp extends StatelessWidget {
             create: (_) => sl<ScheduleCubit>(),
             child: const JadwalMengajarPage(),
           ),
-          '/tutor/konfirmasi-booking': (_) => const KonfirmasiBookingTutorPage(),
-          '/tutor/form-link-meeting': (_) => const FormLinkMeetingPage(),
+          '/tutor/konfirmasi-booking': (context) => MultiBlocProvider(
+            providers: [
+              BlocProvider<ScheduleCubit>(create: (_) => sl<ScheduleCubit>()),
+              BlocProvider<BookingConfirmationCubit>(create: (_) => sl<BookingConfirmationCubit>()),
+            ],
+            child: const KonfirmasiBookingTutorPage(),
+          ),
+          '/tutor/form-link-meeting': (context) => BlocProvider<BookingConfirmationCubit>(
+            create: (_) => sl<BookingConfirmationCubit>(),
+            child: const FormLinkMeetingPage(),
+          ),
           '/tutor/profil': (_) => const ProfilTutorPage(),
           '/tutor/edit-profil': (_) => const EditProfilTutorPage(),
 
