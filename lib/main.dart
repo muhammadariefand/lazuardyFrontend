@@ -56,6 +56,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/tutor/menunggu_verifikasi_
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/booking_confirmation_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/parent_dashboard/parent_dashboard_cubit.dart';
 
 // ── Shared ─────────────────────────────────────────────────────────
 import 'package:lazuadry_mobile_fe/presentation/pages/splash_page.dart';
@@ -278,7 +279,10 @@ class LazuardyApp extends StatelessWidget {
 
 
           // ── Orang Tua: Home ─────────────────────────────
-          '/orang-tua/beranda': (_) => const BerandaOrangtuaPage(),
+          '/orang-tua/beranda': (context) => BlocProvider<ParentDashboardCubit>(
+            create: (_) => sl<ParentDashboardCubit>(),
+            child: const BerandaOrangtuaPage(),
+          ),
 
           // ── Orang Tua: Menu Sidebar ────────────────────────────────────
           '/orang-tua/hubungi-kami': (_) => const HubungiKamiPage(),

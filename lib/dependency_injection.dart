@@ -67,6 +67,13 @@ import 'package:lazuadry_mobile_fe/domain/repositories/tutor_profile_repository.
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_tutor_profile_usecase.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_cubit.dart';
 
+// Parent Dashboard
+import 'package:lazuadry_mobile_fe/data/datasources/parent_dashboard_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/parent_dashboard_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/parent_dashboard_repository.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/parent/get_parent_dashboard_usecase.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/parent_dashboard/parent_dashboard_cubit.dart';
+
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
@@ -273,5 +280,17 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetTutorProfileUseCase(sl()));
   sl.registerFactory(() => TutorProfileCubit(
     getTutorProfileUseCase: sl(),
+  ));
+
+  // Parent Dashboard
+  sl.registerLazySingleton<ParentDashboardRemoteDataSource>(
+    () => ParentDashboardRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<ParentDashboardRepository>(
+    () => ParentDashboardRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton(() => GetParentDashboardUseCase(sl()));
+  sl.registerFactory(() => ParentDashboardCubit(
+    getDashboardUseCase: sl(),
   ));
 }
