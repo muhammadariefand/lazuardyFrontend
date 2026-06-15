@@ -6,8 +6,10 @@ import 'package:lazuadry_mobile_fe/data/repositories/dashboard_repository_impl.d
 import 'package:lazuadry_mobile_fe/data/repositories/region_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/dashboard_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/region_repository.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/register_parent_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/request_otp_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/reset_password_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_tautkan_akun_anak_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/get_dashboard_data_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_districts_usecase.dart';
@@ -25,6 +27,7 @@ import 'package:lazuadry_mobile_fe/domain/repositories/auth_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_login_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_otp_email_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/register_otp_email_anak_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_register_email_usecase.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 
@@ -124,6 +127,11 @@ Future<void> initDependencies() async {
   // Usecase untuk mendapatkan data dashboard
   sl.registerLazySingleton(() => GetDashboardDataUseCase(sl()));
 
+  sl.registerLazySingleton(() => RegisterOtpEmailAnakUsecase(repository: sl()));
+
+  sl.registerLazySingleton(() => VerifyOtpTautkanAkunAnakUsecase(repository: sl()));
+
+  sl.registerLazySingleton(() => RegisterParentUsecase(repository: sl()));
 
   // ── PRESENTATION / STATE MANAGEMENT ─────────────────────────
   sl.registerFactory(() => AuthCubit(
@@ -134,6 +142,9 @@ Future<void> initDependencies() async {
     studentRequestOtpUsecase: sl(),
     studentVerifyOtpUsecase: sl(),
     studentResetPasswordUsecase: sl(),
+    registerOtpEmailAnakUsecase: sl(),
+    verifyOtpTautkanAkunAnakUsecase: sl(),
+    registerParentUsecase: sl(),
     ),
   );
 
