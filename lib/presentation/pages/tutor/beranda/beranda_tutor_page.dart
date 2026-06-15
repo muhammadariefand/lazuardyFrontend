@@ -4,10 +4,13 @@
 // - 2 pendapatan cards: Total Pendapatan + Saldo Escrow
 // - 4 menu grid: Manajemen Sesi / Profil Mengajar / Ulasan Siswa / Tarik Saldo
 // - Notifikasi section
-// - Optional warning banner (Image 2)
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/tutor_dashboard_entity.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_dashboard/tutor_dashboard_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_dashboard/tutor_dashboard_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_buttom_nav.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_drawer.dart';
 
@@ -22,36 +25,17 @@ class BerandaTutorPage extends StatefulWidget {
 class _BerandaTutorPageState extends State<BerandaTutorPage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // ── Data dummy — ganti dengan Cubit state ─────────────────────
-  static const _nama            = 'Ibu Sarah';
-  static const _rating          = 4.8;
-  static const _sesiBulanIni    = 18;
-  static const _totalSiswa      = 12;
-  static const _totalPendapatan = 4800000;
-  static const _saldoEscrow     = 1200000;
-  static const _bergabungSejak  = 'Bergabung Sejak Maret 2026';
-  static const _escrowInfo      = 'Dari 3 sesi dikonfirmasi';
-  static const _hasWarning      = true;   // toggle untuk state warning
-  static const _warningCount    = 1;
-
-  static const _notifList = [
-    _NotifData(
-      icon: Icons.attach_money_rounded,
-      judul: 'Penarikan Disetujui',
-      subjudul: 'Penarikan Rp 500.000 telah diproses ke rekening Anda.',
-      waktu: 'Hari ini,  14:00',
-    ),
-    _NotifData(
-      icon: Icons.check_circle_outline_rounded,
-      judul: 'Sesi Dikonfirmasi Otomatis',
-      subjudul: 'sesi dengan Budi telah dikonfirmsi otomatis. Dana masuk ke saldo.',
-      waktu: 'Kemarin,  12:00',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TutorDashboardCubit>().loadDashboard();
+    });
+  }
 
   // ── Format Rupiah ─────────────────────────────────────────────
-  String _rp(int v) {
-    final s = v.toString();
+  String _rp(num v) {
+    final s = v.toInt().toString();
     final b = StringBuffer('Rp ');
     for (int i = 0; i < s.length; i++) {
       if (i > 0 && (s.length - i) % 3 == 0) b.write('.');
@@ -64,7 +48,18 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      drawer: const TutorDrawer(nama: _nama, inisial: 'S',),
+      drawer: BlocBuilder<TutorDashboardCubit, TutorDashboardState>(
+        builder: (context, state) {
+          if (state is TutorDashboardLoaded) {
+            final tutor = state.dashboardData.tutor;
+            return TutorDrawer(
+              nama: tutor.name.isNotEmpty ? tutor.name : 'Tutor',
+              inisial: tutor.name.isNotEmpty ? tutor.name[0].toUpperCase() : 'T',
+            );
+          }
+          return const TutorDrawer(nama: 'Tutor', inisial: 'T');
+        },
+      ),
       backgroundColor: _teal,
       bottomNavigationBar: TutorBottomNav(
         currentIndex: 0,
@@ -75,43 +70,82 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
         },
       ),
       body: SafeArea(
-        child: Column(children: [
-          _buildAppBar(),
-          Expanded(child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const SizedBox(height: 16),
+        child: BlocBuilder<TutorDashboardCubit, TutorDashboardState>(
+          builder: (context, state) {
+            if (state is TutorDashboardInitial || state is TutorDashboardLoading) {
+              return const Center(child: CircularProgressIndicator(color: Colors.white));
+            }
 
-              // ── Warning banner (kondisional) ─────────────────
-              // if (_hasWarning) ...[
-              //   _buildWarningBanner(),
-              //   const SizedBox(height: 12),
-              // ],
+            if (state is TutorDashboardError) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(state.message, style: const TextStyle(color: Colors.white), textAlign: TextAlign.center),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => context.read<TutorDashboardCubit>().loadDashboard(),
+                        child: const Text('Coba Lagi'),
+                      )
+                    ],
+                  ),
+                ),
+              );
+            }
 
-              // ── 3 stat cards ─────────────────────────────────
-              _buildStatCards(),
-              const SizedBox(height: 12),
+            if (state is TutorDashboardLoaded) {
+              final data = state.dashboardData;
+              return Column(children: [
+                _buildAppBar(data.tutor.name),
+                Expanded(child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const SizedBox(height: 16),
 
-              // ── 2 pendapatan cards ────────────────────────────
-              _buildPendapatanRow(),
-              const SizedBox(height: 20),
+                    // ── Warning banner (kondisional) ─────────────────
+                    if (data.warning > 0) ...[
+                      _buildWarningBanner(data.warning),
+                      const SizedBox(height: 12),
+                    ],
 
-              // ── 4 menu grid ───────────────────────────────────
-              _buildMenuGrid(),
-              const SizedBox(height: 24),
+                    // ── 3 stat cards ─────────────────────────────────
+                    _buildStatCards(
+                      rating: data.tutor.avgRate?.toStringAsFixed(1) ?? '0.0',
+                      sesiBulanIni: data.schedulesTotal.toString(),
+                      totalSiswa: data.studentTotal.toString(),
+                    ),
+                    const SizedBox(height: 12),
 
-              // ── Notifikasi ────────────────────────────────────
-              _buildNotifikasiSection(),
-              const SizedBox(height: 32),
-            ]),
-          )),
-        ]),
+                    // ── 2 pendapatan cards ────────────────────────────
+                    _buildPendapatanRow(
+                      totalPendapatan: data.salaryStats,
+                      saldoEscrow: data.salary,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // ── 4 menu grid ───────────────────────────────────
+                    _buildMenuGrid(),
+                    const SizedBox(height: 24),
+
+                    // ── Notifikasi ────────────────────────────────────
+                    _buildNotifikasiSection(data),
+                    const SizedBox(height: 32),
+                  ]),
+                )),
+              ]);
+            }
+
+            return const SizedBox();
+          },
+        ),
       ),
     );
   }
 
   // ── AppBar ────────────────────────────────────────────────────
-  Widget _buildAppBar() {
+  Widget _buildAppBar(String nama) {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -137,7 +171,7 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
             Text('Selamat datang ', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
             Text('👋', style: TextStyle(fontSize: 13)),
           ]),
-          const Text(_nama, style: TextStyle(
+          Text(nama, style: const TextStyle(
               fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
         ]),
       ]),
@@ -145,51 +179,55 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
   }
 
   // ── Warning Banner ────────────────────────────────────────────
-  // Widget _buildWarningBanner() {
-  //   return Container(
-  //     margin: const EdgeInsets.symmetric(horizontal: 16),
-  //     padding: const EdgeInsets.all(16),
-  //     decoration: BoxDecoration(
-  //       color: const Color(0xFFFFF8E1),
-  //       borderRadius: BorderRadius.circular(14),
-  //       border: Border.all(color: const Color(0xFFFFE082)),
-  //     ),
-  //     child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-  //       const Text('⚠️', style: TextStyle(fontSize: 18)),
-  //       const SizedBox(width: 10),
-  //       Expanded(
-  //         child: RichText(
-  //           text: TextSpan(
-  //             style: const TextStyle(fontSize: 13, color: Color(0xFF92400E), height: 1.5),
-  //             children: [
-  //               TextSpan(
-  //                 text: 'Peringatan ($_warningCount/3)\n',
-  //                 style: const TextStyle(fontWeight: FontWeight.w700),
-  //               ),
-  //               const TextSpan(text: 'Anda telah menerima 1 peringatan.\nJika mencapai 3 peringatan, akun akan '),
-  //               const TextSpan(
-  //                 text: 'disuspend selama 7 hari',
-  //                 style: TextStyle(fontWeight: FontWeight.w700),
-  //               ),
-  //               const TextSpan(text: '.\n Mohon gunakan platform sesuai ketentuan.'),
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //     ]),
-  //   );
-  // }
+  Widget _buildWarningBanner(int warningCount) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFFFE082)),
+      ),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text('⚠️', style: TextStyle(fontSize: 18)),
+        const SizedBox(width: 10),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(fontSize: 13, color: Color(0xFF92400E), height: 1.5),
+              children: [
+                TextSpan(
+                  text: 'Peringatan ($warningCount/3)\n',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const TextSpan(text: 'Anda telah menerima peringatan dari admin.\nJika mencapai 3 peringatan, akun akan '),
+                const TextSpan(
+                  text: 'disuspend selama 7 hari',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const TextSpan(text: '.\n Mohon gunakan platform sesuai ketentuan.'),
+              ],
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
 
   // ── 3 Stat Cards ─────────────────────────────────────────────
-  Widget _buildStatCards() {
+  Widget _buildStatCards({
+    required String rating,
+    required String sesiBulanIni,
+    required String totalSiswa,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(children: [
-        _statCard('⭐', '$_rating', 'Rating'),
+        _statCard('⭐', rating, 'Rating'),
         const SizedBox(width: 10),
-        _statCard('📅', '$_sesiBulanIni', 'Sesi Bulan Ini'),
+        _statCard('📅', sesiBulanIni, 'Sesi Bulan Ini'),
         const SizedBox(width: 10),
-        _statCard('👤', '$_totalSiswa', 'Total Siswa'),
+        _statCard('👤', totalSiswa, 'Total Siswa'),
       ]),
     );
   }
@@ -222,22 +260,22 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
   }
 
   // ── Pendapatan + Escrow ───────────────────────────────────────
-  Widget _buildPendapatanRow() {
+  Widget _buildPendapatanRow({required double totalPendapatan, required double saldoEscrow}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(children: [
         Expanded(child: _pendapatanCard(
           icon: '📈',
           title: 'Total Pendapatan',
-          amount: _totalPendapatan,
-          sub: _bergabungSejak,
+          amount: totalPendapatan,
+          sub: 'Total seluruh penghasilan',
         )),
         const SizedBox(width: 12),
         Expanded(child: _pendapatanCard(
           icon: '💳',
-          title: 'Saldo Escrow',
-          amount: _saldoEscrow,
-          sub: _escrowInfo,
+          title: 'Saldo Tersedia',
+          amount: saldoEscrow,
+          sub: 'Siap ditarik',
         )),
       ]),
     );
@@ -246,7 +284,7 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
   Widget _pendapatanCard({
     required String icon,
     required String title,
-    required int amount,
+    required double amount,
     required String sub,
   }) {
     return Container(
@@ -290,28 +328,32 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: menus.map((m) {
-          final w = (MediaQuery.of(context).size.width - 32 - 24) / 4;
-          return GestureDetector(
-            onTap: () => Navigator.pushNamed(context, m.$3),
-            child: Container(
-              width: w,
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [BoxShadow(
-                    color: Colors.black.withOpacity(0.06), blurRadius: 6)],
-              ),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text(m.$1, style: const TextStyle(fontSize: 28)),
-                const SizedBox(height: 6),
-                Text(m.$2,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 11, fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary, height: 1.3)),
-              ]),
-            ),
+          return Builder(
+            builder: (context) {
+              final w = (MediaQuery.of(context).size.width - 32 - 24) / 4;
+              return GestureDetector(
+                onTap: () => Navigator.pushNamed(context, m.$3),
+                child: Container(
+                  width: w,
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [BoxShadow(
+                        color: Colors.black.withOpacity(0.06), blurRadius: 6)],
+                  ),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    Text(m.$1, style: const TextStyle(fontSize: 28)),
+                    const SizedBox(height: 6),
+                    Text(m.$2,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w500,
+                            color: AppColors.textPrimary, height: 1.3)),
+                  ]),
+                ),
+              );
+            }
           );
         }).toList(),
       ),
@@ -319,7 +361,7 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
   }
 
   // ── Notifikasi ────────────────────────────────────────────────
-  Widget _buildNotifikasiSection() {
+  Widget _buildNotifikasiSection(TutorDashboardEntity data) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -342,52 +384,52 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
           ],
         ),
         const SizedBox(height: 12),
-        ..._notifList.map((n) => Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Container(
-            padding: const EdgeInsets.all(14),
+        if (data.notifications.data.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Container(
-                width: 38, height: 38,
-                decoration: BoxDecoration(
-                  color: _teal.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: Icon(n.icon, color: _teal, size: 18),
+            child: const Text(
+              'Belum ada notifikasi.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          )
+        else
+          ...data.notifications.data.map((n) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
               ),
-              const SizedBox(width: 12),
-              Expanded(child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(n.judul, style: const TextStyle(
-                    fontSize: 13, fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary)),
-                const SizedBox(height: 2),
-                Text(n.subjudul, style: const TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary, height: 1.4)),
-              ])),
-              const SizedBox(width: 8),
-              Text(n.waktu, style: const TextStyle(
-                  fontSize: 11, color: AppColors.textSecondary)),
-            ]),
-          ),
-        )),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Container(
+                  width: 38, height: 38,
+                  decoration: BoxDecoration(
+                    color: _teal.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: const Icon(Icons.notifications_active, color: _teal, size: 18),
+                ),
+                const SizedBox(width: 12),
+                Expanded(child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(n.title, style: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary)),
+                  const SizedBox(height: 2),
+                  Text(n.body, style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondary, height: 1.4)),
+                ])),
+              ]),
+            ),
+          )),
       ]),
     );
   }
-}
-
-// ── Model notif ───────────────────────────────────────────────────
-class _NotifData {
-  final IconData icon;
-  final String judul, subjudul, waktu;
-  const _NotifData({
-    required this.icon,
-    required this.judul,
-    required this.subjudul,
-    required this.waktu,
-  });
 }

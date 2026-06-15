@@ -50,7 +50,17 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            Navigator.of(context).pushReplacementNamed('/siswa/beranda');
+            switch (_selectedRole) {
+              case UserRole.siswa:
+                Navigator.of(context).pushReplacementNamed('/siswa/beranda');
+                break;
+              case UserRole.tutor:
+                Navigator.of(context).pushReplacementNamed('/tutor/beranda');
+                break;
+              case UserRole.orangTua:
+                Navigator.of(context).pushReplacementNamed('/orang-tua/beranda');
+                break;
+            }
           }
           if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -171,7 +181,13 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
                         ),
                         TextButton(
                           onPressed: () {
-                            // TODO: navigasi lupa password
+                            if (_selectedRole == UserRole.tutor) {
+                              Navigator.of(context).pushNamed('/tutor/forgot-password');
+                            } else if (_selectedRole == UserRole.orangTua) {
+                              Navigator.of(context).pushNamed('/orang-tua/forgot-password');
+                            } else {
+                              Navigator.of(context).pushNamed('/siswa/forgot-password');
+                            }
                           },
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
@@ -212,20 +228,25 @@ class _LoginSiswaPageState extends State<LoginSiswaPage> {
 
                     const SizedBox(height: 20),
 
-                    // ── Daftar Link ───────────────────────────
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Belum Punya Akun? ',
-                            style: AppTextStyles.bodySecondary),
-                        GestureDetector(
-                          onTap: () =>
-                              Navigator.of(context).pushNamed('/siswa/register'),
-                          child: const Text('Daftar',
-                              style: AppTextStyles.linkTeal),
-                        ),
-                      ],
-                    ),
+                    if (_selectedRole != UserRole.orangTua)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('Belum Punya Akun? ',
+                              style: AppTextStyles.bodySecondary),
+                          GestureDetector(
+                            onTap: () {
+                              if (_selectedRole == UserRole.tutor) {
+                                Navigator.of(context).pushNamed('/tutor/register');
+                              } else {
+                                Navigator.of(context).pushNamed('/siswa/register');
+                              }
+                            },
+                            child: const Text('Daftar',
+                                style: AppTextStyles.linkTeal),
+                          ),
+                        ],
+                      ),
 
                     const SizedBox(height: 32),
                   ],

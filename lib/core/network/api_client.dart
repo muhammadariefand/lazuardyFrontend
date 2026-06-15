@@ -7,8 +7,8 @@ class ApiClient {
   ApiClient({required Future<String?> Function() getToken}) : dio = Dio(
     BaseOptions(
       baseUrl: AppApiConstants.baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(seconds: 60),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
