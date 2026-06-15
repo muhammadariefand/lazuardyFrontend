@@ -1,4 +1,4 @@
-// lib/presentation/pages/tutor/jadwal_mengajar_page.dart
+// lib/presentation/pages/tutor/jadwal/jadwal_mengajar_page.dart
 // Jadwal Mengajar
 // - Week picker dengan navigasi bulan
 // - "Sesi Hari Ini" section
@@ -8,63 +8,18 @@
 // - Empty state: icon kalender + teks "Belum ada sesi mengajar hari ini"
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/schedule_entity.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_buttom_nav.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
 const _teal  = Color(0xFF3AAFA9);
 const _navy  = Color(0xFF1E2D7D);
 const _green = Color(0xFF4CAF50);
 const _red   = Color(0xFFE53E3E);
-
-// ── Model ─────────────────────────────────────────────────────────
-enum _SesiMode { online, offline }
-
-class _SesiItem {
-  final String namaSiswa, inisial, mapel, tanggal, jam;
-  final _SesiMode mode;
-  final String? alamat, mapsLink, meetLink, waNumber;
-  const _SesiItem({
-    required this.namaSiswa,
-    required this.inisial,
-    required this.mapel,
-    required this.tanggal,
-    required this.jam,
-    required this.mode,
-    this.alamat,
-    this.mapsLink,
-    this.meetLink,
-    this.waNumber,
-  });
-}
-
-// ── Data dummy — sesi per hari (key: "dd-MM-yyyy") ────────────────
-const _sesiPerHari = {
-  '1-4-2026': [
-    _SesiItem(
-      namaSiswa: 'Budi', inisial: 'B',
-      mapel: 'Matematika', tanggal: '1 April 2026', jam: '08:00 - 09:00',
-      mode: _SesiMode.offline,
-      alamat: 'Jl. Melati Indah No. 24, RT 03/RW 05, Kel. Sumberrejo, Kec. Ngaglik, Kab. Sleman, DIY',
-      mapsLink: 'https://maps.google.com/?q=Jl.+Melati+Indah+Sleman',
-      waNumber: '081234567890',
-    ),
-    _SesiItem(
-      namaSiswa: 'Ahmad', inisial: 'A',
-      mapel: 'Matematika', tanggal: '1 April 2026', jam: '10:00 - 11:00',
-      mode: _SesiMode.online,
-      meetLink: 'https://meet.google.com/abc-defg-hij',
-      waNumber: '081234567891',
-    ),
-    _SesiItem(
-      namaSiswa: 'Citra', inisial: 'C',
-      mapel: 'Matematika', tanggal: '1 April 2026', jam: '13:00 - 14:00',
-      mode: _SesiMode.online,
-      meetLink: 'https://meet.google.com/xyz-uvwx-yz1',
-      waNumber: '081234567892',
-    ),
-  ],
-};
 
 class JadwalMengajarPage extends StatefulWidget {
   const JadwalMengajarPage({super.key});
@@ -73,8 +28,8 @@ class JadwalMengajarPage extends StatefulWidget {
 }
 
 class _JadwalMengajarPageState extends State<JadwalMengajarPage> {
-  DateTime _selectedDate = DateTime(2026, 4, 1);
-  DateTime _weekStart   = DateTime(2026, 3, 30);
+  DateTime _selectedDate = DateTime.now();
+  late DateTime _weekStart;
 
   static const _hariSingkat = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
   static const _bulanNama   = [
@@ -85,12 +40,57 @@ class _JadwalMengajarPageState extends State<JadwalMengajarPage> {
   List<DateTime> get _weekDays =>
       List.generate(7, (i) => _weekStart.add(Duration(days: i)));
 
-  String _key(DateTime d) => '${d.day}-${d.month}-${d.year}';
+  @override
+  void initState() {
+    super.initState();
+    // Hitung awal minggu (Senin) dari tanggal hari ini
+    final now = DateTime.now();
+    _weekStart = now.subtract(Duration(days: now.weekday - 1));
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSchedules());
+  }
 
-  List<_SesiItem> get _todaySesi =>
-      _sesiPerHari[_key(_selectedDate)] ?? [];
+  // ── API Call ─────────────────────────────────────────────────────
+  void _loadSchedules() {
+    context.read<ScheduleCubit>().loadSchedules(
+          status: 'active',
+          date: _formatQueryDate(_selectedDate),
+        );
+  }
 
-  // ── Actions ───────────────────────────────────────────────────
+  void _onDateSelected(DateTime date) {
+    setState(() => _selectedDate = date);
+    _loadSchedules();
+  }
+
+  void _prevWeek() {
+    setState(() {
+      _weekStart = _weekStart.subtract(const Duration(days: 7));
+      _selectedDate = _selectedDate.subtract(const Duration(days: 7));
+    });
+    _loadSchedules();
+  }
+
+  void _nextWeek() {
+    setState(() {
+      _weekStart = _weekStart.add(const Duration(days: 7));
+      _selectedDate = _selectedDate.add(const Duration(days: 7));
+    });
+    _loadSchedules();
+  }
+
+  // ── Helpers ─────────────────────────────────────────────────────
+  String _formatQueryDate(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  String _formatTime(DateTime t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+  String _formatLongDate(DateTime d) {
+    const weekdays = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+    return '${weekdays[d.weekday - 1]}, ${d.day} ${_bulanNama[d.month]} ${d.year}';
+  }
+
+  // ── Actions ─────────────────────────────────────────────────────
   Future<void> _openWA(String number) async {
     final uri = Uri.parse('https://wa.me/$number');
     if (await canLaunchUrl(uri)) launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -139,20 +139,55 @@ class _JadwalMengajarPageState extends State<JadwalMengajarPage> {
                     fontSize: 16, fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary)),
             const SizedBox(height: 14),
-            _todaySesi.isEmpty
-                ? _buildEmptyState()
-                : Column(
-                    children: _todaySesi.map((s) => Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
-                      child: _SesiCard(sesi: s,
-                          onWA: () => s.waNumber != null ? _openWA(s.waNumber!) : null,
-                          onOpenLink: (url) => _openUrl(url)),
-                    )).toList(),
-                  ),
+            _buildScheduleSection(),
             const SizedBox(height: 32),
           ]),
         )),
       ]),
+    );
+  }
+
+  // ── Schedule Section (BlocBuilder) ───────────────────────────────
+  Widget _buildScheduleSection() {
+    return BlocBuilder<ScheduleCubit, ScheduleState>(
+      builder: (context, state) {
+        if (state is ScheduleLoading || state is ScheduleInitial) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
+              child: CircularProgressIndicator(color: _teal),
+            ),
+          );
+        }
+
+        if (state is ScheduleError) {
+          return _buildErrorState(state.message);
+        }
+
+        if (state is ScheduleLoaded) {
+          final schedules = state.data.data;
+          if (schedules.isEmpty) {
+            return _buildEmptyState();
+          }
+          return Column(
+            children: schedules.map((s) => Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: _SesiCard(
+                schedule: s,
+                onWA: () {
+                  final number = s.studentTelephoneNumber;
+                  if (number != null && number.isNotEmpty) _openWA(number);
+                },
+                onOpenLink: (url) => _openUrl(url),
+                formatTime: _formatTime,
+                formatLongDate: _formatLongDate,
+              ),
+            )).toList(),
+          );
+        }
+
+        return const SizedBox();
+      },
     );
   }
 
@@ -163,8 +198,7 @@ class _JadwalMengajarPageState extends State<JadwalMengajarPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
-            onTap: () => setState(() =>
-                _weekStart = _weekStart.subtract(const Duration(days: 7))),
+            onTap: _prevWeek,
             child: Container(
               width: 40, height: 40,
               decoration: BoxDecoration(
@@ -175,13 +209,12 @@ class _JadwalMengajarPageState extends State<JadwalMengajarPage> {
                   color: AppColors.textPrimary),
             ),
           ),
-          Text(_bulanNama[_selectedDate.month],
+          Text('${_bulanNama[_selectedDate.month]} ${_selectedDate.year}',
               style: const TextStyle(
                   fontSize: 17, fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary)),
           GestureDetector(
-            onTap: () => setState(() =>
-                _weekStart = _weekStart.add(const Duration(days: 7))),
+            onTap: _nextWeek,
             child: Container(
               width: 40, height: 40,
               decoration: BoxDecoration(
@@ -200,11 +233,10 @@ class _JadwalMengajarPageState extends State<JadwalMengajarPage> {
         children: _weekDays.asMap().entries.map((e) {
           final day = e.value;
           final isSelected = day.day == _selectedDate.day &&
-              day.month == _selectedDate.month;
+              day.month == _selectedDate.month &&
+              day.year == _selectedDate.year;
           return GestureDetector(
-            onTap: () => setState(() {
-              _selectedDate = day;
-            }),
+            onTap: () => _onDateSelected(day),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               width: 44, height: 62,
@@ -249,23 +281,60 @@ class _JadwalMengajarPageState extends State<JadwalMengajarPage> {
       ])),
     );
   }
+
+  // ── Error state ───────────────────────────────────────────────
+  Widget _buildErrorState(String message) {
+    return SizedBox(
+      height: 300,
+      child: Center(child: Column(
+          mainAxisSize: MainAxisSize.min, children: [
+        Icon(Icons.error_outline_rounded,
+            size: 56, color: Colors.grey.shade300),
+        const SizedBox(height: 14),
+        Text(message,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: _loadSchedules,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _teal,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: const Text('Coba Lagi'),
+        ),
+      ])),
+    );
+  }
 }
 
-// ── Kartu sesi ────────────────────────────────────────────────────
+// ── Kartu sesi (powered by ScheduleEntity) ────────────────────────
 class _SesiCard extends StatelessWidget {
-  final _SesiItem sesi;
+  final ScheduleEntity schedule;
   final VoidCallback? onWA;
   final void Function(String url) onOpenLink;
+  final String Function(DateTime) formatTime;
+  final String Function(DateTime) formatLongDate;
 
   const _SesiCard({
-    required this.sesi,
+    required this.schedule,
     required this.onWA,
     required this.onOpenLink,
+    required this.formatTime,
+    required this.formatLongDate,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isOffline = sesi.mode == _SesiMode.offline;
+    final isOnline = schedule.learningMethod.toLowerCase() == 'online';
+    final inisial = schedule.studentName.isNotEmpty
+        ? schedule.studentName[0].toUpperCase()
+        : '?';
+    final jam = '${formatTime(schedule.startTime)} - ${formatTime(schedule.endTime)}';
+    final tanggal = formatLongDate(schedule.date);
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -286,18 +355,18 @@ class _SesiCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
-            child: Text(sesi.inisial,
-                style: TextStyle(
+            child: Text(inisial,
+                style: const TextStyle(
                     fontSize: 22, fontWeight: FontWeight.w700, color: _navy)),
           ),
           const SizedBox(width: 12),
           Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(sesi.namaSiswa,
+            Text(schedule.studentName,
                 style: const TextStyle(
                     fontSize: 15, fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary)),
-            Text('${sesi.mapel} · ${sesi.tanggal}',
+            Text('${schedule.subjectName} · $tanggal',
                 style: const TextStyle(
                     fontSize: 12, color: AppColors.textSecondary)),
           ])),
@@ -305,22 +374,22 @@ class _SesiCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(
-              color: isOffline
-                  ? _red.withOpacity(0.1)
-                  : _green.withOpacity(0.1),
+              color: isOnline
+                  ? _green.withOpacity(0.1)
+                  : _red.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isOffline
-                    ? _red.withOpacity(0.3)
-                    : _green.withOpacity(0.3),
+                color: isOnline
+                    ? _green.withOpacity(0.3)
+                    : _red.withOpacity(0.3),
               ),
             ),
             child: Text(
-              isOffline ? 'Offline' : 'Online',
+              isOnline ? 'Online' : 'Offline',
               style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: isOffline ? _red : _green),
+                  color: isOnline ? _green : _red),
             ),
           ),
         ]),
@@ -332,7 +401,7 @@ class _SesiCard extends StatelessWidget {
           const Icon(Icons.access_time_rounded,
               size: 16, color: AppColors.textSecondary),
           const SizedBox(width: 6),
-          Text(sesi.jam,
+          Text(jam,
               style: const TextStyle(
                   fontSize: 13, color: AppColors.textPrimary)),
           const SizedBox(width: 12),
@@ -366,57 +435,70 @@ class _SesiCard extends StatelessWidget {
             color: Colors.grey.shade100,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: isOffline
-              ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Icon(Icons.location_on_outlined,
-                        size: 16, color: AppColors.textSecondary),
-                    const SizedBox(width: 6),
-                    const Text('Alamat Lokasi sesi',
-                        style: TextStyle(
-                            fontSize: 12, color: AppColors.textSecondary)),
-                  ]),
-                  const SizedBox(height: 4),
-                  Text(sesi.alamat ?? '',
-                      style: const TextStyle(
-                          fontSize: 12, color: AppColors.textPrimary,
-                          height: 1.4)),
-                  const SizedBox(height: 6),
-                  if (sesi.mapsLink != null)
-                    GestureDetector(
-                      onTap: () => onOpenLink(sesi.mapsLink!),
-                      child: const Row(children: [
-                        Icon(Icons.open_in_new_rounded,
-                            size: 13, color: _teal),
-                        SizedBox(width: 4),
-                        Text('Buka di Google Maps',
-                            style: TextStyle(
-                                fontSize: 12, color: _teal,
-                                fontWeight: FontWeight.w500)),
-                      ]),
-                    ),
-                ])
-              : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    const Icon(Icons.videocam_outlined,
-                        size: 15, color: AppColors.textSecondary),
-                    const SizedBox(width: 6),
-                    const Text('Link Meeting',
-                        style: TextStyle(
-                            fontSize: 12, color: AppColors.textSecondary)),
-                  ]),
-                  const SizedBox(height: 4),
-                  if (sesi.meetLink != null)
-                    GestureDetector(
-                      onTap: () => onOpenLink(sesi.meetLink!),
-                      child: Text(sesi.meetLink!,
-                          style: const TextStyle(
-                              fontSize: 12, color: _teal,
-                              fontWeight: FontWeight.w500)),
-                    ),
-                ]),
+          child: isOnline
+              ? _buildOnlineInfo()
+              : _buildOfflineInfo(),
         ),
       ]),
     );
+  }
+
+  Widget _buildOnlineInfo() {
+    final link = schedule.address; // "Google Meet" or actual link
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Row(children: [
+        Icon(Icons.videocam_outlined,
+            size: 15, color: AppColors.textSecondary),
+        SizedBox(width: 6),
+        Text('Link Meeting',
+            style: TextStyle(
+                fontSize: 12, color: AppColors.textSecondary)),
+      ]),
+      const SizedBox(height: 4),
+      GestureDetector(
+        onTap: () {
+          if (link.startsWith('http')) {
+            onOpenLink(link);
+          }
+        },
+        child: Text(link,
+            style: const TextStyle(
+                fontSize: 12, color: _teal,
+                fontWeight: FontWeight.w500)),
+      ),
+    ]);
+  }
+
+  Widget _buildOfflineInfo() {
+    final alamat = schedule.address;
+    final mapsLink = 'https://maps.google.com/?q=${Uri.encodeComponent(alamat)}';
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Icon(Icons.location_on_outlined,
+            size: 16, color: AppColors.textSecondary),
+        SizedBox(width: 6),
+        Text('Alamat Lokasi sesi',
+            style: TextStyle(
+                fontSize: 12, color: AppColors.textSecondary)),
+      ]),
+      const SizedBox(height: 4),
+      Text(alamat,
+          style: const TextStyle(
+              fontSize: 12, color: AppColors.textPrimary,
+              height: 1.4)),
+      const SizedBox(height: 6),
+      GestureDetector(
+        onTap: () => onOpenLink(mapsLink),
+        child: const Row(children: [
+          Icon(Icons.open_in_new_rounded,
+              size: 13, color: _teal),
+          SizedBox(width: 4),
+          Text('Buka di Google Maps',
+              style: TextStyle(
+                  fontSize: 12, color: _teal,
+                  fontWeight: FontWeight.w500)),
+        ]),
+      ),
+    ]);
   }
 }
