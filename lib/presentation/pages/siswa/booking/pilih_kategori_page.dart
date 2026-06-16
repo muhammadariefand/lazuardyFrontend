@@ -2,16 +2,13 @@
 // Pilih Kategori → tap Akademik → expand jenjang & mapel
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import '../../../../domain/entities/subject_entity.dart';
+import '../../../state_management/student_booking/booking_flow_cubit.dart';
+import '../../../state_management/student_booking/booking_flow_state.dart';
 
 const _teal = Color(0xFF3AAFA9);
-
-// ── Data mapel per jenjang ─────────────────────────────────────────
-const _mapelSD = ['Matematika', 'Bahasa Indonesia', 'Bahasa Inggris', 'PKN', 'IPA', 'IPS', 'Informtika'];
-const _mapelSMP = ['Matematika', 'Bahasa Indonesia', 'Bahasa Inggris', 'PKN', 'IPA', 'IPS', 'Informtika'];
-const _mapelSMA = ['Matematika', 'Fisika', 'Kimia', 'Bioogi', 'Bahasa Indonesia', 'Bahasa Inggris',
-  'Ekonomi', 'Sosiologi', 'Geografi', 'PKN', 'Sejarah', 'Informatika'];
-const _mapelUmum = ['Mengaji'];
 
 class PilihKategoriPage extends StatefulWidget {
   const PilihKategoriPage({super.key});
@@ -21,22 +18,25 @@ class PilihKategoriPage extends StatefulWidget {
 
 class _PilihKategoriPageState extends State<PilihKategoriPage> {
   // State expand per kategori
-  bool _akademikExpanded = false;
-  bool _umumExpanded = false;
+  String? _expandedKategori; // 'akademik' or 'umum'
 
   // State pilihan
   String? _selectedJenjang;
-  String? _selectedMapel;
-  String? _expandedKategori; // 'akademik' or 'umum'
+  SubjectEntity? _selectedSubject;
+  
+  // Data dinamis dari API
+  List<String> _jenjangList = [];
+  List<SubjectEntity> _mapelList = [];
 
-  List<String> get _currentMapelList {
-    if (_expandedKategori == 'umum') return _mapelUmum;
-    switch (_selectedJenjang) {
-      case 'SD': return _mapelSD;
-      case 'SMP': return _mapelSMP;
-      case 'SMA': return _mapelSMA;
-      default: return _mapelSD;
-    }
+  // Data statis untuk Umum
+  final List<SubjectEntity> _mapelUmum = [
+    SubjectEntity(id: -1, name: 'Mengaji', level: 'Umum'),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<BookingFlowCubit>().fetchJenjang();
   }
 
   void _onKategoriTap(String kategori) {
@@ -45,19 +45,41 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
         // Toggle off
         _expandedKategori = null;
         _selectedJenjang = null;
-        _selectedMapel = null;
+        _selectedSubject = null;
+        _mapelList = [];
       } else {
         _expandedKategori = kategori;
-        _selectedJenjang = kategori == 'akademik' ? 'SD' : null;
-        _selectedMapel = null;
-        // Jika umum langsung expand mapel
-        if (kategori == 'umum') _selectedMapel = null;
+        if (kategori == 'akademik') {
+          // Default jenjang pertama jika tersedia
+          _selectedJenjang = _jenjangList.isNotEmpty ? _jenjangList.first : null;
+          _selectedSubject = null;
+          _mapelList = [];
+          if (_selectedJenjang != null) {
+            context.read<BookingFlowCubit>().fetchClasses(_selectedJenjang!);
+          }
+        } else {
+          // Kategori Umum
+          _selectedJenjang = null;
+          _selectedSubject = null;
+          _mapelList = _mapelUmum;
+        }
       }
     });
   }
 
+  void _onJenjangTap(String jenjang) {
+    if (_selectedJenjang != jenjang) {
+      setState(() {
+        _selectedJenjang = jenjang;
+        _selectedSubject = null;
+        _mapelList = [];
+      });
+      context.read<BookingFlowCubit>().fetchClasses(jenjang);
+    }
+  }
+
   void _onLanjutkan() {
-    if (_selectedMapel == null) {
+    if (_selectedSubject == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Pilih mata pelajaran terlebih dahulu'),
         backgroundColor: Color(0xFFE53E3E),
@@ -66,95 +88,121 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
       ));
       return;
     }
+    
     Navigator.pushNamed(context, '/siswa/booking/pilih-tutor',
         arguments: {
           'kategori': _expandedKategori,
-          'jenjang': _selectedJenjang,
-          'mapel': _selectedMapel,
+          'jenjang': _selectedJenjang, // bisa null untuk umum
+          'subject_id': _selectedSubject!.id,
+          'mapel': _selectedSubject!.name,
         });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: _teal,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        titleSpacing: 0,
-        leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context)),
-        title: const Text('Pilih Kategori',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-      ),
-      bottomNavigationBar: _selectedMapel != null
-          ? Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              child: SizedBox(
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: _onLanjutkan,
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: _teal,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12))),
-                  child: const Text('Lanjutkan',
-                      style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-                ),
+    return BlocConsumer<BookingFlowCubit, BookingFlowState>(
+      listener: (context, state) {
+        if (state is BookingFlowError) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.message),
+            backgroundColor: const Color(0xFFE53E3E),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+          ));
+        } else if (state is JenjangLoaded) {
+          setState(() {
+            _jenjangList = state.jenjangList;
+          });
+        } else if (state is ClassesLoaded) {
+          setState(() {
+            _mapelList = state.classes;
+          });
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is BookingFlowLoading;
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: _teal,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            titleSpacing: 0,
+            leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context)),
+            title: const Text('Pilih Kategori',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          ),
+          bottomNavigationBar: _selectedSubject != null
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  child: SizedBox(
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: _onLanjutkan,
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: _teal,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12))),
+                      child: const Text('Lanjutkan',
+                          style:
+                              TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+          body: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const SizedBox(height: 4),
+              const Text('Pilih Kategori Pembelajaran',
+                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+              const SizedBox(height: 16),
+
+              // ── Kartu Akademik ────────────────────────────────────
+              _buildKategoriCard(
+                icon: '📚',
+                title: 'Akademik',
+                subtitle: 'Matematika, Fisika, Kimia, dll.',
+                isExpanded: _expandedKategori == 'akademik',
+                onTap: () => _onKategoriTap('akademik'),
               ),
-            )
-          : const SizedBox.shrink(),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const SizedBox(height: 4),
-          const Text('Piiih Kategori Pembeajaran',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-          const SizedBox(height: 16),
 
-          // ── Kartu Akademik ────────────────────────────────────
-          _buildKategoriCard(
-            icon: '📚',
-            title: 'Akademik',
-            subtitle: 'Matematika, Fisika, Kimia, dll.',
-            isExpanded: _expandedKategori == 'akademik',
-            onTap: () => _onKategoriTap('akademik'),
+              // ── Expand: Jenjang + Mapel Akademik ─────────────────
+              if (_expandedKategori == 'akademik') ...[
+                const SizedBox(height: 20),
+                _buildJenjangSection(isLoading),
+                const SizedBox(height: 20),
+                _buildMapelSection(isLoading),
+              ],
+
+              const SizedBox(height: 16),
+
+              // ── Kartu Umum ────────────────────────────────────────
+              _buildKategoriCard(
+                icon: '📖',
+                title: 'Umum',
+                subtitle: 'Mengaji',
+                isExpanded: _expandedKategori == 'umum',
+                onTap: () => _onKategoriTap('umum'),
+              ),
+
+              // ── Expand: Mapel Umum ────────────────────────────────
+              if (_expandedKategori == 'umum') ...[
+                const SizedBox(height: 20),
+                _buildMapelSection(false), // Umum tidak hit API (statis)
+              ],
+
+              const SizedBox(height: 32),
+            ]),
           ),
-
-          // ── Expand: Jenjang + Mapel Akademik ─────────────────
-          if (_expandedKategori == 'akademik') ...[
-            const SizedBox(height: 20),
-            _buildJenjangSection(),
-            const SizedBox(height: 20),
-            _buildMapelSection(),
-          ],
-
-          const SizedBox(height: 16),
-
-          // ── Kartu Umum ────────────────────────────────────────
-          _buildKategoriCard(
-            icon: '📖',
-            title: 'Umum',
-            subtitle: 'Mengaji',
-            isExpanded: _expandedKategori == 'umum',
-            onTap: () => _onKategoriTap('umum'),
-          ),
-
-          // ── Expand: Mapel Umum ────────────────────────────────
-          if (_expandedKategori == 'umum') ...[
-            const SizedBox(height: 20),
-            _buildMapelSection(),
-          ],
-
-          const SizedBox(height: 32),
-        ]),
-      ),
+        );
+      },
     );
   }
 
@@ -183,7 +231,7 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
             BoxShadow(
                 color: isExpanded
                     ? _teal.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.04),
+                     : Colors.black.withOpacity(0.04),
                 blurRadius: 8,
                 offset: const Offset(0, 2))
           ],
@@ -212,38 +260,40 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
   }
 
   // ── Chip jenjang SD/SMP/SMA ─────────────────────────────────────
-  Widget _buildJenjangSection() {
-    const jenjangList = ['SD', 'SMP', 'SMA'];
+  Widget _buildJenjangSection(bool isLoading) {
+    if (_jenjangList.isEmpty && isLoading) {
+      return const Center(child: CircularProgressIndicator(color: _teal));
+    } else if (_jenjangList.isEmpty) {
+      return const Text('Tidak ada jenjang tersedia', style: TextStyle(color: AppColors.textSecondary));
+    }
+
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Text('Pilih Jenjang',
           style: TextStyle(
               fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
       const SizedBox(height: 10),
-      Row(children: jenjangList.map((j) {
+      Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: _jenjangList.map((j) {
         final isSelected = _selectedJenjang == j;
-        return Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: GestureDetector(
-            onTap: () => setState(() {
-              _selectedJenjang = j;
-              _selectedMapel = null; // reset mapel saat ganti jenjang
-            }),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
-              decoration: BoxDecoration(
-                color: isSelected ? _teal : Colors.white,
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                    color: isSelected ? _teal : _teal.withOpacity(0.5),
-                    width: isSelected ? 1.5 : 1.2),
-              ),
-              child: Text(j,
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected ? Colors.white : AppColors.textPrimary)),
+        return GestureDetector(
+          onTap: () => _onJenjangTap(j),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
+            decoration: BoxDecoration(
+              color: isSelected ? _teal : Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                  color: isSelected ? _teal : _teal.withOpacity(0.5),
+                  width: isSelected ? 1.5 : 1.2),
             ),
+            child: Text(j,
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isSelected ? Colors.white : AppColors.textPrimary)),
           ),
         );
       }).toList()),
@@ -251,7 +301,13 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
   }
 
   // ── Chip mapel ──────────────────────────────────────────────────
-  Widget _buildMapelSection() {
+  Widget _buildMapelSection(bool isLoading) {
+    if (_expandedKategori == 'akademik' && isLoading && _mapelList.isEmpty) {
+      return const Center(child: CircularProgressIndicator(color: _teal));
+    } else if (_mapelList.isEmpty) {
+      return const Text('Tidak ada mata pelajaran tersedia', style: TextStyle(color: AppColors.textSecondary));
+    }
+
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Text('Pilih Mata Pelajaran',
           style: TextStyle(
@@ -260,10 +316,10 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
       Wrap(
         spacing: 10,
         runSpacing: 10,
-        children: _currentMapelList.map((mapel) {
-          final isSelected = _selectedMapel == mapel;
+        children: _mapelList.map((mapel) {
+          final isSelected = _selectedSubject?.id == mapel.id;
           return GestureDetector(
-            onTap: () => setState(() => _selectedMapel = mapel),
+            onTap: () => setState(() => _selectedSubject = mapel),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
@@ -274,7 +330,7 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
                     color: isSelected ? _teal : _teal.withOpacity(0.5),
                     width: isSelected ? 1.5 : 1.2),
               ),
-              child: Text(mapel,
+              child: Text(mapel.name,
                   style: TextStyle(
                       fontSize: 13,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,

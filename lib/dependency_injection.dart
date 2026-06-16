@@ -65,6 +65,13 @@ import 'package:lazuadry_mobile_fe/domain/usecases/student/get_package_detail_us
 import 'package:lazuadry_mobile_fe/domain/usecases/student/order_packages_usecase.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/package/package_cubit.dart';
 
+// Booking Student
+import 'package:lazuadry_mobile_fe/data/datasources/student_booking_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/student_booking_repository.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/student_booking_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/student/student_booking_usecases.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/student_booking/booking_flow_cubit.dart';
+
 // State Management / Cubit
 import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
@@ -159,6 +166,9 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<ScheduleRemoteDataSource>(
     () => ScheduleRemoteDataSourceImpl(dio: sl()),
   );
+  sl.registerLazySingleton<StudentBookingRemoteDataSource>(
+    () => StudentBookingRemoteDataSourceImpl(dio: sl()),
+  );
 
   // Remote Data Source untuk Report
   sl.registerLazySingleton<ReportRemoteDataSource>(
@@ -197,6 +207,9 @@ Future<void> initDependencies() async {
   // Repository untuk Jadwal
   sl.registerLazySingleton<ScheduleRepository>(
     () => ScheduleRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton<StudentBookingRepository>(
+    () => StudentBookingRepositoryImpl(remoteDataSource: sl()),
   );
 
   // Repository untuk Laporan
@@ -254,6 +267,14 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetPackageDetailUseCase(sl()));
   sl.registerLazySingleton(() => OrderPackagesUseCase(sl()));
 
+  // Student Booking
+  sl.registerLazySingleton(() => GetJenjangUseCase(sl()));
+  sl.registerLazySingleton(() => GetClassesByLevelUseCase(sl()));
+  sl.registerLazySingleton(() => GetTutorsByCriteriaUseCase(sl()));
+  sl.registerLazySingleton(() => GetTutorByIdUseCase(sl()));
+  sl.registerLazySingleton(() => GetTutorSchedulesUseCase(sl()));
+  sl.registerLazySingleton(() => TakeMeetingUseCase(sl()));
+
   sl.registerLazySingleton(() => VerifyOtpTautkanAkunAnakUsecase(repository: sl()));
 
   sl.registerLazySingleton(() => RegisterParentUsecase(repository: sl()));
@@ -307,6 +328,15 @@ Future<void> initDependencies() async {
     getPackagesUseCase: sl(),
     getPackageDetailUseCase: sl(),
     orderPackagesUseCase: sl(),
+  ));
+
+  sl.registerFactory(() => BookingFlowCubit(
+    getJenjangUseCase: sl(),
+    getClassesByLevelUseCase: sl(),
+    getTutorsByCriteriaUseCase: sl(),
+    getTutorByIdUseCase: sl(),
+    getTutorSchedulesUseCase: sl(),
+    takeMeetingUseCase: sl(),
   ));
 
   sl.registerFactory(() => ParentProfileCubit(

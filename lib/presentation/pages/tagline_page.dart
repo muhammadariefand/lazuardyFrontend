@@ -33,12 +33,14 @@ class TaglinePage extends StatelessWidget {
                     height: 50,
                   ),
                   const SizedBox(width: 16),
-                  const Text(
-                    'Bimbel Lazuardy',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
+                  Flexible(
+                    child: const Text(
+                      'Bimbel Lazuardy',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryDark,
+                      ),
                     ),
                   ),
                 ],

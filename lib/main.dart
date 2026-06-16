@@ -57,6 +57,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/bookin
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/parent_dashboard/parent_dashboard_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/package/package_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/student_booking/booking_flow_cubit.dart';
 
 // ── Shared ─────────────────────────────────────────────────────────
 import 'package:lazuadry_mobile_fe/presentation/pages/splash_page.dart';
@@ -188,11 +189,23 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/kode-pembayaran': (_) => KodePembayaranPage(),
           '/siswa/pembayaran-berhasil': (_) => PembayaranBerhasilPage(),
 
-          // ── Siswa: Booking ────────────────────────────────────────
-          '/siswa/booking/pilih-kategori': (_) => const PilihKategoriPage(),
-          '/siswa/booking/pilih-tutor': (_) => const PilihTutorPage(),
-          '/siswa/booking/pilih-jadwal': (_) => const PilihJadwalPage(),
-          '/siswa/booking/konfirmasi': (_) => const KonfirmasiBookingPage(),
+          // ── Siswa: Booking Tutor ──────────────────────────────────────────
+          '/siswa/booking/pilih-kategori': (context) => BlocProvider<BookingFlowCubit>(
+            create: (_) => sl<BookingFlowCubit>(),
+            child: const PilihKategoriPage(),
+          ),
+          '/siswa/booking/pilih-tutor': (context) => BlocProvider<BookingFlowCubit>(
+            create: (_) => sl<BookingFlowCubit>(),
+            child: const PilihTutorPage(),
+          ),
+          '/siswa/booking/pilih-jadwal': (context) => BlocProvider<BookingFlowCubit>(
+            create: (_) => sl<BookingFlowCubit>(),
+            child: const PilihJadwalPage(),
+          ),
+          '/siswa/booking/konfirmasi': (context) => BlocProvider<BookingFlowCubit>(
+            create: (_) => sl<BookingFlowCubit>(),
+            child: const KonfirmasiBookingPage(),
+          ),
           '/siswa/booking/berhasil': (_) => const BookingBerhasilPage(),
 
           // ── Siswa: Riwayat Sesi ────────────────────────────────────────
