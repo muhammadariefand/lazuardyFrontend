@@ -13,4 +13,15 @@ abstract class ScheduleRepository {
     required String decision,
     String? urlMeeting,
   });
+
+  Future<ScheduleEntity> getScheduleById(int scheduleId);
+
+  Future<void> markScheduleComplete(int scheduleId);
+
+  Future<void> submitReview({
+    required int tutorId,
+    required double rate,
+    required String comment,
+  });
 }
+

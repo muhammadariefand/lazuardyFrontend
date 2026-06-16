@@ -1,12 +1,18 @@
 // lib/presentation/pages/siswa/detail_riwayat_sesi_page.dart
-// Detail Riwayat Sesi — berdasarkan status sesi, tampilkan info & action berbeda
-// - Menunggu Konfirmasi: + banner Konfirmasi Penyelesaian + tombol
-// - Selesai (belum rating): + tombol Beri Rating Tutor
-// - Selesai (sudah rating): tanpa tombol rating
-// - Dibatalkan: banner merah + info strikethrough
+// Detail Riwayat Sesi — fetch via RiwayatSesiCubit.fetchScheduleById
+// Status:
+//   reported  → tombol Konfirmasi Selesai
+//   completed → tombol Beri Rating Tutor
+//   cancelled → banner dibatalkan
+//   lainnya   → tampilkan detail saja
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import '../../../../domain/entities/schedule_entity.dart';
+import '../../../state_management/riwayat_sesi/riwayat_sesi_cubit.dart';
+import '../../../state_management/riwayat_sesi/riwayat_sesi_state.dart';
 
 const _teal = Color(0xFF3AAFA9);
 const _navy = Color(0xFF1E2D7D);
@@ -15,124 +21,186 @@ const _orange = Color(0xFFF59E0B);
 const _red = Color(0xFFE53E3E);
 const _purple = Color(0xFF8B5CF6);
 
-// Status enum (sama dengan riwayat_sesi_page, idealnya di shared model)
-enum _SesiStatus { menungguKonfirmasi, selesai, dibatalkan }
-
 class DetailRiwayatSesiPage extends StatefulWidget {
   const DetailRiwayatSesiPage({super.key});
+
   @override
-  State<DetailRiwayatSesiPage> createState() =>
-      _DetailRiwayatSesiPageState();
+  State<DetailRiwayatSesiPage> createState() => _DetailRiwayatSesiPageState();
 }
 
 class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
-  bool _isKonfirmasiLoading = false;
+  int? _scheduleId;
+  ScheduleEntity? _schedule;
 
-  // Data dummy — nanti diambil dari args atau Cubit
-  static const _tutorNama = 'Ibu Sarah';
-  static const _tutorInisial = 'S';
-  static const _mapel = 'Matematika';
-  static const _tanggal = '5 Maret 2026';
-  static const _waktu = '13:00 - 14:00';
-  static const _mode = 'Online';
-  static const _topik = 'Aljabar, Persamaan Linear';
-  static const _catatan =
-      'Siswa memahami konsep aljabar dengan cepat. Perlu latihan soal cerita lebih banyak.';
-  static const _sudahRating = false; // ubah ke true untuk state sudah rating
-
-  // Status diambil dari arguments
-  _SesiStatus _getStatus(Map? args) {
-    final s = args?['status'] as String? ?? 'menunggu';
-    if (s == 'selesai') return _SesiStatus.selesai;
-    if (s == 'dibatalkan') return _SesiStatus.dibatalkan;
-    return _SesiStatus.menungguKonfirmasi;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments as Map?;
+    final id = args?['schedule_id'] as int?;
+    if (id != null && id != _scheduleId) {
+      _scheduleId = id;
+      context.read<RiwayatSesiCubit>().fetchScheduleById(id);
+    }
   }
 
-  void _onKonfirmasiSelesai() async {
-    setState(() => _isKonfirmasiLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    // TODO: panggil use case konfirmasi selesai
-    if (mounted) {
-      setState(() => _isKonfirmasiLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Sesi berhasil dikonfirmasi selesai'),
-          backgroundColor: _green,
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
-      Navigator.pop(context);
+  String _formatTanggal(DateTime dt) =>
+      DateFormat('d MMMM yyyy', 'id').format(dt.toLocal());
+
+  String _formatJam(DateTime start, DateTime end) {
+    final f = DateFormat('HH:mm');
+    return '${f.format(start.toLocal())} - ${f.format(end.toLocal())}';
+  }
+
+  String get _tutorInisial {
+    if (_schedule == null) return '?';
+    final parts = _schedule!.tutorName.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
+    return _schedule!.tutorName.isNotEmpty
+        ? _schedule!.tutorName[0].toUpperCase()
+        : '?';
+  }
+
+  void _onKonfirmasiSelesai() {
+    if (_scheduleId == null) return;
+    context.read<RiwayatSesiCubit>().markComplete(_scheduleId!);
   }
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)?.settings.arguments as Map?;
-    final status = _getStatus(args);
-    final isDibatalkan = status == _SesiStatus.dibatalkan;
-    final isSelesai = status == _SesiStatus.selesai;
-    final isMenunggu = status == _SesiStatus.menungguKonfirmasi;
+    return BlocConsumer<RiwayatSesiCubit, RiwayatSesiState>(
+      listener: (context, state) {
+        if (state is ScheduleDetailLoaded) {
+          setState(() => _schedule = state.schedule);
+        }
+        if (state is RiwayatSesiError) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.message),
+            backgroundColor: _red,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ));
+        }
+        if (state is MarkCompleteSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: const Text('Sesi berhasil dikonfirmasi selesai'),
+            backgroundColor: _green,
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ));
+          Navigator.pop(context, true); // kirim 'true' untuk refresh list
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is RiwayatSesiLoading;
+        final isMarkCompleteLoading = state is MarkCompleteLoading;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: _teal,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        titleSpacing: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Detail Sesi',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-        ),
-      ),
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: _teal,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            titleSpacing: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: const Text(
+              'Detail Sesi',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
+          ),
 
-      // ── Sticky bottom button ───────────────────────────────────
-      bottomNavigationBar: _buildBottomBar(status, context),
+          // ── Sticky bottom button ───────────────────────────────────
+          bottomNavigationBar:
+              _schedule != null ? _buildBottomBar(context, _schedule!, isMarkCompleteLoading) : null,
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(children: [
-          const SizedBox(height: 4),
+          body: isLoading && _schedule == null
+              ? const Center(child: CircularProgressIndicator(color: _teal))
+              : _schedule == null
+                  ? _buildErrorState(context)
+                  : _buildBody(_schedule!),
+        );
+      },
+    );
+  }
 
-          // ── Kartu tutor + status ────────────────────────────
-          _buildTutorCard(status),
-          const SizedBox(height: 16),
-
-          // ── Banner dibatalkan (hanya status Dibatalkan) ──────
-          if (isDibatalkan) ...[
-            _buildDibatalkanBanner(),
+  Widget _buildErrorState(BuildContext context) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, color: _red, size: 48),
+            const SizedBox(height: 12),
+            const Text('Gagal memuat detail sesi',
+                style: TextStyle(color: AppColors.textSecondary)),
             const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                if (_scheduleId != null) {
+                  context.read<RiwayatSesiCubit>().fetchScheduleById(_scheduleId!);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _teal,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: const Text('Coba Lagi'),
+            ),
           ],
+        ),
+      );
 
-          // ── Info tanggal/waktu/mode ──────────────────────────
-          _buildInfoCard(isDibatalkan),
+  Widget _buildBody(ScheduleEntity sesi) {
+    final status = sesi.status.toLowerCase();
+    final isCancelled = status == 'cancelled';
+    final isReported = status == 'reported';
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(children: [
+        const SizedBox(height: 4),
+
+        // ── Kartu tutor + status ────────────────────────────
+        _buildTutorCard(sesi),
+        const SizedBox(height: 16),
+
+        // ── Banner dibatalkan ────────────────────────────────
+        if (isCancelled) ...[
+          _buildDibatalkanBanner(),
           const SizedBox(height: 16),
+        ],
 
-          // ── Laporan tutor (hanya Menunggu & Selesai) ─────────
-          if (!isDibatalkan) ...[
-            _buildLaporanTutor(),
-            const SizedBox(height: 16),
-          ],
+        // ── Info tanggal/waktu/mode ──────────────────────────
+        _buildInfoCard(sesi, isCancelled),
+        const SizedBox(height: 16),
 
-          // ── Banner Konfirmasi Penyelesaian (hanya Menunggu) ──
-          if (isMenunggu) _buildKonfirmasiBanner(),
+        // ── Banner Konfirmasi Penyelesaian (reported) ─────────
+        if (isReported) _buildKonfirmasiBanner(),
 
-          const SizedBox(height: 24),
-        ]),
-      ),
+        // ── Info meeting link (online & ada link) ─────────────
+        if (!isCancelled && sesi.learningMethod.toLowerCase() == 'online' &&
+            sesi.meetingLink != null &&
+            sesi.meetingLink!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildMeetingLinkCard(sesi.meetingLink!),
+        ],
+
+        const SizedBox(height: 24),
+      ]),
     );
   }
 
   // ── Bottom bar kondisional ─────────────────────────────────────
-  Widget? _buildBottomBar(_SesiStatus status, BuildContext context) {
-    if (status == _SesiStatus.selesai && !_sudahRating) {
-      // Belum rating → tombol Beri Rating Tutor
+  Widget? _buildBottomBar(
+      BuildContext context, ScheduleEntity sesi, bool isLoading) {
+    final status = sesi.status.toLowerCase();
+
+    if (status == 'completed') {
       return Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         child: SizedBox(
@@ -142,9 +210,10 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
               context,
               '/siswa/riwayat-sesi/rating',
               arguments: {
-                'tutor_nama': _tutorNama,
+                'tutor_id': sesi.tutorId,
+                'tutor_nama': sesi.tutorName,
                 'tutor_inisial': _tutorInisial,
-                'mapel': _mapel,
+                'mapel': sesi.subjectName,
               },
             ),
             style: ElevatedButton.styleFrom(
@@ -161,26 +230,35 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
         ),
       );
     }
-    return null; // tidak ada bottom bar untuk status lain
+    return null;
   }
 
   // ── Kartu tutor ────────────────────────────────────────────────
-  Widget _buildTutorCard(_SesiStatus status) {
+  Widget _buildTutorCard(ScheduleEntity sesi) {
+    final status = sesi.status.toLowerCase();
     Color badgeColor;
     String badgeLabel;
+
     switch (status) {
-      case _SesiStatus.menungguKonfirmasi:
+      case 'reported':
         badgeColor = _purple;
         badgeLabel = 'Menunggu Konfirmasi';
         break;
-      case _SesiStatus.selesai:
+      case 'completed':
         badgeColor = _green;
         badgeLabel = 'Selesai';
         break;
-      case _SesiStatus.dibatalkan:
+      case 'cancelled':
         badgeColor = _red;
         badgeLabel = 'Dibatalkan';
         break;
+      case 'ongoing':
+        badgeColor = _teal;
+        badgeLabel = 'Sedang Berlangsung';
+        break;
+      default:
+        badgeColor = _orange;
+        badgeLabel = 'Menunggu';
     }
 
     return Container(
@@ -189,28 +267,45 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: _teal.withOpacity(0.4)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)
+        ],
       ),
       child: Row(children: [
         Container(
-          width: 56, height: 56,
+          width: 56,
+          height: 56,
           decoration: BoxDecoration(
             color: Colors.grey.shade200,
             borderRadius: BorderRadius.circular(10),
           ),
           alignment: Alignment.center,
-          child: Text(_tutorInisial,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: _navy)),
+          child: Text(
+            _tutorInisial,
+            style: const TextStyle(
+                fontSize: 22, fontWeight: FontWeight.w700, color: _navy),
+          ),
         ),
         const SizedBox(width: 12),
-        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text(_tutorNama,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          const Text(_mapel,
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-          const SizedBox(height: 6),
-          _whatsappBadge(),
-        ])),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(sesi.tutorName,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary)),
+              Text(sesi.subjectName,
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondary)),
+              const SizedBox(height: 6),
+              if (sesi.tutorTelephoneNumber != null &&
+                  sesi.tutorTelephoneNumber!.isNotEmpty)
+                _whatsappBadge(sesi.tutorTelephoneNumber!),
+            ],
+          ),
+        ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
@@ -219,7 +314,10 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
             border: Border.all(color: badgeColor.withOpacity(0.3)),
           ),
           child: Text(badgeLabel,
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: badgeColor)),
+              style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: badgeColor)),
         ),
       ]),
     );
@@ -227,145 +325,209 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
 
   // ── Banner dibatalkan ──────────────────────────────────────────
   Widget _buildDibatalkanBanner() => Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: _red.withOpacity(0.08),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Container(width: 28, height: 28, decoration: BoxDecoration(
-          shape: BoxShape.circle, border: Border.all(color: _red, width: 1.5)),
-        child: const Icon(Icons.close_rounded, color: _red, size: 16)),
-      const SizedBox(width: 12),
-      const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Sesi Dibatalkan',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _red)),
-        SizedBox(height: 4),
-        Text('Sesi ini telah dibatalkan. Kuota sesi telah dikembalikan ke akun Anda.',
-            style: TextStyle(fontSize: 13, color: _red, height: 1.4)),
-      ])),
-    ]),
-  );
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _red.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: _red, width: 1.5)),
+            child: const Icon(Icons.close_rounded, color: _red, size: 16),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Sesi Dibatalkan',
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: _red)),
+                SizedBox(height: 4),
+                Text(
+                    'Sesi ini telah dibatalkan. Hubungi admin jika ada pertanyaan.',
+                    style: TextStyle(fontSize: 13, color: _red, height: 1.4)),
+              ],
+            ),
+          ),
+        ]),
+      );
 
   // ── Info card (tanggal/waktu/mode) ─────────────────────────────
-  Widget _buildInfoCard(bool isDibatalkan) => Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: _teal.withOpacity(0.4)),
-      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
-    ),
-    child: Column(children: [
-      _infoRow(Icons.access_time_outlined, 'Tanggal', _tanggal, strikethrough: isDibatalkan),
-      const Divider(height: 20),
-      _infoRow(Icons.calendar_today_outlined, 'Waktu', _waktu, strikethrough: isDibatalkan),
-      const Divider(height: 20),
-      _infoRow(Icons.videocam_outlined, 'Mode', _mode, strikethrough: isDibatalkan),
-    ]),
-  );
-
-  Widget _infoRow(IconData icon, String label, String value, {bool strikethrough = false}) =>
-    Row(children: [
-      Icon(icon, size: 22, color: AppColors.textSecondary),
-      const SizedBox(width: 14),
-      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-        Text(value,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: strikethrough ? AppColors.textSecondary : AppColors.textPrimary,
-              decoration: strikethrough ? TextDecoration.lineThrough : TextDecoration.none,
-            )),
-      ]),
-    ]);
-
-  // ── Laporan Tutor ──────────────────────────────────────────────
-  Widget _buildLaporanTutor() => Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: _teal.withOpacity(0.4)),
-      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
-    ),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('Laporan Tutor',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-      const SizedBox(height: 12),
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
+  Widget _buildInfoCard(ScheduleEntity sesi, bool isDibatalkan) => Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _teal.withOpacity(0.4)),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)
+          ],
         ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Pembelajaran',
-              style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-          Text('Topik: $_topik',
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          const SizedBox(height: 8),
-          Text(_catatan,
-              style: const TextStyle(fontSize: 13, color: AppColors.textPrimary, height: 1.5)),
-        ]),
-      ),
-    ]),
-  );
-
-  // ── Banner Konfirmasi Penyelesaian ─────────────────────────────
-  Widget _buildKonfirmasiBanner() => Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: const Color(0xFFFFF8E1),
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: const Color(0xFFFFE082)),
-    ),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Row(children: [
-        Icon(Icons.info_outline_rounded, color: _orange, size: 20),
-        SizedBox(width: 8),
-        Text('Konfirmasi Penyelesaian',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF92400E))),
-      ]),
-      const SizedBox(height: 6),
-      const Text(
-        'Tutor telah menandai sesi ini selesai. Konfirmasi jika sudah benar. Auto-konfirmasi dalam 24 jam',
-        style: TextStyle(fontSize: 12, color: Color(0xFF92400E), height: 1.5),
-      ),
-      const SizedBox(height: 14),
-      SizedBox(
-        width: double.infinity, height: 48,
-        child: ElevatedButton.icon(
-          onPressed: _isKonfirmasiLoading ? null : _onKonfirmasiSelesai,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _teal,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Column(children: [
+          _infoRow(Icons.access_time_outlined, 'Tanggal',
+              _formatTanggal(sesi.date),
+              strikethrough: isDibatalkan),
+          const Divider(height: 20),
+          _infoRow(Icons.calendar_today_outlined, 'Waktu',
+              _formatJam(sesi.startTime, sesi.endTime),
+              strikethrough: isDibatalkan),
+          const Divider(height: 20),
+          _infoRow(
+            sesi.learningMethod.toLowerCase() == 'online'
+                ? Icons.videocam_outlined
+                : Icons.location_on_outlined,
+            'Mode',
+            sesi.learningMethod[0].toUpperCase() +
+                sesi.learningMethod.substring(1),
+            strikethrough: isDibatalkan,
           ),
-          icon: _isKonfirmasiLoading
-              ? const SizedBox(width: 18, height: 18,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-              : const Icon(Icons.check_rounded, size: 18),
-          label: const Text('Konfirmasi Selesai',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-        ),
-      ),
-    ]),
-  );
+          if (sesi.studentName.isNotEmpty) ...[
+            const Divider(height: 20),
+            _infoRow(Icons.person_outline, 'Siswa', sesi.studentName),
+          ],
+        ]),
+      );
 
-  Widget _whatsappBadge() => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-    decoration: BoxDecoration(
-      color: const Color(0xFF25D366),
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: const Row(mainAxisSize: MainAxisSize.min, children: [
-      Icon(Icons.chat_rounded, size: 12, color: Colors.white),
-      SizedBox(width: 4),
-      Text('WhatsApp', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white)),
-    ]),
-  );
+  Widget _infoRow(IconData icon, String label, String value,
+          {bool strikethrough = false}) =>
+      Row(children: [
+        Icon(icon, size: 22, color: AppColors.textSecondary),
+        const SizedBox(width: 14),
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 12, color: AppColors.textSecondary)),
+          Text(value,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: strikethrough
+                    ? AppColors.textSecondary
+                    : AppColors.textPrimary,
+                decoration: strikethrough
+                    ? TextDecoration.lineThrough
+                    : TextDecoration.none,
+              )),
+        ]),
+      ]);
+
+  // ── Meeting link card ──────────────────────────────────────────
+  Widget _buildMeetingLinkCard(String link) => Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEFF6FF),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.3)),
+        ),
+        child: Row(children: [
+          const Icon(Icons.link_rounded,
+              color: Color(0xFF3B82F6), size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Link Meeting',
+                    style: TextStyle(
+                        fontSize: 12, color: AppColors.textSecondary)),
+                Text(link,
+                    style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF3B82F6),
+                        fontWeight: FontWeight.w600),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis),
+              ],
+            ),
+          ),
+        ]),
+      );
+
+  // ── Banner Konfirmasi Penyelesaian (reported) ──────────────────
+  Widget _buildKonfirmasiBanner() {
+    return BlocBuilder<RiwayatSesiCubit, RiwayatSesiState>(
+      builder: (context, state) {
+        final isLoading = state is MarkCompleteLoading;
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF8E1),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFFFE082)),
+          ),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Row(children: [
+              Icon(Icons.info_outline_rounded, color: _orange, size: 20),
+              SizedBox(width: 8),
+              Text('Konfirmasi Penyelesaian',
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF92400E))),
+            ]),
+            const SizedBox(height: 6),
+            const Text(
+              'Tutor telah menandai sesi ini selesai. Konfirmasi jika sudah benar. Auto-konfirmasi dalam 24 jam',
+              style: TextStyle(
+                  fontSize: 12, color: Color(0xFF92400E), height: 1.5),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: isLoading ? null : _onKonfirmasiSelesai,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _teal,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: isLoading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2.5))
+                    : const Icon(Icons.check_rounded, size: 18),
+                label: const Text('Konfirmasi Selesai',
+                    style: TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ]),
+        );
+      },
+    );
+  }
+
+  Widget _whatsappBadge(String phone) => GestureDetector(
+        onTap: () {
+          // Bisa dibuka di WhatsApp via url_launcher
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFF25D366),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.chat_rounded, size: 12, color: Colors.white),
+            const SizedBox(width: 4),
+            Text(phone,
+                style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white)),
+          ]),
+        ),
+      );
 }

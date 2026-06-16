@@ -8,6 +8,7 @@ class ScheduleEntity {
   final DateTime endTime;
   final String status;
   final String learningMethod;
+  final String? meetingLink;
   final String address;
   final String tutorName;
   final String subjectName;
@@ -25,6 +26,7 @@ class ScheduleEntity {
     required this.endTime,
     required this.status,
     required this.learningMethod,
+    this.meetingLink,
     required this.address,
     required this.tutorName,
     required this.subjectName,

@@ -71,6 +71,10 @@ import 'package:lazuadry_mobile_fe/domain/repositories/student_booking_repositor
 import 'package:lazuadry_mobile_fe/data/repositories/student_booking_repository_impl.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/student/student_booking_usecases.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_booking/booking_flow_cubit.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/student/get_schedule_by_id_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/student/mark_schedule_complete_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/student/submit_review_usecase.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/riwayat_sesi/riwayat_sesi_cubit.dart';
 
 // State Management / Cubit
 import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
@@ -275,6 +279,11 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetTutorSchedulesUseCase(sl()));
   sl.registerLazySingleton(() => TakeMeetingUseCase(sl()));
 
+  // Riwayat Sesi
+  sl.registerLazySingleton(() => GetScheduleByIdUseCase(sl()));
+  sl.registerLazySingleton(() => MarkScheduleCompleteUseCase(sl()));
+  sl.registerLazySingleton(() => SubmitReviewUseCase(sl()));
+
   sl.registerLazySingleton(() => VerifyOtpTautkanAkunAnakUsecase(repository: sl()));
 
   sl.registerLazySingleton(() => RegisterParentUsecase(repository: sl()));
@@ -337,6 +346,13 @@ Future<void> initDependencies() async {
     getTutorByIdUseCase: sl(),
     getTutorSchedulesUseCase: sl(),
     takeMeetingUseCase: sl(),
+  ));
+
+  sl.registerFactory(() => RiwayatSesiCubit(
+    getSchedulesUseCase: sl(),
+    getScheduleByIdUseCase: sl(),
+    markScheduleCompleteUseCase: sl(),
+    submitReviewUseCase: sl(),
   ));
 
   sl.registerFactory(() => ParentProfileCubit(

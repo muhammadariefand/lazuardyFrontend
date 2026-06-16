@@ -16,12 +16,33 @@ abstract class ScheduleRemoteDataSource {
     required String decision,
     String? urlMeeting,
   });
+
+  /// GET /schedule/getById?schedule_id={id}
+  Future<ScheduleModel> getScheduleById(int scheduleId);
+
+  /// PATCH /student/schedule/mark-as-complete
+  Future<void> markScheduleComplete(int scheduleId);
+
+  /// POST /student/review/create
+  Future<void> submitReview({
+    required int tutorId,
+    required double rate,
+    required String comment,
+  });
 }
 
 class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
   final Dio dio;
 
   ScheduleRemoteDataSourceImpl({required this.dio});
+
+  String _extractMessage(DioException e, String fallback) {
+    final data = e.response?.data;
+    if (data is Map && data['message'] != null) {
+      return data['message'].toString();
+    }
+    return fallback;
+  }
 
   @override
   Future<PaginatedDataModel<ScheduleModel>> getSchedules({
@@ -32,11 +53,9 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
     final queryParams = <String, dynamic>{
       'page': page,
     };
-    // Hanya kirim status jika tidak kosong
     if (status.isNotEmpty) {
       queryParams['status'] = status;
     }
-    // Hanya kirim date jika tidak kosong
     if (date.isNotEmpty) {
       queryParams['date'] = date;
     }
@@ -63,15 +82,7 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
       if (e.response?.statusCode == 401) {
         throw ServerException('Sesi telah berakhir, silakan login kembali');
       }
-      String errorMessage = 'Terjadi kesalahan pada server';
-      if (e.response?.data != null && e.response?.data is Map) {
-        errorMessage = e.response?.data['message'] 
-            ?? e.response?.data['error'] 
-            ?? errorMessage;
-      } else if (e.message != null) {
-        errorMessage = e.message!;
-      }
-      throw ServerException(errorMessage);
+      throw ServerException(_extractMessage(e, 'Terjadi kesalahan pada server'));
     } on ServerException {
       rethrow;
     } catch (e) {
@@ -96,5 +107,93 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
       '/tutor/schedule/booking-confirmation',
       data: data,
     );
+  }
+
+  @override
+  Future<ScheduleModel> getScheduleById(int scheduleId) async {
+    try {
+      final response = await dio.get(
+        '/schedule/getById',
+        queryParameters: {'schedule_id': scheduleId},
+      );
+      final responseData = response.data as Map<String, dynamic>;
+      if (responseData['status'] == 'success') {
+        final data = responseData['data'] as Map<String, dynamic>;
+        return ScheduleModel.fromJson(data);
+      }
+      throw ServerException(responseData['message'] ?? 'Gagal mengambil detail sesi');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Sesi telah berakhir, silakan login kembali');
+      }
+      if (e.response?.statusCode == 404) {
+        throw ServerException('Data sesi tidak ditemukan');
+      }
+      throw ServerException(_extractMessage(e, 'Terjadi kesalahan saat memuat detail sesi'));
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> markScheduleComplete(int scheduleId) async {
+    try {
+      final response = await dio.patch(
+        '/student/schedule/mark-as-complete',
+        data: {'schedule_id': scheduleId},
+      );
+      final responseData = response.data as Map<String, dynamic>;
+      if (responseData['status'] != 'success') {
+        throw ServerException(responseData['message'] ?? 'Gagal menandai sesi selesai');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Sesi telah berakhir, silakan login kembali');
+      }
+      if (e.response?.statusCode == 403) {
+        throw ServerException('Anda tidak memiliki akses untuk aksi ini');
+      }
+      throw ServerException(_extractMessage(e, 'Terjadi kesalahan saat konfirmasi selesai'));
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> submitReview({
+    required int tutorId,
+    required double rate,
+    required String comment,
+  }) async {
+    try {
+      final response = await dio.post(
+        '/student/review/create',
+        data: {
+          'tutor_id': tutorId,
+          'rate': rate,
+          'comment': comment,
+        },
+      );
+      final responseData = response.data as Map<String, dynamic>;
+      if (responseData['status'] != 'success') {
+        throw ServerException(responseData['message'] ?? 'Gagal mengirim rating');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Sesi telah berakhir, silakan login kembali');
+      }
+      if (e.response?.statusCode == 403) {
+        throw ServerException('Hanya siswa yang dapat memberikan rating');
+      }
+      throw ServerException(_extractMessage(e, 'Terjadi kesalahan saat mengirim rating'));
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+    }
   }
 }

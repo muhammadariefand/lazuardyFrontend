@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/dependency_injection.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/auth/login_page.dart';
@@ -58,6 +59,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/t
 import 'package:lazuadry_mobile_fe/presentation/state_management/parent_dashboard/parent_dashboard_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/package/package_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_booking/booking_flow_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/riwayat_sesi/riwayat_sesi_cubit.dart';
 
 // ── Shared ─────────────────────────────────────────────────────────
 import 'package:lazuadry_mobile_fe/presentation/pages/splash_page.dart';
@@ -97,6 +99,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/parent_profile/
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id', null);
   await initDependencies();
   runApp(const LazuardyApp());
 }
@@ -209,9 +212,18 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/booking/berhasil': (_) => const BookingBerhasilPage(),
 
           // ── Siswa: Riwayat Sesi ────────────────────────────────────────
-          '/siswa/riwayat-sesi': (_) => const RiwayatSesiPage(),
-          '/siswa/riwayat-sesi/detail': (_) => const DetailRiwayatSesiPage(),
-          '/siswa/riwayat-sesi/rating': (_) => const RatingTutorPage(),
+          '/siswa/riwayat-sesi': (context) => BlocProvider<RiwayatSesiCubit>(
+            create: (_) => sl<RiwayatSesiCubit>(),
+            child: const RiwayatSesiPage(),
+          ),
+          '/siswa/riwayat-sesi/detail': (context) => BlocProvider<RiwayatSesiCubit>(
+            create: (_) => sl<RiwayatSesiCubit>(),
+            child: const DetailRiwayatSesiPage(),
+          ),
+          '/siswa/riwayat-sesi/rating': (context) => BlocProvider<RiwayatSesiCubit>(
+            create: (_) => sl<RiwayatSesiCubit>(),
+            child: const RatingTutorPage(),
+          ),
 
           // ── Siswa: Riwayat Ulasan Tutor ────────────────────────────────
           '/siswa/ulasan-tutor': (_) => const UlasanTutorPage(),

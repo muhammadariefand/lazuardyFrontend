@@ -10,6 +10,14 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
 
   ScheduleRepositoryImpl({required this.remoteDataSource});
 
+  String _extractDioMessage(DioException e, String fallback) {
+    final data = e.response?.data;
+    if (data is Map && data.containsKey('message')) {
+      return data['message'].toString();
+    }
+    return e.message ?? fallback;
+  }
+
   @override
   Future<PaginatedDataEntity<ScheduleEntity>> getSchedules({
     required String status,
@@ -26,13 +34,9 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
       if (e.response?.statusCode == 401) {
         throw ServerException('Unauthorized');
       }
-      final data = e.response?.data;
-      throw ServerException(
-        data is Map && data.containsKey('message')
-            ? data['message'].toString()
-            : (e.message ?? 'Gagal memuat jadwal'),
-      );
+      throw ServerException(_extractDioMessage(e, 'Gagal memuat jadwal'));
     } catch (e) {
+      if (e is ServerException) rethrow;
       throw ServerException('Terjadi kesalahan saat memuat jadwal');
     }
   }
@@ -53,14 +57,63 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
       if (e.response?.statusCode == 401) {
         throw ServerException('Unauthorized');
       }
-      final data = e.response?.data;
-      throw ServerException(
-        data is Map && data.containsKey('message')
-            ? data['message'].toString()
-            : (e.message ?? 'Gagal mengonfirmasi booking'),
-      );
+      throw ServerException(_extractDioMessage(e, 'Gagal mengonfirmasi booking'));
     } catch (e) {
+      if (e is ServerException) rethrow;
       throw ServerException('Terjadi kesalahan saat mengonfirmasi booking');
+    }
+  }
+
+  @override
+  Future<ScheduleEntity> getScheduleById(int scheduleId) async {
+    try {
+      return await remoteDataSource.getScheduleById(scheduleId);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Unauthorized');
+      }
+      throw ServerException(_extractDioMessage(e, 'Gagal memuat detail sesi'));
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException('Terjadi kesalahan saat memuat detail sesi');
+    }
+  }
+
+  @override
+  Future<void> markScheduleComplete(int scheduleId) async {
+    try {
+      await remoteDataSource.markScheduleComplete(scheduleId);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Unauthorized');
+      }
+      throw ServerException(_extractDioMessage(e, 'Gagal menandai sesi selesai'));
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException('Terjadi kesalahan saat menandai sesi selesai');
+    }
+  }
+
+  @override
+  Future<void> submitReview({
+    required int tutorId,
+    required double rate,
+    required String comment,
+  }) async {
+    try {
+      await remoteDataSource.submitReview(
+        tutorId: tutorId,
+        rate: rate,
+        comment: comment,
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Unauthorized');
+      }
+      throw ServerException(_extractDioMessage(e, 'Gagal mengirim rating'));
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException('Terjadi kesalahan saat mengirim rating');
     }
   }
 }
