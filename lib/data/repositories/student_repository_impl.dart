@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/student_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/server_exception.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/student_biodata.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/paginated_data_entity.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/review_entity.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/student_repository.dart';
 
 class StudentRepositoryImpl implements StudentRepository {
@@ -57,6 +59,29 @@ class StudentRepositoryImpl implements StudentRepository {
       rethrow;
     } catch (e) {
       throw ServerException('Terjadi kesalahan tidak terduga saat memperbarui foto profil.');
+    }
+  }
+
+  @override
+  Future<PaginatedDataEntity<ReviewEntity>> getStudentReviews({
+    int? tutorId,
+    int? minRating,
+    int? maxRating,
+    int? page,
+    int pagination = 10,
+  }) async {
+    try {
+      return await remoteDataSource.getStudentReviews(
+        tutorId: tutorId,
+        minRating: minRating,
+        maxRating: maxRating,
+        page: page,
+        pagination: pagination,
+      );
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan tidak terduga saat mengambil daftar ulasan.');
     }
   }
 }

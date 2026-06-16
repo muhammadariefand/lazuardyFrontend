@@ -56,6 +56,8 @@ import 'package:lazuadry_mobile_fe/domain/usecases/student/update_profile_photo_
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_tutor_dashboard_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/update_tutor_biodata_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/update_tutor_profile_photo_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor/create_presence_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/siswa/get_student_reviews_usecase.dart';
 
 import 'package:lazuadry_mobile_fe/data/datasources/package_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/package_repository.dart';
@@ -91,6 +93,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/parent_profile/
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_dashboard/tutor_dashboard_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_tutor/ulasan_tutor_cubit.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/confirm_booking_usecase.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/booking_confirmation_cubit.dart';
 
@@ -256,6 +259,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => StudentRequestOtpUsecase(sl()));
   sl.registerLazySingleton(() => StudentVerifyOtpUsecase(sl()));
   sl.registerLazySingleton(() => StudentResetPasswordUsecase(sl()));
+  sl.registerLazySingleton(() => GetStudentReviewsUseCase(sl()));
 
   // Region/Wilayah Usecases
   sl.registerLazySingleton(() => GetProvincesUseCase(sl()));
@@ -416,5 +420,10 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetParentDashboardUseCase(sl()));
   sl.registerFactory(() => ParentDashboardCubit(
     getDashboardUseCase: sl(),
+  ));
+
+  // Siswa: Ulasan Tutor
+  sl.registerFactory(() => UlasanTutorCubit(
+    getStudentReviewsUseCase: sl(),
   ));
 }

@@ -96,6 +96,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_c
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_dashboard/tutor_dashboard_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/parent_profile/parent_profile_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_tutor/ulasan_tutor_cubit.dart';
 
 // ── Orang Tua ──────────────────────────────────────────────────────
 
@@ -227,10 +228,13 @@ class LazuardyApp extends StatelessWidget {
             child: const RatingTutorPage(),
           ),
 
-          // ── Siswa: Riwayat Ulasan Tutor ────────────────────────────────
-          '/siswa/ulasan-tutor': (_) => const UlasanTutorPage(),
+          // ── Siswa: Ulasan Tutor ───────────────────────────────────
+          '/siswa/ulasan-tutor': (context) => BlocProvider<UlasanTutorCubit>(
+                create: (_) => sl<UlasanTutorCubit>()..fetchReviews(),
+                child: const UlasanTutorPage(),
+              ),
 
-          // ── Siswa: Riwayat Pembayaran ────────────────────────────────
+          // ── Tutor ────────────────────────────────
           '/siswa/riwayat-pembayaran': (_) => const RiwayatPembayaranPage(),
 
           // ── Tutor: Register flow ───────────────────────────────
