@@ -137,4 +137,27 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
       throw ServerException('Terjadi kesalahan saat membatalkan sesi');
     }
   }
+
+  @override
+  Future<void> createPresence({
+    required int scheduleId,
+    required String topic,
+    required String notes,
+  }) async {
+    try {
+      await remoteDataSource.createPresence(
+        scheduleId: scheduleId,
+        topic: topic,
+        notes: notes,
+      );
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Unauthorized');
+      }
+      throw ServerException(_extractDioMessage(e, 'Gagal membuat laporan sesi'));
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException('Terjadi kesalahan saat membuat laporan sesi');
+    }
+  }
 }

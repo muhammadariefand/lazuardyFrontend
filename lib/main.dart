@@ -295,7 +295,10 @@ class LazuardyApp extends StatelessWidget {
           '/tutor/notifikasi': (_) => const NotifikasiTutorPage(),
 
           // ── Tutor: Manajemen Sesi ─────────────────────────────
-          '/tutor/manajemen-sesi': (_) => const ManajemenSesiPage(),
+          '/tutor/manajemen-sesi': (context) => BlocProvider<ScheduleCubit>(
+            create: (_) => sl<ScheduleCubit>(),
+            child: const ManajemenSesiPage(),
+          ),
 
           // ── Tutor: Profil Mengajar ─────────────────────────────
           '/tutor/profil-mengajar': (_) => const ProfilMengajarPage(),

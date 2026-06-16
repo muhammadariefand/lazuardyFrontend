@@ -1,20 +1,17 @@
-// lib/presentation/pages/tutor/laporan_sesi_page.dart
-// Laporan Sesi
-// - AppBar teal "Laporan Sesi"
-// - Subtitle "Isi perkembangan belajar siswa"
-// - Card info sesi (nama, mapel, tanggal, jam, badge mode, WhatsApp)
-// - Field "Topik yang Dibahas"
-// - Field "Catatan Untuk Siswa"
-// - Bottom buttons: Batal | Kirim Laporan
+// lib/presentation/pages/tutor/beranda/manajemen_sesi/laporan_sesi_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/manajemen_sesi/manajemen_sesi_page.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/schedule_entity.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/laporan_sesi/laporan_sesi_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/laporan_sesi/laporan_sesi_state.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const _teal = Color(0xFF3AAFA9);
 
 class LaporanSesiPage extends StatefulWidget {
-  final SesiData sesi;
+  final ScheduleEntity sesi;
 
   const LaporanSesiPage({super.key, required this.sesi});
 
@@ -25,7 +22,6 @@ class LaporanSesiPage extends StatefulWidget {
 class _LaporanSesiPageState extends State<LaporanSesiPage> {
   final _topikController = TextEditingController();
   final _catatanController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -34,7 +30,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
     super.dispose();
   }
 
-  Future<void> _kirimLaporan() async {
+  void _kirimLaporan() {
     if (_topikController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -45,96 +41,140 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    context.read<LaporanSesiCubit>().kirimLaporan(
+          scheduleId: widget.sesi.id,
+          topic: _topikController.text.trim(),
+          notes: _catatanController.text.trim(),
+        );
+  }
 
-    // TODO: Kirim ke API
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Laporan berhasil dikirim!'),
-          backgroundColor: _teal,
-        ),
-      );
-      Navigator.pop(context); // kembali ke ManajemenSesiPage
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
+
+  String _formatLongDate(DateTime d) {
+    const bulanNama = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+    ];
+    return '${d.day} ${bulanNama[d.month]} ${d.year}';
+  }
+
+  String _formatTime(DateTime t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) {
     final sesi = widget.sesi;
+    final isOnline = sesi.learningMethod.toLowerCase() == 'online';
+    final tanggal = _formatLongDate(sesi.date);
+    final jamMulai = _formatTime(sesi.startTime);
+    final jamSelesai = _formatTime(sesi.endTime);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          _buildAppBar(),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Isi perkembangan belajar siswa',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ── Kartu Info Sesi ────────────────────────────
-                  _buildSesiCard(sesi),
-                  const SizedBox(height: 24),
-
-                  // ── Form Topik ────────────────────────────────
-                  const Text(
-                    'Topik yang Dibahas',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildTextField(
-                    controller: _topikController,
-                    hint: 'Masukan topik yang dibahas',
-                    minLines: 3,
-                    maxLines: 5,
-                  ),
-                  const SizedBox(height: 20),
-
-                  // ── Form Catatan ──────────────────────────────
-                  const Text(
-                    'Catatan Untuk Siswa',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _buildTextField(
-                    controller: _catatanController,
-                    hint: 'Masukan catatan untuk siswa',
-                    minLines: 5,
-                    maxLines: 8,
-                  ),
-                  const SizedBox(height: 32),
-                ],
-              ),
+    return BlocConsumer<LaporanSesiCubit, LaporanSesiState>(
+      listener: (context, state) {
+        if (state is LaporanSesiSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: _teal,
             ),
-          ),
+          );
+          Navigator.pop(context); // kembali ke ManajemenSesiPage
+        } else if (state is LaporanSesiError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is LaporanSesiLoading;
 
-          // ── Bottom Buttons ────────────────────────────────────
-          _buildBottomButtons(),
-        ],
-      ),
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: Column(
+            children: [
+              _buildAppBar(),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Isi perkembangan belajar siswa',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // ── Kartu Info Sesi ────────────────────────────
+                      _buildSesiCard(
+                        sesi: sesi,
+                        tanggal: tanggal,
+                        jamMulai: jamMulai,
+                        jamSelesai: jamSelesai,
+                        isOnline: isOnline,
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ── Form Topik ────────────────────────────────
+                      const Text(
+                        'Topik yang Dibahas',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildTextField(
+                        controller: _topikController,
+                        hint: 'Masukan topik yang dibahas',
+                        minLines: 3,
+                        maxLines: 5,
+                        enabled: !isLoading,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ── Form Catatan ──────────────────────────────
+                      const Text(
+                        'Catatan Untuk Siswa',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _buildTextField(
+                        controller: _catatanController,
+                        hint: 'Masukan catatan untuk siswa',
+                        minLines: 5,
+                        maxLines: 8,
+                        enabled: !isLoading,
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Bottom Buttons ────────────────────────────────────
+              _buildBottomButtons(isLoading),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -169,7 +209,15 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
   }
 
   // ── Kartu Info Sesi ───────────────────────────────────────────
-  Widget _buildSesiCard(SesiData sesi) {
+  Widget _buildSesiCard({
+    required ScheduleEntity sesi,
+    required String tanggal,
+    required String jamMulai,
+    required String jamSelesai,
+    required bool isOnline,
+  }) {
+    final inisial = sesi.studentName.isNotEmpty ? sesi.studentName[0].toUpperCase() : '?';
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -189,14 +237,14 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
           // Header: avatar + info + badge
           Row(
             children: [
-              _buildAvatar(sesi.nama),
+              _buildAvatar(inisial),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      sesi.nama,
+                      sesi.studentName,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -205,7 +253,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${sesi.mapel} · ${sesi.tanggal}',
+                      '${sesi.subjectName} · $tanggal',
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textSecondary,
@@ -214,7 +262,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
                   ],
                 ),
               ),
-              _buildModeBadge(sesi.isOnline),
+              _buildModeBadge(isOnline),
             ],
           ),
           const SizedBox(height: 12),
@@ -226,12 +274,13 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
                   size: 18, color: AppColors.textSecondary),
               const SizedBox(width: 6),
               Text(
-                '${sesi.jamMulai} - ${sesi.jamSelesai}',
+                '$jamMulai - $jamSelesai',
                 style: const TextStyle(
                     fontSize: 14, color: AppColors.textPrimary),
               ),
               const SizedBox(width: 12),
-              _buildWhatsAppButton(sesi.nomorWa),
+              if (sesi.studentTelephoneNumber != null && sesi.studentTelephoneNumber!.isNotEmpty)
+                _buildWhatsAppButton(sesi.studentTelephoneNumber!),
             ],
           ),
         ],
@@ -245,11 +294,13 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
     required String hint,
     required int minLines,
     required int maxLines,
+    required bool enabled,
   }) {
     return TextField(
       controller: controller,
       minLines: minLines,
       maxLines: maxLines,
+      enabled: enabled,
       style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,
@@ -258,7 +309,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: enabled ? Colors.white : Colors.grey[100],
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: _teal.withOpacity(0.6)),
@@ -267,12 +318,16 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: _teal, width: 1.5),
         ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[300]!),
+        ),
       ),
     );
   }
 
   // ── Bottom Buttons ────────────────────────────────────────────
-  Widget _buildBottomButtons() {
+  Widget _buildBottomButtons(bool isLoading) {
     return Container(
       padding: EdgeInsets.only(
         left: 16,
@@ -289,7 +344,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
           // Batal
           Expanded(
             child: OutlinedButton(
-              onPressed: _isLoading ? null : () => Navigator.pop(context),
+              onPressed: isLoading ? null : () => Navigator.pop(context),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 side: const BorderSide(color: _teal),
@@ -313,7 +368,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
           Expanded(
             flex: 2,
             child: ElevatedButton(
-              onPressed: _isLoading ? null : _kirimLaporan,
+              onPressed: isLoading ? null : _kirimLaporan,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _teal,
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -322,7 +377,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
                 ),
                 elevation: 0,
               ),
-              child: _isLoading
+              child: isLoading
                   ? const SizedBox(
                       width: 20,
                       height: 20,
@@ -347,7 +402,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
   }
 
   // ── Shared Widgets ────────────────────────────────────────────
-  Widget _buildAvatar(String nama) {
+  Widget _buildAvatar(String inisial) {
     return Container(
       width: 48,
       height: 48,
@@ -357,7 +412,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
       ),
       child: Center(
         child: Text(
-          nama[0].toUpperCase(),
+          inisial,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -393,7 +448,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
   Widget _buildWhatsAppButton(String nomor) {
     return GestureDetector(
       onTap: () {
-        // TODO: launch WhatsApp
+        _openUrl('https://wa.me/$nomor');
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

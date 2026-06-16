@@ -1,24 +1,42 @@
-// lib/presentation/pages/tutor/riwayat_sesi_detail_page.dart
-// Riwayat Sesi (Detail)
-// - AppBar teal "Riwayat Sesi"
-// - Card 1: nama siswa + mapel + WhatsApp badge + mode badge
-// - Card 2: Tanggal / Waktu / Mode (dengan icon)
-// - Card 3 (kondisional): Alamat Lokasi (offline) ATAU Link Meeting (online)
-// - Card 4: Laporan Pembelajaran (Topik + Catatan)
+// lib/presentation/pages/tutor/beranda/manajemen_sesi/riwayat_sesi_detail_page.dart
 
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/manajemen_sesi/manajemen_sesi_page.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/schedule_entity.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const _teal = Color(0xFF3AAFA9);
 
 class RiwayatSesiDetailPage extends StatelessWidget {
-  final RiwayatSesiData sesi;
+  final ScheduleEntity sesi;
 
   const RiwayatSesiDetailPage({super.key, required this.sesi});
 
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  String _formatLongDate(DateTime d) {
+    const bulanNama = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+    ];
+    return '${d.day} ${bulanNama[d.month]} ${d.year}';
+  }
+
+  String _formatTime(DateTime t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
   @override
   Widget build(BuildContext context) {
+    final isOnline = sesi.learningMethod.toLowerCase() == 'online';
+    final tanggal = _formatLongDate(sesi.date);
+    final jamMulai = _formatTime(sesi.startTime);
+    final jamSelesai = _formatTime(sesi.endTime);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -30,24 +48,19 @@ class RiwayatSesiDetailPage extends StatelessWidget {
               child: Column(
                 children: [
                   // Card 1: Info Siswa
-                  _buildSiswaCard(),
+                  _buildSiswaCard(isOnline),
                   const SizedBox(height: 14),
 
                   // Card 2: Detail Waktu
-                  _buildWaktuCard(),
+                  _buildWaktuCard(tanggal, jamMulai, jamSelesai, isOnline),
                   const SizedBox(height: 14),
 
                   // Card 3: Lokasi / Link (kondisional)
-                  if (!sesi.isOnline && sesi.alamat != null)
+                  if (!isOnline && sesi.address.isNotEmpty)
                     _buildAlamatCard(),
-                  if (sesi.isOnline && sesi.linkMeeting != null)
+                  if (isOnline && sesi.meetingLink != null && sesi.meetingLink!.isNotEmpty)
                     _buildLinkMeetingCard(),
                   const SizedBox(height: 14),
-
-                  // Card 4: Laporan Pembelajaran
-                  if (sesi.topikLaporan != null || sesi.catatanLaporan != null)
-                    _buildLaporanCard(),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -88,18 +101,20 @@ class RiwayatSesiDetailPage extends StatelessWidget {
   }
 
   // ── Card 1: Info Siswa ────────────────────────────────────────
-  Widget _buildSiswaCard() {
+  Widget _buildSiswaCard(bool isOnline) {
+    final inisial = sesi.studentName.isNotEmpty ? sesi.studentName[0].toUpperCase() : '?';
+
     return _cardWrapper(
       child: Row(
         children: [
-          _buildAvatar(sesi.nama),
+          _buildAvatar(inisial),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  sesi.nama,
+                  sesi.studentName,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -110,46 +125,47 @@ class RiwayatSesiDetailPage extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      sesi.mapel,
+                      sesi.subjectName,
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textSecondary,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    _buildWhatsAppButton(sesi.nomorWa),
+                    if (sesi.studentTelephoneNumber != null && sesi.studentTelephoneNumber!.isNotEmpty)
+                      _buildWhatsAppButton(sesi.studentTelephoneNumber!),
                   ],
                 ),
               ],
             ),
           ),
-          _buildModeBadge(sesi.isOnline),
+          _buildModeBadge(isOnline),
         ],
       ),
     );
   }
 
   // ── Card 2: Waktu ─────────────────────────────────────────────
-  Widget _buildWaktuCard() {
+  Widget _buildWaktuCard(String tanggal, String jamMulai, String jamSelesai, bool isOnline) {
     return _cardWrapper(
       child: Column(
         children: [
           _buildDetailRow(
             icon: Icons.schedule_outlined,
             label: 'Tanggal',
-            value: sesi.tanggal,
+            value: tanggal,
           ),
           const SizedBox(height: 16),
           _buildDetailRow(
             icon: Icons.calendar_today_outlined,
             label: 'Waktu',
-            value: '${sesi.jamMulai} - ${sesi.jamSelesai}',
+            value: '$jamMulai - $jamSelesai',
           ),
           const SizedBox(height: 16),
           _buildDetailRow(
             icon: Icons.location_on_outlined,
             label: 'Mode',
-            value: sesi.isOnline ? 'Online' : 'Offline',
+            value: isOnline ? 'Online' : 'Offline',
           ),
         ],
       ),
@@ -178,7 +194,7 @@ class RiwayatSesiDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            sesi.alamat!,
+            sesi.address,
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.textPrimary,
@@ -188,7 +204,7 @@ class RiwayatSesiDetailPage extends StatelessWidget {
           const SizedBox(height: 10),
           GestureDetector(
             onTap: () {
-              // TODO: launch Google Maps
+              _openUrl('https://maps.google.com/?q=${Uri.encodeComponent(sesi.address)}');
             },
             child: const Row(
               children: [
@@ -231,55 +247,21 @@ class RiwayatSesiDetailPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(
-            sesi.linkMeeting!,
-            style: const TextStyle(
-              fontSize: 13,
-              color: _teal,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── Card 4: Laporan Pembelajaran ─────────────────────────────
-  Widget _buildLaporanCard() {
-    return _cardWrapper(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Laporan Pembelajaran',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          if (sesi.topikLaporan != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Topik: ${sesi.topikLaporan}',
+          GestureDetector(
+            onTap: () {
+              if (sesi.meetingLink != null) {
+                _openUrl(sesi.meetingLink!);
+              }
+            },
+            child: Text(
+              sesi.meetingLink ?? '-',
               style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                fontSize: 13,
+                color: _teal,
+                decoration: TextDecoration.underline,
               ),
             ),
-          ],
-          if (sesi.catatanLaporan != null) ...[
-            const SizedBox(height: 10),
-            Text(
-              sesi.catatanLaporan!,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textPrimary,
-                height: 1.6,
-              ),
-            ),
-          ],
+          ),
         ],
       ),
     );
@@ -341,7 +323,7 @@ class RiwayatSesiDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(String nama) {
+  Widget _buildAvatar(String inisial) {
     return Container(
       width: 48,
       height: 48,
@@ -351,7 +333,7 @@ class RiwayatSesiDetailPage extends StatelessWidget {
       ),
       child: Center(
         child: Text(
-          nama[0].toUpperCase(),
+          inisial,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -387,7 +369,7 @@ class RiwayatSesiDetailPage extends StatelessWidget {
   Widget _buildWhatsAppButton(String nomor) {
     return GestureDetector(
       onTap: () {
-        // TODO: launch WhatsApp
+        _openUrl('https://wa.me/$nomor');
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

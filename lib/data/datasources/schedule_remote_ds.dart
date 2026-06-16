@@ -35,6 +35,13 @@ abstract class ScheduleRemoteDataSource {
     required int scheduleId,
     required String reason,
   });
+
+  /// POST /tutor/presence/create
+  Future<void> createPresence({
+    required int scheduleId,
+    required String topic,
+    required String notes,
+  });
 }
 
 class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
@@ -231,6 +238,40 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
         throw ServerException('Sesi tidak ditemukan');
       }
       throw ServerException(_extractMessage(e, 'Terjadi kesalahan saat membatalkan sesi'));
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> createPresence({
+    required int scheduleId,
+    required String topic,
+    required String notes,
+  }) async {
+    try {
+      final response = await dio.post(
+        '/tutor/presence/create',
+        data: {
+          'schedule_id': scheduleId,
+          'topic': topic,
+          'notes': notes,
+        },
+      );
+      final responseData = response.data as Map<String, dynamic>;
+      if (responseData['status'] != 'success') {
+        throw ServerException(responseData['message'] ?? 'Gagal membuat laporan sesi');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Sesi telah berakhir, silakan login kembali');
+      }
+      if (e.response?.statusCode == 403) {
+        throw ServerException('Akses ditolak. Fitur ini hanya untuk Tutor.');
+      }
+      throw ServerException(_extractMessage(e, 'Terjadi kesalahan saat membuat laporan sesi'));
     } on ServerException {
       rethrow;
     } catch (e) {

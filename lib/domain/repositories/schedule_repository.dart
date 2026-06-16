@@ -29,5 +29,12 @@ abstract class ScheduleRepository {
     required int scheduleId,
     required String reason,
   });
+
+  /// POST /tutor/presence/create
+  Future<void> createPresence({
+    required int scheduleId,
+    required String topic,
+    required String notes,
+  });
 }
 

@@ -78,6 +78,10 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/riwayat_sesi/ri
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/cancel_schedule_usecase.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/pembatalan_sesi/pembatalan_sesi_cubit.dart';
 
+// Laporan Sesi (Tutor)
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor/create_presence_usecase.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/laporan_sesi/laporan_sesi_cubit.dart';
+
 // State Management / Cubit
 import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
@@ -362,6 +366,12 @@ Future<void> initDependencies() async {
   sl.registerFactory(() => PembatalanSesiCubit(
     getScheduleByIdUseCase: sl(),
     cancelScheduleUseCase: sl(),
+  ));
+
+  // Tutor: Laporan Sesi
+  sl.registerLazySingleton(() => CreatePresenceUseCase(sl()));
+  sl.registerFactory(() => LaporanSesiCubit(
+    createPresenceUseCase: sl(),
   ));
 
   sl.registerFactory(() => ParentProfileCubit(

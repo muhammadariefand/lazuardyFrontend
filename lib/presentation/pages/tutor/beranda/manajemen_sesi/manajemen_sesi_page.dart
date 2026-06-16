@@ -1,73 +1,20 @@
-// lib/presentation/pages/tutor/manajemen_sesi_page.dart
-// (Tab Mendatang) & (Tab Riwayat)
+// lib/presentation/pages/tutor/beranda/manajemen_sesi/manajemen_sesi_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/schedule_entity.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/manajemen_sesi/riwayat_sesi_detail_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/manajemen_sesi/laporan_sesi_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_state.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/laporan_sesi/laporan_sesi_cubit.dart';
+import 'package:lazuadry_mobile_fe/dependency_injection.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const _teal = Color(0xFF3AAFA9);
+const _red = Color(0xFFE53E3E);
 
-// ── Models ────────────────────────────────────────────────────────
-class SesiData {
-  final String nama;
-  final String mapel;
-  final String tanggal;
-  final String jamMulai;
-  final String jamSelesai;
-  final bool isOnline;
-  final String? linkMeeting;
-  final String? alamat;
-  final String nomorWa;
-
-  const SesiData({
-    required this.nama,
-    required this.mapel,
-    required this.tanggal,
-    required this.jamMulai,
-    required this.jamSelesai,
-    required this.isOnline,
-    this.linkMeeting,
-    this.alamat,
-    required this.nomorWa,
-  });
-}
-
-class RiwayatSesiData {
-  final String nama;
-  final String mapel;
-  final String tanggal;
-  final String jamMulai;
-  final String jamSelesai;
-  final bool isOnline;
-  final String? alamat;
-  final String? linkMeeting;
-  final String nomorWa;
-  final bool laporanDiisi;
-  final bool dikonfirmasiSiswa;
-  final bool danaMasuk;
-  final String? topikLaporan;
-  final String? catatanLaporan;
-
-  const RiwayatSesiData({
-    required this.nama,
-    required this.mapel,
-    required this.tanggal,
-    required this.jamMulai,
-    required this.jamSelesai,
-    required this.isOnline,
-    this.alamat,
-    this.linkMeeting,
-    required this.nomorWa,
-    this.laporanDiisi = false,
-    this.dikonfirmasiSiswa = false,
-    this.danaMasuk = false,
-    this.topikLaporan,
-    this.catatanLaporan,
-  });
-}
-
-// ── Page ──────────────────────────────────────────────────────────
 class ManajemenSesiPage extends StatefulWidget {
   const ManajemenSesiPage({super.key});
 
@@ -76,67 +23,40 @@ class ManajemenSesiPage extends StatefulWidget {
 }
 
 class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
-  int _selectedTab = 0;
+  int _selectedTab = 0; // 0: Mendatang, 1: Riwayat
 
-  // ── Dummy Data ────────────────────────────────────────────────
-  static const _mendatangList = [
-    SesiData(
-      nama: 'Ahmad',
-      mapel: 'Matematika',
-      tanggal: '1 April 2026',
-      jamMulai: '10:00',
-      jamSelesai: '11:00',
-      isOnline: true,
-      linkMeeting: 'https://meet.google.com/abc-defg-hij',
-      nomorWa: '6281234567890',
-    ),
-    SesiData(
-      nama: 'Rizky',
-      mapel: 'Matematika',
-      tanggal: '31 Maret 2026',
-      jamMulai: '14:00',
-      jamSelesai: '15:00',
-      isOnline: false,
-      alamat:
-          'Jl. Melati Indah No. 24, RT 03/RW 05, Kel. Sumberrejo, Kec. Ngaglik, Kab. Sleman, DIY',
-      nomorWa: '6289876543210',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
+  }
 
-  static const _riwayatList = [
-    RiwayatSesiData(
-      nama: 'Ahmad',
-      mapel: 'Matematika',
-      tanggal: '1 April 2026',
-      jamMulai: '14:00',
-      jamSelesai: '15:00',
-      isOnline: false,
-      alamat:
-          'Jl. Melati Indah No. 24, RT 03/RW 05, Kel. Sumberrejo, Kec. Ngaglik, Kab. Sleman, DIY',
-      nomorWa: '6281234567890',
-      laporanDiisi: true,
-      dikonfirmasiSiswa: true,
-      danaMasuk: true,
-      topikLaporan: 'Aljabar, Persamaan Linear',
-      catatanLaporan:
-          'Siswa memahami konsep aljabar dengan cepat.\nPerlu latihan soal cerita lebih banyak.',
-    ),
-    RiwayatSesiData(
-      nama: 'Dewi',
-      mapel: 'Matematika',
-      tanggal: '31 Maret 2026',
-      jamMulai: '17:00',
-      jamSelesai: '18:00',
-      isOnline: true,
-      linkMeeting: 'https://meet.google.com/xyz-uvwx-yz',
-      nomorWa: '6285678901234',
-      laporanDiisi: true,
-      dikonfirmasiSiswa: true,
-      danaMasuk: true,
-      topikLaporan: 'Geometri, Luas Bangun Datar',
-      catatanLaporan: 'Siswa perlu lebih banyak latihan soal geometri.',
-    ),
-  ];
+  void _loadData() {
+    context.read<ScheduleCubit>().loadSchedules(
+          status: _selectedTab == 0 ? 'active' : 'completed',
+          date: '',
+        );
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  String _formatLongDate(DateTime d) {
+    const bulanNama = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+    ];
+    return '${d.day} ${bulanNama[d.month]} ${d.year}';
+  }
+
+  String _formatTime(DateTime t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) {
@@ -149,9 +69,67 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
           _buildTabToggle(),
           const SizedBox(height: 16),
           Expanded(
-            child: _selectedTab == 0
-                ? _buildMendatangList()
-                : _buildRiwayatList(),
+            child: RefreshIndicator(
+              color: _teal,
+              onRefresh: () async => _loadData(),
+              child: BlocBuilder<ScheduleCubit, ScheduleState>(
+                builder: (context, state) {
+                  if (state is ScheduleLoading || state is ScheduleInitial) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: _teal),
+                    );
+                  }
+
+                  if (state is ScheduleError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(state.message, style: const TextStyle(color: _red)),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            onPressed: _loadData,
+                            style: ElevatedButton.styleFrom(backgroundColor: _teal),
+                            child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (state is ScheduleLoaded) {
+                    final list = state.data.data;
+                    if (list.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'Tidak ada data sesi',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      itemCount: list.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 14),
+                      itemBuilder: (_, i) {
+                        final item = list[i];
+                        if (_selectedTab == 0) {
+                          return _buildMendatangCard(item);
+                        } else {
+                          return _buildRiwayatCard(item);
+                        }
+                      },
+                    );
+                  }
+
+                  return const SizedBox();
+                },
+              ),
+            ),
           ),
         ],
       ),
@@ -212,7 +190,10 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
     final isActive = _selectedTab == index;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _selectedTab = index),
+        onTap: () {
+          setState(() => _selectedTab = index);
+          _loadData();
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -246,16 +227,12 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
   }
 
   // ── Tab Mendatang ─────────────────────────────────────────────
-  Widget _buildMendatangList() {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      itemCount: _mendatangList.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 14),
-      itemBuilder: (_, i) => _buildMendatangCard(_mendatangList[i]),
-    );
-  }
+  Widget _buildMendatangCard(ScheduleEntity sesi) {
+    final isOnline = sesi.learningMethod.toLowerCase() == 'online';
+    final tanggal = _formatLongDate(sesi.date);
+    final jamMulai = _formatTime(sesi.startTime);
+    final jamSelesai = _formatTime(sesi.endTime);
 
-  Widget _buildMendatangCard(SesiData sesi) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -275,27 +252,28 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSesiHeader(
-              nama: sesi.nama,
-              mapel: sesi.mapel,
-              tanggal: sesi.tanggal,
-              isOnline: sesi.isOnline,
+              nama: sesi.studentName,
+              mapel: sesi.subjectName,
+              tanggal: tanggal,
+              isOnline: isOnline,
             ),
             const SizedBox(height: 12),
             _buildJamRow(
-              jamMulai: sesi.jamMulai,
-              jamSelesai: sesi.jamSelesai,
-              nomorWa: sesi.nomorWa,
+              jamMulai: jamMulai,
+              jamSelesai: jamSelesai,
+              nomorWa: sesi.studentTelephoneNumber,
             ),
             const SizedBox(height: 10),
-            if (sesi.isOnline && sesi.linkMeeting != null)
+            if (isOnline && sesi.meetingLink != null && sesi.meetingLink!.isNotEmpty)
               _buildInfoBox(
                 icon: Icons.videocam_outlined,
                 title: 'Link Meeting',
-                content: sesi.linkMeeting!,
+                content: sesi.meetingLink!,
                 isLink: true,
+                onTap: () => _openUrl(sesi.meetingLink!),
               )
-            else if (!sesi.isOnline && sesi.alamat != null)
-              _buildAlamatBox(sesi.alamat!),
+            else if (!isOnline && sesi.address.isNotEmpty)
+              _buildAlamatBox(sesi.address),
             const SizedBox(height: 14),
             _buildTandaiButton(sesi),
           ],
@@ -304,7 +282,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
     );
   }
 
-  Widget _buildTandaiButton(SesiData sesi) {
+  Widget _buildTandaiButton(ScheduleEntity sesi) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
@@ -312,9 +290,14 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => LaporanSesiPage(sesi: sesi),
+              builder: (_) => BlocProvider<LaporanSesiCubit>(
+                create: (_) => sl<LaporanSesiCubit>(),
+                child: LaporanSesiPage(sesi: sesi),
+              ),
             ),
-          );
+          ).then((_) {
+            _loadData();
+          });
         },
         icon: const Icon(
           Icons.check_circle_outline_rounded,
@@ -342,16 +325,15 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
   }
 
   // ── Tab Riwayat ───────────────────────────────────────────────
-  Widget _buildRiwayatList() {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      itemCount: _riwayatList.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 14),
-      itemBuilder: (_, i) => _buildRiwayatCard(_riwayatList[i]),
-    );
-  }
+  Widget _buildRiwayatCard(ScheduleEntity sesi) {
+    final isOnline = sesi.learningMethod.toLowerCase() == 'online';
+    final tanggal = _formatLongDate(sesi.date);
+    final jamMulai = _formatTime(sesi.startTime);
+    final jamSelesai = _formatTime(sesi.endTime);
 
-  Widget _buildRiwayatCard(RiwayatSesiData sesi) {
+    // Dummy status logic, assuming if it's completed, it's finished.
+    // the backend will probably return more details if report is filled etc.
+    // We'll just display "Selesai" badge.
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -380,27 +362,21 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSesiHeader(
-                nama: sesi.nama,
-                mapel: sesi.mapel,
-                tanggal: sesi.tanggal,
-                isOnline: sesi.isOnline,
+                nama: sesi.studentName,
+                mapel: sesi.subjectName,
+                tanggal: tanggal,
+                isOnline: isOnline,
               ),
               const SizedBox(height: 12),
               _buildJamRow(
-                jamMulai: sesi.jamMulai,
-                jamSelesai: sesi.jamSelesai,
-                nomorWa: sesi.nomorWa,
+                jamMulai: jamMulai,
+                jamSelesai: jamSelesai,
+                nomorWa: sesi.studentTelephoneNumber,
               ),
               const SizedBox(height: 8),
-              if (sesi.laporanDiisi)
+              if (sesi.status == 'completed' || sesi.status == 'reported')
                 _buildStatusRow(
-                    Icons.description_outlined, 'Laporan sudah diisi'),
-              if (sesi.dikonfirmasiSiswa)
-                _buildStatusRow(
-                    Icons.check_circle_outline_rounded, 'Dikonfirmasi siswa'),
-              if (sesi.danaMasuk)
-                _buildStatusRow(
-                    Icons.attach_money_rounded, 'Dana sudah masuk saldo'),
+                    Icons.check_circle_outline_rounded, 'Sesi Selesai'),
             ],
           ),
         ),
@@ -415,9 +391,10 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
     required String tanggal,
     required bool isOnline,
   }) {
+    final inisial = nama.isNotEmpty ? nama[0].toUpperCase() : '?';
     return Row(
       children: [
-        _buildAvatar(nama),
+        _buildAvatar(inisial),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -450,7 +427,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
   Widget _buildJamRow({
     required String jamMulai,
     required String jamSelesai,
-    required String nomorWa,
+    required String? nomorWa,
   }) {
     return Row(
       children: [
@@ -462,7 +439,8 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
           style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
         ),
         const SizedBox(width: 12),
-        _buildWhatsAppButton(nomorWa),
+        if (nomorWa != null && nomorWa.isNotEmpty)
+          _buildWhatsAppButton(nomorWa),
       ],
     );
   }
@@ -472,42 +450,46 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
     required String title,
     required String content,
     bool isLink = false,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 18, color: AppColors.textSecondary),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                      fontSize: 13, color: AppColors.textSecondary),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  content,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: isLink ? _teal : AppColors.textPrimary,
-                    decoration:
-                        isLink ? TextDecoration.underline : TextDecoration.none,
-                    height: 1.4,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 18, color: AppColors.textSecondary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                        fontSize: 13, color: AppColors.textSecondary),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  Text(
+                    content,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isLink ? _teal : AppColors.textPrimary,
+                      decoration:
+                          isLink ? TextDecoration.underline : TextDecoration.none,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -546,7 +528,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
           const SizedBox(height: 8),
           GestureDetector(
             onTap: () {
-              // TODO: launch Google Maps
+              _openUrl('https://maps.google.com/?q=${Uri.encodeComponent(alamat)}');
             },
             child: const Row(
               children: [
@@ -584,7 +566,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
     );
   }
 
-  Widget _buildAvatar(String nama) {
+  Widget _buildAvatar(String inisial) {
     return Container(
       width: 48,
       height: 48,
@@ -594,7 +576,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
       ),
       child: Center(
         child: Text(
-          nama[0].toUpperCase(),
+          inisial,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -630,7 +612,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
   Widget _buildWhatsAppButton(String nomor) {
     return GestureDetector(
       onTap: () {
-        // TODO: launch WhatsApp
+        _openUrl('https://wa.me/$nomor');
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
