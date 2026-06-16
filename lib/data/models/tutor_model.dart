@@ -11,6 +11,7 @@ class TutorModel extends TutorEntity {
     required super.learningMethods,
     super.education,
     super.price,
+    super.salary,
     super.avgRate,
     super.dateOfBirth,
     super.gender,
@@ -37,6 +38,11 @@ class TutorModel extends TutorEntity {
       parsedPrice = double.tryParse(json['price'].toString());
     }
 
+    double? parsedSalary;
+    if (json['salary'] != null) {
+      parsedSalary = double.tryParse(json['salary'].toString());
+    }
+
     List<Map<String, dynamic>>? parsedEducation;
     if (json['education'] != null && json['education'] is List) {
       parsedEducation = List<Map<String, dynamic>>.from(json['education']);
@@ -57,6 +63,7 @@ class TutorModel extends TutorEntity {
       learningMethods: methods,
       education: parsedEducation,
       price: parsedPrice,
+      salary: parsedSalary,
       avgRate: parsedRate,
       dateOfBirth: json['dateOfBirth']?.toString(),
       gender: json['gender']?.toString(),

@@ -8,6 +8,7 @@ class TutorEntity {
   final List<String> learningMethods;
   final List<Map<String, dynamic>>? education;
   final double? price;
+  final double? salary;
   final double? avgRate;
   final String? dateOfBirth;
   final String? gender;
@@ -27,6 +28,7 @@ class TutorEntity {
     required this.learningMethods,
     this.education,
     this.price,
+    this.salary,
     this.avgRate,
     this.dateOfBirth,
     this.gender,

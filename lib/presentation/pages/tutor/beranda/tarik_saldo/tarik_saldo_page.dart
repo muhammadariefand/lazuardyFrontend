@@ -1,36 +1,17 @@
-// lib/presentation/pages/tutor/tarik_saldo_page.dart
-// Tarik Saldo (normal)
-//   - Card saldo tersedia + info bank
-//   - Card ajukan penarikan: input jumlah + tombol Tarik Saldo
-//   - Banner info proses admin
-//   - Riwayat Penarikan: list card (approved / rejected)
-// Dialog sukses "Penarikan Diajukan"
-//   - Icon centang hijau
-//   - Judul + deskripsi
-//   - Tombol "Kembali Ke Tarik Saldo"
+// lib/presentation/pages/tutor/beranda/tarik_saldo/tarik_saldo_page.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/payout_entity.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/tutor_entity.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tarik_saldo/tarik_saldo_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tarik_saldo/tarik_saldo_state.dart';
+import 'package:intl/intl.dart';
 
 const _teal = Color(0xFF3AAFA9);
 
-// ── Model riwayat ─────────────────────────────────────────────────
-enum StatusPenarikan { approved, pending, rejected }
-
-class _RiwayatData {
-  final int jumlah;
-  final String tanggal;
-  final StatusPenarikan status;
-
-  const _RiwayatData({
-    required this.jumlah,
-    required this.tanggal,
-    required this.status,
-  });
-}
-
-// ── Page ──────────────────────────────────────────────────────────
 class TarikSaldoPage extends StatefulWidget {
   const TarikSaldoPage({super.key});
 
@@ -40,51 +21,35 @@ class TarikSaldoPage extends StatefulWidget {
 
 class _TarikSaldoPageState extends State<TarikSaldoPage> {
   final _jumlahCtrl = TextEditingController();
-  bool _isLoading = false;
+  final ScrollController _scrollController = ScrollController();
 
-  // ── Dummy data ─────────────────────────────────────────────────
-  static const _saldo       = 1200000;
-  static const _namaBank    = 'Bank BCA';
-  static const _noRekening  = '12345678900';
-
-  static const _riwayatList = [
-    _RiwayatData(
-      jumlah: 500000,
-      tanggal: '25 Maret 2026, 10:31',
-      status: StatusPenarikan.approved,
-    ),
-    _RiwayatData(
-      jumlah: 500000,
-      tanggal: '24 Maret 2026, 16:39',
-      status: StatusPenarikan.approved,
-    ),
-    _RiwayatData(
-      jumlah: 500000,
-      tanggal: '22 Maret 2026, 17:22',
-      status: StatusPenarikan.rejected,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
 
   @override
   void dispose() {
     _jumlahCtrl.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
-  // ── Format Rupiah ─────────────────────────────────────────────
-  String _rp(int v) {
-    final s = v.toString();
-    final b = StringBuffer('Rp ');
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) b.write('.');
-    b.write(s[i]);
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<TarikSaldoCubit>().fetchMoreHistory();
     }
-    return b.toString();
   }
 
-  // ── Aksi tarik ────────────────────────────────────────────────
-  Future<void> _tarikSaldo() async {
-    final raw = int.tryParse(_jumlahCtrl.text.trim());
+  String _rp(double v) {
+    return NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0)
+        .format(v);
+  }
+
+  void _tarikSaldo(TutorEntity tutor) {
+    final raw = double.tryParse(_jumlahCtrl.text.trim());
     if (raw == null || raw <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -94,7 +59,11 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
       );
       return;
     }
-    if (raw > _saldo) {
+    
+    // Asumsi tutor.salary adalah saldo yang tersedia. Jika ada field lain, sesuaikan.
+    final availableSaldo = tutor.salary ?? 0.0; 
+    
+    if (raw > availableSaldo) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Jumlah melebihi saldo tersedia'),
@@ -104,16 +73,24 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
       return;
     }
 
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 800)); // simulate API
-    if (!mounted) return;
-    setState(() => _isLoading = false);
+    if (tutor.accountNumber == null || tutor.accountNumber!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nomor rekening tidak ditemukan di profil Anda.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
-    _jumlahCtrl.clear();
-    _showSuksesDialog();
+    // Panggil cubit
+    context.read<TarikSaldoCubit>().submitTakeMoney(
+          amount: raw,
+          bankAccountId: tutor.accountNumber!, // Pakai nomor rekening sebagai identifier
+          note: 'Pencairan saldo melalui aplikasi',
+        );
   }
 
-  // ── Dialog sukses (Image 3) ───────────────────────────────────
   void _showSuksesDialog() {
     showDialog(
       context: context,
@@ -194,56 +171,137 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          _buildAppBar(),
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 4),
-
-                  // ── Card Saldo ────────────────────────────────
-                  _buildSaldoCard(),
-                  const SizedBox(height: 14),
-
-                  // ── Card Ajukan Penarikan ─────────────────────
-                  _buildAjukanCard(),
-                  const SizedBox(height: 14),
-
-                  // ── Banner Info ───────────────────────────────
-                  _buildInfoBanner(),
-                  const SizedBox(height: 24),
-
-                  // ── Riwayat Penarikan ─────────────────────────
-                  const Text(
-                    'Riwayat Penarikan',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  ..._riwayatList.map(
-                    (r) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _buildRiwayatCard(r),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+      body: BlocConsumer<TarikSaldoCubit, TarikSaldoState>(
+        listener: (context, state) {
+          if (state is TarikSaldoLoaded) {
+            if (state.submitErrorMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.submitErrorMessage!),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              context.read<TarikSaldoCubit>().clearSubmitMessages();
+            } else if (state.submitSuccessMessage != null) {
+              _jumlahCtrl.clear();
+              _showSuksesDialog();
+              context.read<TarikSaldoCubit>().clearSubmitMessages();
+            }
+          }
+        },
+        builder: (context, state) {
+          return Column(
+            children: [
+              _buildAppBar(),
+              Expanded(
+                child: _buildBody(state),
               ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBody(TarikSaldoState state) {
+    if (state is TarikSaldoInitial || (state is TarikSaldoLoading && state.isFirstFetch)) {
+      return const Center(child: CircularProgressIndicator(color: _teal));
+    } else if (state is TarikSaldoError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(state.message, style: const TextStyle(color: Colors.red)),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () => context.read<TarikSaldoCubit>().initFetch(),
+              style: ElevatedButton.styleFrom(backgroundColor: _teal),
+              child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    TutorEntity? tutorProfile;
+    List<PayoutEntity> payouts = [];
+    bool isSubmitting = false;
+
+    if (state is TarikSaldoLoaded) {
+      tutorProfile = state.tutorProfile;
+      payouts = state.payouts;
+      isSubmitting = state.isSubmitting;
+    } else if (state is TarikSaldoLoading) {
+      tutorProfile = state.tutorProfile;
+      payouts = state.oldPayouts;
+    }
+
+    if (tutorProfile == null) return const SizedBox.shrink();
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        await context.read<TarikSaldoCubit>().initFetch();
+      },
+      color: _teal,
+      child: ListView(
+        controller: _scrollController,
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        padding: const EdgeInsets.all(16),
+        children: [
+          const SizedBox(height: 4),
+
+          // ── Card Saldo ────────────────────────────────
+          _buildSaldoCard(tutorProfile),
+          const SizedBox(height: 14),
+
+          // ── Card Ajukan Penarikan ─────────────────────
+          _buildAjukanCard(tutorProfile, isSubmitting),
+          const SizedBox(height: 14),
+
+          // ── Banner Info ───────────────────────────────
+          _buildInfoBanner(),
+          const SizedBox(height: 24),
+
+          // ── Riwayat Penarikan ─────────────────────────
+          const Text(
+            'Riwayat Penarikan',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
             ),
           ),
+          const SizedBox(height: 12),
+          
+          if (payouts.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Center(
+                child: Text(
+                  'Belum ada riwayat penarikan',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              ),
+            )
+          else
+            ...payouts.map(
+              (p) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _buildRiwayatCard(p),
+              ),
+            ),
+            
+          if (state is TarikSaldoLoaded && !state.hasReachedMax && payouts.isNotEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator(color: _teal)),
+            ),
+            
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -280,7 +338,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
   }
 
   // ── Card Saldo ────────────────────────────────────────────────
-  Widget _buildSaldoCard() {
+  Widget _buildSaldoCard(TutorEntity tutor) {
     return _cardWrapper(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,7 +362,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
 
           // Nominal
           Text(
-            _rp(_saldo),
+            _rp(tutor.salary ?? 0.0),
             style: const TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w900,
@@ -315,14 +373,14 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
 
           // Info bank
           Text(
-            _namaBank,
+            tutor.bankCode ?? 'Bank Belum Diatur',
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.textSecondary,
             ),
           ),
           Text(
-            _noRekening,
+            tutor.accountNumber ?? '-',
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.textSecondary,
@@ -334,7 +392,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
   }
 
   // ── Card Ajukan Penarikan ─────────────────────────────────────
-  Widget _buildAjukanCard() {
+  Widget _buildAjukanCard(TutorEntity tutor, bool isSubmitting) {
     return _cardWrapper(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,8 +441,8 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: _isLoading ? null : _tarikSaldo,
-              icon: _isLoading
+              onPressed: isSubmitting ? null : () => _tarikSaldo(tutor),
+              icon: isSubmitting
                   ? const SizedBox(
                       width: 18,
                       height: 18,
@@ -448,9 +506,10 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
   }
 
   // ── Card Riwayat ──────────────────────────────────────────────
-  Widget _buildRiwayatCard(_RiwayatData r) {
-    final isApproved = r.status == StatusPenarikan.approved;
-    final isPending  = r.status == StatusPenarikan.pending;
+  Widget _buildRiwayatCard(PayoutEntity p) {
+    final statusStr = p.status.toLowerCase();
+    final isApproved = statusStr == 'success' || statusStr == 'approved';
+    final isPending  = statusStr == 'pending';
 
     final Color iconColor = isApproved
         ? const Color(0xFF2E7D32)
@@ -465,10 +524,10 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
             : Icons.cancel_outlined;
 
     final String statusLabel = isApproved
-        ? 'Approved'
+        ? 'Sukses'
         : isPending
             ? 'Pending'
-            : 'Rejected';
+            : 'Gagal';
 
     final Color badgeBg = isApproved
         ? const Color(0xFFE8F5E9)
@@ -481,6 +540,8 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
         : isPending
             ? const Color(0xFFF57C00)
             : const Color(0xFFC62828);
+            
+    final String tanggal = DateFormat('dd MMM yyyy, HH:mm', 'id_ID').format(p.createdAt);
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -505,7 +566,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _rp(r.jumlah),
+                  _rp(p.amount),
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -514,7 +575,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  r.tanggal,
+                  tanggal,
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,

@@ -107,6 +107,14 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/t
 import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_siswa/ulasan_siswa_cubit.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_tutor_reviews_usecase.dart';
 
+// Tutor: Tarik Saldo
+import 'package:lazuadry_mobile_fe/data/datasources/tarik_saldo_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/tarik_saldo_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/tarik_saldo_repository.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_payout_history_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor/take_money_usecase.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tarik_saldo/tarik_saldo_cubit.dart';
+
 // Parent Dashboard
 import 'package:lazuadry_mobile_fe/data/datasources/parent_dashboard_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/parent_dashboard_repository_impl.dart';
@@ -434,5 +442,20 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GetTutorReviewsUseCase(sl()));
   sl.registerFactory(() => UlasanSiswaCubit(
     getTutorReviewsUseCase: sl(),
+  ));
+
+  // Tutor: Tarik Saldo
+  sl.registerLazySingleton<TarikSaldoRemoteDataSource>(
+    () => TarikSaldoRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<TarikSaldoRepository>(
+    () => TarikSaldoRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton(() => GetPayoutHistoryUseCase(sl()));
+  sl.registerLazySingleton(() => TakeMoneyUseCase(sl()));
+  sl.registerFactory(() => TarikSaldoCubit(
+    getTutorProfileUseCase: sl(),
+    getPayoutHistoryUseCase: sl(),
+    takeMoneyUseCase: sl(),
   ));
 }
