@@ -3,9 +3,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/dependency_injection.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/auth/login_page.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/auth/otp_verification_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/beranda/beranda_orangtua_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/jadwal/jadwal_orangtua_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/orang_tua/laporan/laporan_orangtua_page.dart';
@@ -39,9 +40,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/riwayat_sesi/riwayat
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/sesi_dibatalkan_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/ulasan_tutor/ulasan_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/beranda_tutor_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/manajemen_sesi/laporan_sesi_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/manajemen_sesi/manajemen_sesi_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/manajemen_sesi/riwayat_sesi_detail_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/profil_mengajar/profil_mengajar_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/tarik_saldo/tarik_saldo_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/beranda/ulasan_siswa/ulasan_siswa_page.dart';
@@ -61,7 +60,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/parent_dashboar
 // ── Shared ─────────────────────────────────────────────────────────
 import 'package:lazuadry_mobile_fe/presentation/pages/splash_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tagline_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/auth/login_page.dart';
 // import 'package:lazuadry_mobile_fe/presentation/pages/auth/otp_verification_page.dart';
 
 // ── Siswa ──────────────────────────────────────────────────────────
@@ -72,19 +70,10 @@ import 'package:lazuadry_mobile_fe/presentation/pages/siswa/reset_password_siswa
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/detail_pribadi_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/detail_alamat_siswa_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/beranda_siswa_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/batalkan_sesi_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/detail_sesi_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/edit_profil_siswa_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/jadwal_siswa_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/konfirmasi_pembatalan_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/laporan_siswa_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/profil_siswa_page.dart';
-import 'package:lazuadry_mobile_fe/presentation/pages/siswa/sesi_dibatalkan_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/beli_paket/beli_paket_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/beli_paket/pembayaran_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/beli_paket/kode_pembayaran_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/siswa/beli_paket/pembayaran_berhasil_page.dart';
-
 
 // ── Tutor ──────────────────────────────────────────────────────────
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/register_tutor_page.dart';
@@ -125,16 +114,20 @@ class LazuardyApp extends StatelessWidget {
           // ── Entry ─────────────────────────────────────────────
           '/': (_) => const SplashPage(),
           '/tagline': (_) => const TaglinePage(),
+          '/login': (_) => const LoginPage(),
+          '/register/verifikasi-otp': (_) => const OtpVerificationPage(),
+
           '/siswa/login': (_) => const LoginSiswaPage(),
 
           // ── Siswa: Register flow ───────────────────────────────
           '/siswa/register': (_) => const RegisterSiswaPage(),
           '/siswa/detail-pribadi': (_) => const DetailPribadiSiswaPage(),
           '/siswa/detail-alamat': (context) => BlocProvider<RegionCubit>(
-            create: (context) => sl<RegionCubit>(), 
+            create: (context) => sl<RegionCubit>(),
             child: const DetailAlamatSiswaPage(),
           ),
-          '/siswa/otp-verification': (context) => const OtpVerificationSiswaPage(),
+          '/siswa/otp-verification': (context) =>
+              const OtpVerificationSiswaPage(),
           // '/siswa/otp-verification': (ctx) {
           //   final args = ModalRoute.of(ctx)?.settings.arguments
           //       as Map<String, String>?;
@@ -142,11 +135,11 @@ class LazuardyApp extends StatelessWidget {
           //     email: args?['email'],
           //     context: args?['context'] ?? 'register',
           //   );
-          
 
           // ── Siswa: Auth flow ───────────────────────────────────
           '/siswa/forgot-password': (_) => const ForgotPasswordSiswaPage(),
-          '/siswa/otp-verification-forgot-password': (_) => const OtpVerificationForgotPasswordPage(),
+          '/siswa/otp-verification-forgot-password': (_) =>
+              const OtpVerificationForgotPasswordPage(),
           '/siswa/reset-password': (_) => const ResetPasswordSiswaPage(),
 
           // ── Siswa: Menu Sidebar ────────────────────────────────────
@@ -167,7 +160,8 @@ class LazuardyApp extends StatelessWidget {
           ),
           '/siswa/detail-sesi': (_) => const DetailSesiPage(),
           '/siswa/batalkan-sesi': (_) => const BatalkanSesiPage(),
-          '/siswa/konfirmasi-pembatalan': (_) => const KonfirmasiPembatalanPage(),
+          '/siswa/konfirmasi-pembatalan': (_) =>
+              const KonfirmasiPembatalanPage(),
           '/siswa/sesi-dibatalkan': (_) => const SesiDibatalkanPage(),
           '/siswa/laporan': (context) => BlocProvider<ReportCubit>(
             create: (_) => sl<ReportCubit>(),
@@ -208,12 +202,13 @@ class LazuardyApp extends StatelessWidget {
           '/tutor/register': (_) => const RegisterTutorPage(),
           '/tutor/detail-pribadi': (_) => const DetailPribadiTutorPage(),
           '/tutor/detail-alamat': (_) => const DetailAlamatTutorPage(),
-          '/tutor/formulir-pendaftaran': (_) => const FormulirPendaftaranTutorPage(),
+          '/tutor/formulir-pendaftaran': (_) =>
+              const FormulirPendaftaranTutorPage(),
           '/tutor/formulir-profil': (_) => const FormulirProfilTutorPage(),
           '/tutor/menunggu-verifikasi': (_) => const MenungguVerifikasiPage(),
           '/tutor/otp': (ctx) {
-            final args = ModalRoute.of(ctx)?.settings.arguments
-                as Map<String, String>?;
+            final args =
+                ModalRoute.of(ctx)?.settings.arguments as Map<String, String>?;
             return OtpVerificationTutorPage(
               email: args?['email'],
               context: args?['context'] ?? 'register',
@@ -272,11 +267,12 @@ class LazuardyApp extends StatelessWidget {
           // ── Orang Tua ─────────────────────
           '/orang-tua/register': (_) => const RegisterOrangTuaPage(),
           '/orang-tua/login': (_) => const LoginOrangTuaPage(),
-          '/orang-tua/otp-verification': (_) => const OtpVerificationTutorPage(),
+          '/orang-tua/otp-verification': (_) =>
+              const OtpVerificationTutorPage(),
           '/orang-tua/forgot-password': (_) => const ForgotPasswordTutorPage(),
           '/orang-tua/reset-password': (_) => const ResetPasswordTutorPage(),
           '/orang-tua/tautkan-akun-anak': (_) => const TautkanAkunAnakPage(),
-
+          '/orang-tua/verifikasi-otp-akun-anak': (_) => const VerifikasiOtpTautkanPage(),
 
           // ── Orang Tua: Home ─────────────────────────────
           '/orang-tua/beranda': (context) => BlocProvider<ParentDashboardCubit>(

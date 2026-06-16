@@ -7,12 +7,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lazuadry_mobile_fe/core/enums/role_enum.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
-
-enum UserRole { siswa, tutor, orangTua }
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
 
-  UserRole _selectedRole = UserRole.siswa;
+  RoleEnum _selectedRole = RoleEnum.student;
   bool _obscurePassword = true;
   bool _rememberMe = true;
 
@@ -37,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _onRoleChanged(UserRole role) {
+  void _onRoleChanged(RoleEnum role) {
     setState(() {
       _selectedRole = role;
       _emailCtrl.clear();
@@ -47,24 +46,24 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onLogin() {
-    // if (_formKey.currentState?.validate() ?? false) {
-    //   context.read<AuthCubit>().login(
-    //         _emailCtrl.text.trim(),
-    //         _passwordCtrl.text,
-    //       );
-    // }
+    if (_formKey.currentState?.validate() ?? false) {
+      context.read<AuthCubit>().studentLogin(
+            _emailCtrl.text,
+            _passwordCtrl.text,
+          );
+    } 
   }
 
   // Navigasi beranda sesuai role setelah login sukses
   void _navigateAfterLogin() {
     switch (_selectedRole) {
-      case UserRole.siswa:
+      case RoleEnum.student:
         Navigator.of(context).pushReplacementNamed('/siswa/beranda');
         break;
-      case UserRole.tutor:
+      case RoleEnum.tutor:
         Navigator.of(context).pushReplacementNamed('/tutor/beranda');
         break;
-      case UserRole.orangTua:
+      case RoleEnum.parent:
         Navigator.of(context).pushReplacementNamed('/orang-tua/beranda');
         break;
     }
@@ -73,23 +72,24 @@ class _LoginPageState extends State<LoginPage> {
   // Navigasi daftar sesuai role (tidak dipanggil untuk Orang Tua)
   void _navigateToRegister() {
     switch (_selectedRole) {
-      case UserRole.siswa:
+      case RoleEnum.student:
         Navigator.of(context).pushNamed('/siswa/register');
         break;
-      case UserRole.tutor:
+      case RoleEnum.tutor:
         Navigator.of(context).pushNamed('/tutor/register');
         break;
-      case UserRole.orangTua:
-        break; // tidak akan terjadi
+      case RoleEnum.parent:
+        Navigator.of(context).pushNamed('/orang-tua/register');
+        break;
     }
   }
 
   String get _forgotPasswordRoute {
     switch (_selectedRole) {
-      case UserRole.siswa:
-      case UserRole.orangTua:
+      case RoleEnum.student:
+      case RoleEnum.parent:
         return '/siswa/forgot-password';
-      case UserRole.tutor:
+      case RoleEnum.tutor:
         return '/tutor/forgot-password';
     }
   }
@@ -104,14 +104,17 @@ class _LoginPageState extends State<LoginPage> {
           if (state is AuthFailure) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
-              ..showSnackBar(SnackBar(
-                content: Text(state.error),
-                backgroundColor: AppColors.errorRed,
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.all(16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ));
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(state.error),
+                  backgroundColor: AppColors.errorRed,
+                  behavior: SnackBarBehavior.floating,
+                  margin: const EdgeInsets.all(16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              );
           }
         },
         builder: (context, state) {
@@ -127,7 +130,10 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 16),
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.textPrimary,
+                      ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
@@ -138,13 +144,18 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 16),
 
                     // Tab role
-                    _RoleTabSelector(selected: _selectedRole, onChanged: _onRoleChanged),
+                    _RoleTabSelector(
+                      key: UniqueKey(),
+                      selected: _selectedRole,
+                      onChanged: _onRoleChanged,
+                    ),
                     const SizedBox(height: 20),
 
                     // Info banner khusus Orang Tua
-                    if (_selectedRole == UserRole.orangTua) ...[
+                    if (_selectedRole == RoleEnum.parent) ...[
                       const _InfoBanner(
-                        message: 'Gunakan email dan password akun anak Anda untuk masuk sebagai orang tua.',
+                        message:
+                            'Gunakan email dan password akun anak Anda untuk masuk sebagai orang tua.',
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -158,11 +169,15 @@ class _LoginPageState extends State<LoginPage> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: AppTheme.inputDecoration(
                         hint: 'Masukan Email Anda',
-                        prefixIcon: const Icon(Icons.email_outlined,
-                            color: AppColors.textSecondary, size: 20),
+                        prefixIcon: const Icon(
+                          Icons.email_outlined,
+                          color: AppColors.textSecondary,
+                          size: 20,
+                        ),
                       ),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Email wajib diisi';
+                        if (v == null || v.trim().isEmpty)
+                          return 'Email wajib diisi';
                         if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(v)) {
                           return 'Format email tidak valid';
                         }
@@ -181,21 +196,27 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: _obscurePassword,
                       decoration: AppTheme.inputDecoration(
                         hint: 'Masukan Kata Sandi',
-                        prefixIcon: const Icon(Icons.lock_outline,
-                            color: AppColors.textSecondary, size: 20),
+                        prefixIcon: const Icon(
+                          Icons.lock_outline,
+                          color: AppColors.textSecondary,
+                          size: 20,
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword
                                 ? Icons.visibility_outlined
                                 : Icons.visibility_off_outlined,
-                            color: AppColors.textSecondary, size: 20,
+                            color: AppColors.textSecondary,
+                            size: 20,
                           ),
                           onPressed: () => setState(
-                              () => _obscurePassword = !_obscurePassword),
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                       ),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return 'Password wajib diisi';
+                        if (v == null || v.isEmpty)
+                          return 'Password wajib diisi';
                         if (v.length < 6) return 'Minimal 6 karakter';
                         return null;
                       },
@@ -209,11 +230,13 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         RememberMeCheckbox(
                           value: _rememberMe,
-                          onChanged: (v) => setState(() => _rememberMe = v ?? false),
+                          onChanged: (v) =>
+                              setState(() => _rememberMe = v ?? false),
                         ),
                         TextButton(
-                          onPressed: () =>
-                              Navigator.of(context).pushNamed(_forgotPasswordRoute),
+                          onPressed: () => Navigator.of(
+                            context,
+                          ).pushNamed(_forgotPasswordRoute),
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
                             minimumSize: const Size(0, 36),
@@ -231,7 +254,11 @@ class _LoginPageState extends State<LoginPage> {
                     ),
 
                     const SizedBox(height: 24),
-                    PrimaryButton(label: 'Masuk', onPressed: _onLogin, isLoading: isLoading),
+                    PrimaryButton(
+                      label: 'Masuk',
+                      onPressed: _onLogin,
+                      isLoading: isLoading,
+                    ),
                     const SizedBox(height: 24),
                     const OrDivider(),
                     const SizedBox(height: 20),
@@ -241,18 +268,22 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 20),
 
                     // Daftar — HANYA untuk Siswa & Tutor, Orang Tua tidak muncul
-                    if (_selectedRole != UserRole.orangTua)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text('Belum Punya Akun? ',
-                              style: AppTextStyles.bodySecondary),
-                          GestureDetector(
-                            onTap: _navigateToRegister,
-                            child: const Text('Daftar', style: AppTextStyles.linkTeal),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Belum Punya Akun? ',
+                          style: AppTextStyles.bodySecondary,
+                        ),
+                        GestureDetector(
+                          onTap: _navigateToRegister,
+                          child: const Text(
+                            'Daftar',
+                            style: AppTextStyles.linkTeal,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
 
                     const SizedBox(height: 32),
                   ],
@@ -268,9 +299,9 @@ class _LoginPageState extends State<LoginPage> {
 
 // ── Tab Selector ───────────────────────────────────────────────────
 class _RoleTabSelector extends StatelessWidget {
-  final UserRole selected;
-  final ValueChanged<UserRole> onChanged;
-  const _RoleTabSelector({required this.selected, required this.onChanged});
+  final RoleEnum selected;
+  final ValueChanged<RoleEnum> onChanged;
+  const _RoleTabSelector({super.key, required this.selected, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +312,7 @@ class _RoleTabSelector extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
-        children: UserRole.values.map((role) {
+        children: RoleEnum.values.map((role) {
           final isSelected = selected == role;
           return Expanded(
             child: GestureDetector(
@@ -295,7 +326,7 @@ class _RoleTabSelector extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  _label(role),
+                  role.display,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
@@ -308,14 +339,6 @@ class _RoleTabSelector extends StatelessWidget {
         }).toList(),
       ),
     );
-  }
-
-  String _label(UserRole role) {
-    switch (role) {
-      case UserRole.siswa: return 'Siswa';
-      case UserRole.tutor: return 'Tutor';
-      case UserRole.orangTua: return 'Orang Tua';
-    }
   }
 }
 
@@ -336,8 +359,11 @@ class _InfoBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline_rounded,
-              color: Color(0xFFF59E0B), size: 18),
+          const Icon(
+            Icons.info_outline_rounded,
+            color: Color(0xFFF59E0B),
+            size: 18,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

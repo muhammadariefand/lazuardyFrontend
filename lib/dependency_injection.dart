@@ -32,8 +32,10 @@ import 'package:lazuadry_mobile_fe/domain/repositories/student_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/tutor_dashboard_repository.dart';
 
 // Usecases
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/register_parent_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/request_otp_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/reset_password_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_tautkan_akun_anak_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/get_dashboard_data_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/get_schedules_usecase.dart';
@@ -45,6 +47,7 @@ import 'package:lazuadry_mobile_fe/domain/usecases/region/get_subdistricts_useca
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_login_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_otp_email_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/register_otp_email_anak_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_register_email_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/student/get_student_biodata_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_tutor_dashboard_usecase.dart';
@@ -220,6 +223,11 @@ Future<void> initDependencies() async {
 
   // Student Usecases
   sl.registerLazySingleton(() => GetStudentBiodataUseCase(sl()));
+  sl.registerLazySingleton(() => RegisterOtpEmailAnakUsecase(repository: sl()));
+
+  sl.registerLazySingleton(() => VerifyOtpTautkanAkunAnakUsecase(repository: sl()));
+
+  sl.registerLazySingleton(() => RegisterParentUsecase(repository: sl()));
 
   // Tutor Usecases
   sl.registerLazySingleton(() => GetTutorDashboardUseCase(sl()));
@@ -233,6 +241,9 @@ Future<void> initDependencies() async {
     studentRequestOtpUsecase: sl(),
     studentVerifyOtpUsecase: sl(),
     studentResetPasswordUsecase: sl(),
+    registerOtpEmailAnakUsecase: sl(),
+    verifyOtpTautkanAkunAnakUsecase: sl(),
+    registerParentUsecase: sl(),
     ),
   );
 

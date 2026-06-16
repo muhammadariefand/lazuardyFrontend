@@ -60,7 +60,7 @@ class TaglinePage extends StatelessWidget {
               PrimaryButton(
                 label: 'Selanjutnya',
                 onPressed: () {
-                  Navigator.of(context).pushNamed('/siswa/login');
+                  Navigator.of(context).pushNamed('/login');
                 },
               ),
 

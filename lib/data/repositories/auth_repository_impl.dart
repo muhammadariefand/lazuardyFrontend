@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/auth_local_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/auth_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/auth/register_student_request.dart';
@@ -19,12 +18,17 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> registerOtpEmail(String email) async {
+    await remoteDataSource.registerOtpEmail(email);
+  }
+
+  @override
   Future<void> studentVerifyOtpRegisterEmail({
     required String email,
     required String otp,
   }) async {
     await remoteDataSource.studentVerifyOtpRegisterEmail(
-      email: email, 
+      email: email,
       otp: otp,
     );
   }
@@ -33,12 +37,13 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> studentRegister(RegisterStudentRequest request) async {
     try {
       final response = await remoteDataSource.studentRegister(request);
-      
-      final token = response['access_token'] 
-          ?? response['token']
-          ?? response['data']?['token']
-          ?? response['data']?['access_token'];
-      
+
+      final token =
+          response['access_token'] ??
+          response['token'] ??
+          response['data']?['token'] ??
+          response['data']?['access_token'];
+
       await localDataSource.saveUserToken(token);
     } on ServerException {
       rethrow;
@@ -53,11 +58,12 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await remoteDataSource.studentLogin(email, password);
 
       // Coba semua kemungkinan key yang biasa dipakai backend
-      final token = response['access_token'] 
-          ?? response['token']
-          ?? response['data']?['token']
-          ?? response['data']?['access_token'];
-      
+      final token =
+          response['access_token'] ??
+          response['token'] ??
+          response['data']?['token'] ??
+          response['data']?['access_token'];
+
       await localDataSource.saveUserToken(token);
     } on ServerException {
       rethrow;
@@ -80,7 +86,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<String> studentForgotPasswordVerify(String email, String otp) async {
     try {
-      final token = await remoteDataSource.studentForgotPasswordVerify(email, otp);
+      final token = await remoteDataSource.studentForgotPasswordVerify(
+        email,
+        otp,
+      );
       return token;
     } on ServerException {
       rethrow;
@@ -107,6 +116,43 @@ class AuthRepositoryImpl implements AuthRepository {
       rethrow;
     } catch (e) {
       throw ServerException('Gagal mereset password');
+    }
+  }
+
+  @override
+  Future<void> registerOtpEmailAnak(String email) async {
+    try {
+      await remoteDataSource.registerOtpEmailAnak(email);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal mengirim OTP untuk akun anak');
+    }
+  }
+
+  @override
+  Future<void> verifyOtpTautkanAkunAnak(String email, String otp) async {
+    try {
+      await remoteDataSource.verifyOtpTautkanAkunAnak(email, otp);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal memverifikasi OTP tautkan akun anak');
+    }
+  }
+
+  @override
+  Future<void> registerParent(
+    String email,
+    String password,
+    String childEmail,
+  ) async {
+    try {
+      await remoteDataSource.registerParent(email, password, childEmail);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal melakukan registrasi orang tua');
     }
   }
 }

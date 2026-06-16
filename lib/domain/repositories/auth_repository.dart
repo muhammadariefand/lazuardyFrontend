@@ -1,10 +1,9 @@
-// import 'package:lazuadry_mobile_fe/domain/entities/student.dart';
-
 import 'package:lazuadry_mobile_fe/domain/entities/auth/register_student_request.dart';
-import 'package:lazuadry_mobile_fe/domain/entities/student_biodata.dart';
 
 abstract class AuthRepository {
   Future<void> studentRegisterOtpEmail(String email);
+
+  Future<void> registerOtpEmail(String email);
 
   Future<void> studentVerifyOtpRegisterEmail({
     required String email,
@@ -24,4 +23,10 @@ abstract class AuthRepository {
     required String password,
     required String confirmPassword,
   });
+
+  Future<void> registerOtpEmailAnak(String email);
+
+  Future<void> verifyOtpTautkanAkunAnak(String email, String otp);
+
+  Future<void> registerParent(String email, String password, String childEmail);
 }
