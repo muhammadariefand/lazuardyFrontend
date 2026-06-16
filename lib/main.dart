@@ -89,6 +89,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedu
 import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_dashboard/tutor_dashboard_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/parent_profile/parent_profile_cubit.dart';
 
 // ── Orang Tua ──────────────────────────────────────────────────────
 
@@ -298,7 +299,10 @@ class LazuardyApp extends StatelessWidget {
           ),
 
           // ── Orang Tua: Profil Anak ─────────────────────────────
-          '/orang-tua/profil-anak': (_) => const ProfilAnakPage(),
+          '/orang-tua/profil-anak': (context) => BlocProvider<ParentProfileCubit>(
+            create: (_) => sl<ParentProfileCubit>(),
+            child: const ProfilAnakPage(),
+          ),
         },
       ),
     );

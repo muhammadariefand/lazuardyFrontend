@@ -1,33 +1,26 @@
-// lib/presentation/pages/orangtua/profil_anak_page.dart
-// Image 6: Profil Anak
-// - AppBar teal "Profil Anak"
-// - Card header: avatar lingkaran + nama + email + no hp
-// - Card "Detail Pribadi": Nama Lengkap, Kelas, Jenis Kelamin,
-//   Tanggal Lahir, Nomor WhatsApp — semua read-only field
-// - Card "Detail Alamat": Provinsi, Kota/Kabupaten, (dst)
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/orangtua_bottom_nav.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/parent_profile/parent_profile_cubit.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/student_biodata.dart';
 
 const _teal = Color(0xFF3AAFA9);
 
-class ProfilAnakPage extends StatelessWidget {
+class ProfilAnakPage extends StatefulWidget {
   const ProfilAnakPage({super.key});
 
-  // ── Dummy data ─────────────────────────────────────────────────
-  static const _namaLengkap    = 'Mardhika Murni Pramestika';
-  static const _email          = 'mardhikatika@gmail.com';
-  static const _noHp           = '089505086860';
-  static const _kelas          = '3 SMA';
-  static const _jenisKelamin   = 'Perempuan';
-  static const _tanggalLahir   = '20/08/2005';
-  static const _provinsi       = 'DI Yogyakarta';
-  static const _kotaKabupaten  = 'Sleman';
-  static const _kecamatan      = 'Ngaglik';
-  static const _kelurahan      = 'Sumberrejo';
-  static const _alamatLengkap  =
-      'Jl. Melati Indah No. 24, RT 03/RW 05';
+  @override
+  State<ProfilAnakPage> createState() => _ProfilAnakPageState();
+}
+
+class _ProfilAnakPageState extends State<ProfilAnakPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Load profile on initialization
+    context.read<ParentProfileCubit>().loadProfile();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,46 +38,82 @@ class ProfilAnakPage extends StatelessWidget {
         children: [
           _buildAppBar(context),
           Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  const SizedBox(height: 8),
+            child: BlocBuilder<ParentProfileCubit, ParentProfileState>(
+              builder: (context, state) {
+                if (state is ParentProfileLoading || state is ParentProfileInitial) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: _teal),
+                  );
+                }
 
-                  // ── Card Header ─────────────────────────────
-                  _buildHeaderCard(),
-                  const SizedBox(height: 14),
+                if (state is ParentProfileError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                        const SizedBox(height: 16),
+                        Text(state.message, style: const TextStyle(color: AppColors.textSecondary)),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => context.read<ParentProfileCubit>().loadProfile(),
+                          style: ElevatedButton.styleFrom(backgroundColor: _teal),
+                          child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
+                    ),
+                  );
+                }
 
-                  // ── Card Detail Pribadi ──────────────────────
-                  _buildSectionCard(
-                    title: 'Detail Pribadi',
-                    fields: [
-                      _FieldItem('Nama Lengkap', _namaLengkap),
-                      _FieldItem('Kelas', _kelas),
-                      _FieldItem('Jenis Kelamin', _jenisKelamin),
-                      _FieldItem('Tanggal Lahir', _tanggalLahir),
-                      _FieldItem('Nomor WhatsApp', _noHp),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
+                if (state is ParentProfileLoaded) {
+                  return _buildContent(state.profile);
+                }
 
-                  // ── Card Detail Alamat ───────────────────────
-                  _buildSectionCard(
-                    title: 'Detail Alamat',
-                    fields: [
-                      _FieldItem('Provinsi', _provinsi),
-                      _FieldItem('Kota/Kabupaten', _kotaKabupaten),
-                      _FieldItem('Kecamatan', _kecamatan),
-                      _FieldItem('Kelurahan', _kelurahan),
-                      _FieldItem('Alamat Lengkap', _alamatLengkap),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
+                return const SizedBox();
+              },
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(StudentBiodata profile) {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          const SizedBox(height: 8),
+
+          // ── Card Header ─────────────────────────────
+          _buildHeaderCard(profile),
+          const SizedBox(height: 14),
+
+          // ── Card Detail Pribadi ──────────────────────
+          _buildSectionCard(
+            title: 'Detail Pribadi',
+            fields: [
+              _FieldItem('Nama Lengkap', profile.name ?? '-'),
+              _FieldItem('Kelas', profile.className ?? '-'),
+              _FieldItem('Jenis Kelamin', profile.gender ?? '-'),
+              _FieldItem('Tanggal Lahir', profile.dateOfBirth ?? '-'),
+              _FieldItem('Nomor WhatsApp', profile.telephoneNumber ?? '-'),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // ── Card Detail Alamat ───────────────────────
+          _buildSectionCard(
+            title: 'Detail Alamat',
+            fields: [
+              _FieldItem('Provinsi', profile.homeAddress?.province ?? '-'),
+              _FieldItem('Kota/Kabupaten', profile.homeAddress?.regency ?? '-'),
+              _FieldItem('Kecamatan', profile.homeAddress?.district ?? '-'),
+              _FieldItem('Kelurahan', profile.homeAddress?.subdistrict ?? '-'),
+            ],
+          ),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -115,7 +144,11 @@ class ProfilAnakPage extends StatelessWidget {
   }
 
   // ── Card Header ───────────────────────────────────────────────
-  Widget _buildHeaderCard() {
+  Widget _buildHeaderCard(StudentBiodata profile) {
+    final initials = profile.name != null && profile.name!.isNotEmpty
+        ? profile.name![0].toUpperCase()
+        : 'M';
+
     return _cardWrapper(
       child: Row(
         children: [
@@ -127,40 +160,59 @@ class ProfilAnakPage extends StatelessWidget {
               color: Color(0xFFCFE3F3),
               shape: BoxShape.circle,
             ),
-            child: const Center(
-              child: Text(
-                'M',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: _teal,
-                ),
-              ),
-            ),
+            child: profile.profilePhotoUrl != null && profile.profilePhotoUrl!.isNotEmpty
+                ? ClipOval(
+                    child: Image.network(
+                      profile.profilePhotoUrl!,
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: Text(
+                          initials,
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: _teal,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : Center(
+                    child: Text(
+                      initials,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        color: _teal,
+                      ),
+                    ),
+                  ),
           ),
           const SizedBox(width: 14),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _namaLengkap,
-                  style: TextStyle(
+                  profile.name ?? 'Nama Tidak Diketahui',
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  _email,
-                  style: TextStyle(
+                  profile.email ?? 'Email tidak tersedia',
+                  style: const TextStyle(
                       fontSize: 13, color: AppColors.textSecondary),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
-                  _noHp,
-                  style: TextStyle(
+                  profile.telephoneNumber ?? 'Nomor telepon tidak tersedia',
+                  style: const TextStyle(
                       fontSize: 13, color: AppColors.textSecondary),
                 ),
               ],

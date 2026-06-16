@@ -40,6 +40,7 @@ import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_usecase.dart'
 import 'package:lazuadry_mobile_fe/domain/usecases/get_dashboard_data_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/get_schedules_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/get_reports_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/get_parent_profile_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_districts_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_provinces_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/region/get_regencies_usecase.dart';
@@ -57,6 +58,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashb
 import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/parent_profile/parent_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_dashboard/tutor_dashboard_cubit.dart';
@@ -272,11 +274,17 @@ Future<void> initDependencies() async {
     getStudentBiodataUseCase: sl(),
   ));
 
+  sl.registerFactory(() => ParentProfileCubit(
+    getParentProfileUseCase: sl(),
+  ));
+
   sl.registerFactory(() => TutorDashboardCubit(
     getTutorDashboardUseCase: sl(),
   ));
 
   sl.registerLazySingleton(() => ConfirmBookingUseCase(sl()));
+
+  sl.registerLazySingleton(() => GetParentProfileUseCase(sl()));
 
   sl.registerFactory(() => BookingConfirmationCubit(
     confirmBookingUseCase: sl(),
