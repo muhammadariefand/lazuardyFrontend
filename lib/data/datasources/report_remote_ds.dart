@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../models/report_model.dart';
 import '../models/paginated_data_model.dart';
+import '../../domain/entities/server_exception.dart';
 
 abstract class ReportRemoteDataSource {
   Future<PaginatedDataModel<ReportModel>> getReports({
@@ -17,19 +18,17 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
   Future<PaginatedDataModel<ReportModel>> getReports({
     required int page,
   }) async {
-    final response = await dio.get(
-      '/reports',
-      queryParameters: {
-        'page': page,
-      },
-    );
+    try {
+      final response = await dio.get(
+        '/reports',
+        queryParameters: {
+          'page': page,
+        },
+      );
 
-    if (response.data is Map<String, dynamic>) {
       final responseData = response.data as Map<String, dynamic>;
-
-      // Cek status sukses dari backend
-      final status = responseData['status']?.toString().toLowerCase();
-      if (status == 'success' || responseData['data'] != null) {
+      
+      if (responseData['status']?.toString().toLowerCase() == 'success') {
         final dataMap = responseData['data'] as Map<String, dynamic>?;
         if (dataMap != null) {
           final rawList = dataMap['data'] as List<dynamic>? ?? [];
@@ -39,8 +38,24 @@ class ReportRemoteDataSourceImpl implements ReportRemoteDataSource {
           return PaginatedDataModel<ReportModel>.fromJson(dataMap, reports);
         }
       }
+      throw ServerException(responseData['message'] ?? 'Format respon laporan tidak valid');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Sesi telah berakhir, silakan login kembali');
+      }
+      String errorMessage = 'Terjadi kesalahan pada server';
+      if (e.response?.data != null && e.response?.data is Map) {
+        errorMessage = e.response?.data['message'] 
+            ?? e.response?.data['error'] 
+            ?? errorMessage;
+      } else if (e.message != null) {
+        errorMessage = e.message!;
+      }
+      throw ServerException(errorMessage);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
     }
-
-    throw Exception('Format respon laporan tidak valid');
   }
 }

@@ -292,7 +292,10 @@ class LazuardyApp extends StatelessWidget {
           ),
 
           // ── Orang Tua: Laporan ─────────────────────────────
-          '/orang-tua/laporan-anak': (_) => const LaporanOrangtuaPage(),
+          '/orang-tua/laporan-anak': (context) => BlocProvider<ReportCubit>(
+            create: (_) => sl<ReportCubit>(),
+            child: const LaporanOrangtuaPage(),
+          ),
 
           // ── Orang Tua: Profil Anak ─────────────────────────────
           '/orang-tua/profil-anak': (_) => const ProfilAnakPage(),

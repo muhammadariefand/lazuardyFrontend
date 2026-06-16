@@ -6,65 +6,31 @@
 //   sub-card abu: Topik (bold) + catatan
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/orangtua_bottom_nav.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_state.dart';
 
 const _teal = Color(0xFF3AAFA9);
 
-// ── Model ─────────────────────────────────────────────────────────
-class _LaporanData {
-  final String mapel;
-  final String namaTutor;
-  final String tanggal;
-  final String topik;
-  final String catatan;
-
-  const _LaporanData({
-    required this.mapel,
-    required this.namaTutor,
-    required this.tanggal,
-    required this.topik,
-    required this.catatan,
-  });
-}
 
 // ── Page ──────────────────────────────────────────────────────────
-class LaporanOrangtuaPage extends StatelessWidget {
+class LaporanOrangtuaPage extends StatefulWidget {
   const LaporanOrangtuaPage({super.key});
 
-  static const _laporanList = [
-    _LaporanData(
-      mapel: 'Matematika',
-      namaTutor: 'Ibu Sarah',
-      tanggal: '5 Maret 2026',
-      topik: 'Aljabar, Persamaan Linear',
-      catatan:
-          'Siswa memahami konsep aljabar dengan cepat.\nPerlu latihan soal cerita lebih banyak.',
-    ),
-    _LaporanData(
-      mapel: 'Fisika',
-      namaTutor: 'Pak Ahmad',
-      tanggal: '3 Maret 2026',
-      topik: 'Hukum Newton, Gaya',
-      catatan: 'Siswa masih belum memahami hukum Newton dengan baik.',
-    ),
-    _LaporanData(
-      mapel: 'Kimia',
-      namaTutor: 'Pak Budi',
-      tanggal: '28 Februari 2026',
-      topik: 'Tabel Periodik, Reaksi Kimia',
-      catatan:
-          'Menguasai tabel periodik dan reaksi kimia dasar dengan sangat baik.',
-    ),
-    _LaporanData(
-      mapel: 'B. Inggris',
-      namaTutor: 'Pak Rinai',
-      tanggal: '15 Februari 2026',
-      topik: 'Grammar, Vocabulary',
-      catatan:
-          'Siswa cukup aktif dan mampu menyusun kalimat dengan baik.',
-    ),
-  ];
+  @override
+  State<LaporanOrangtuaPage> createState() => _LaporanOrangtuaPageState();
+}
+
+class _LaporanOrangtuaPageState extends State<LaporanOrangtuaPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ReportCubit>().loadReports(page: 1);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,13 +48,68 @@ class LaporanOrangtuaPage extends StatelessWidget {
         children: [
           _buildAppBar(context),
           Expanded(
-            child: ListView.separated(
-              physics: const BouncingScrollPhysics(),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              itemCount: _laporanList.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 14),
-              itemBuilder: (_, i) => _buildLaporanCard(_laporanList[i]),
+            child: BlocBuilder<ReportCubit, ReportState>(
+              builder: (context, state) {
+                if (state is ReportLoading || state is ReportInitial) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (state is ReportError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(state.message, style: const TextStyle(color: AppColors.textSecondary)),
+                        const SizedBox(height: 14),
+                        ElevatedButton(
+                          onPressed: () => context.read<ReportCubit>().loadReports(page: 1),
+                          child: const Text('Coba Lagi'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (state is ReportLoaded) {
+                  final reports = state.data.data;
+                  
+                  if (reports.isEmpty) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 60),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.assignment_outlined,
+                              size: 80,
+                              color: Color(0xFFE0E0E0),
+                            ),
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Belum ada laporan pembelajaran',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF9E9E9E),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return ListView.separated(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    itemCount: reports.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 14),
+                    itemBuilder: (_, i) => _buildLaporanCard(reports[i]),
+                  );
+                }
+
+                return const SizedBox();
+              },
             ),
           ),
         ],
@@ -120,8 +141,18 @@ class LaporanOrangtuaPage extends StatelessWidget {
     );
   }
 
+  String _formatDate(DateTime date) {
+    const months = [
+      '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return '${date.day} ${months[date.month]} ${date.year}';
+  }
+
   // ── Card Laporan ──────────────────────────────────────────────
-  Widget _buildLaporanCard(_LaporanData l) {
+  Widget _buildLaporanCard(dynamic report) { // Menggunakan dynamic atau ReportEntity (jika di-import)
+    final tanggalStr = _formatDate(report.createdAt);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -139,9 +170,9 @@ class LaporanOrangtuaPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Mapel (teal)
+          // Topik sebagai header utama (teal) - Karena tidak ada mapel di API
           Text(
-            l.mapel,
+            report.topic.isEmpty ? 'Sesi Pembelajaran' : report.topic,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -151,7 +182,7 @@ class LaporanOrangtuaPage extends StatelessWidget {
           const SizedBox(height: 2),
           // Tutor + tanggal
           Text(
-            '${l.namaTutor} · ${l.tanggal}',
+            '${report.tutorName} · $tanggalStr',
             style: const TextStyle(
                 fontSize: 13, color: AppColors.textSecondary),
           ),
@@ -168,9 +199,9 @@ class LaporanOrangtuaPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Topik: ${l.topik}',
-                  style: const TextStyle(
+                const Text(
+                  'Catatan Tutor:',
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
@@ -178,7 +209,7 @@ class LaporanOrangtuaPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  l.catatan,
+                  report.notes.isEmpty ? '-' : report.notes,
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textPrimary,

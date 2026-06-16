@@ -259,13 +259,14 @@ Future<void> initDependencies() async {
     ),
   );
 
+  sl.registerFactory(() => ReportCubit(
+    getReportsUseCase: sl(),
+  ));
+
   sl.registerFactory(() => ScheduleCubit(
     getSchedulesUseCase: sl(),
   ));
 
-  sl.registerFactory(() => ReportCubit(
-    getReportsUseCase: sl(),
-  ));
 
   sl.registerFactory(() => StudentProfileCubit(
     getStudentBiodataUseCase: sl(),
