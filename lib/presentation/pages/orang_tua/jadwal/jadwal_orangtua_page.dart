@@ -121,42 +121,45 @@ class JadwalOrangtuaPage extends StatefulWidget {
 }
 
 class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
-  int _selectedDayIdx = 2; // Rabu default
-  final String _bulan = 'April';
-  final int _tahun = 2026;
-
-  // Hari dalam minggu yang ditampilkan
-  final List<Map<String, dynamic>> _hariList = [
-    {'label': 'Sen', 'tanggal': 30, 'date': DateTime(2026, 3, 30)},
-    {'label': 'Sel', 'tanggal': 31, 'date': DateTime(2026, 3, 31)},
-    {'label': 'Rab', 'tanggal': 1, 'date': DateTime(2026, 4, 1)},
-    {'label': 'Kam', 'tanggal': 2, 'date': DateTime(2026, 4, 2)},
-    {'label': 'Jum', 'tanggal': 3, 'date': DateTime(2026, 4, 3)},
-    {'label': 'Sab', 'tanggal': 4, 'date': DateTime(2026, 4, 4)},
-    {'label': 'Min', 'tanggal': 5, 'date': DateTime(2026, 4, 5)},
-  ];
-
-  DateTime get _selectedDate => _hariList[_selectedDayIdx]['date'] as DateTime;
+  late DateTime _currentWeekStart;
+  int _selectedDayIdx = 0;
+  late List<DateTime> _hariList;
 
   @override
   void initState() {
     super.initState();
+    final now = DateTime.now();
+    // Cari hari Senin dari minggu ini (weekday 1 = Senin)
+    int daysFromMonday = now.weekday - 1;
+    _currentWeekStart = now.subtract(Duration(days: daysFromMonday));
+    _selectedDayIdx = daysFromMonday; // Hari ini yang terpilih by default
+    _generateHariList();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ScheduleCubit>().loadSchedules(
-            status: 'active',
-            date: _formatQueryDate(_selectedDate),
-          );
+      _fetchSchedule();
     });
   }
+
+  void _generateHariList() {
+    _hariList = List.generate(7, (index) => _currentWeekStart.add(Duration(days: index)));
+  }
+
+  void _fetchSchedule() {
+    context.read<ScheduleCubit>().loadSchedules(
+          status: 'active',
+          date: _formatQueryDate(_selectedDate),
+        );
+  }
+
+  DateTime get _selectedDate => _hariList[_selectedDayIdx];
+  String get _bulan => _monthName(_selectedDate.month);
+  String get _tahun => _selectedDate.year.toString();
 
   void _onSelectedDay(int index) {
     setState(() {
       _selectedDayIdx = index;
     });
-    context.read<ScheduleCubit>().loadSchedules(
-          status: 'active',
-          date: _formatQueryDate(_selectedDate),
-        );
+    _fetchSchedule();
   }
 
   Widget _buildScheduleSection() {
@@ -193,9 +196,27 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
               .toList();
 
           if (schedules.isEmpty) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 32),
-              child: Text('Tidak ada jadwal aktif untuk tanggal ini.'),
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 60),
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.calendar_month_rounded,
+                      size: 80,
+                      color: Color(0xFFE0E0E0),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Belum ada jadwal hari ini',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF9E9E9E),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           }
 
@@ -290,7 +311,11 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _navBtn(Icons.chevron_left_rounded, () {
-          setState(() {/* TODO: prev month */});
+          setState(() {
+            _currentWeekStart = _currentWeekStart.subtract(const Duration(days: 7));
+            _generateHariList();
+          });
+          _fetchSchedule();
         }),
         Text(
           '$_bulan $_tahun',
@@ -301,7 +326,11 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
           ),
         ),
         _navBtn(Icons.chevron_right_rounded, () {
-          setState(() {/* TODO: next month */});
+          setState(() {
+            _currentWeekStart = _currentWeekStart.add(const Duration(days: 7));
+            _generateHariList();
+          });
+          _fetchSchedule();
         }),
       ],
     );
@@ -324,10 +353,11 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
 
   // ── Day Selector ──────────────────────────────────────────────
   Widget _buildDaySelector() {
+    const labels = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: List.generate(_hariList.length, (i) {
-        final hari = _hariList[i];
+        final date = _hariList[i];
         final isSelected = _selectedDayIdx == i;
         return GestureDetector(
           onTap: () => _onSelectedDay(i),
@@ -345,7 +375,7 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
             child: Column(
               children: [
                 Text(
-                  hari['label'] as String,
+                  labels[i],
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -354,7 +384,7 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${hari['tanggal']}',
+                  '${date.day}',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,

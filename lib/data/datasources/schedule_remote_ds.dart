@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../models/schedule_model.dart';
 import '../models/paginated_data_model.dart';
+import '../../domain/entities/server_exception.dart';
 
 abstract class ScheduleRemoteDataSource {
   Future<PaginatedDataModel<ScheduleModel>> getSchedules({
@@ -40,24 +41,42 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
       queryParams['date'] = date;
     }
 
-    final response = await dio.get(
-      '/schedules',
-      queryParameters: queryParams,
-    );
+    try {
+      final response = await dio.get(
+        '/schedules',
+        queryParameters: queryParams,
+      );
 
-    if (response.data is Map<String, dynamic>) {
       final responseData = response.data as Map<String, dynamic>;
-      final dataMap = responseData['data'] as Map<String, dynamic>?;
-      if (dataMap != null) {
-        final rawList = dataMap['data'] as List<dynamic>? ?? [];
-        final schedules = rawList
-            .map((item) => ScheduleModel.fromJson(item as Map<String, dynamic>))
-            .toList();
-        return PaginatedDataModel<ScheduleModel>.fromJson(dataMap, schedules);
+      if (responseData['status'] == 'success') {
+        final dataMap = responseData['data'] as Map<String, dynamic>?;
+        if (dataMap != null) {
+          final rawList = dataMap['data'] as List<dynamic>? ?? [];
+          final schedules = rawList
+              .map((item) => ScheduleModel.fromJson(item as Map<String, dynamic>))
+              .toList();
+          return PaginatedDataModel<ScheduleModel>.fromJson(dataMap, schedules);
+        }
       }
+      throw ServerException(responseData['message'] ?? 'Format respon jadwal tidak valid');
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Sesi telah berakhir, silakan login kembali');
+      }
+      String errorMessage = 'Terjadi kesalahan pada server';
+      if (e.response?.data != null && e.response?.data is Map) {
+        errorMessage = e.response?.data['message'] 
+            ?? e.response?.data['error'] 
+            ?? errorMessage;
+      } else if (e.message != null) {
+        errorMessage = e.message!;
+      }
+      throw ServerException(errorMessage);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
     }
-
-    throw Exception('Format respon jadwal tidak valid');
   }
 
   @override
