@@ -11,4 +11,14 @@ class TutorProfileRepositoryImpl implements TutorProfileRepository {
   Future<TutorEntity> getTutorProfile() async {
     return await remoteDataSource.getTutorProfile();
   }
+
+  @override
+  Future<void> updateTutorBiodata(Map<String, dynamic> data) async {
+    return await remoteDataSource.updateTutorBiodata(data);
+  }
+
+  @override
+  Future<void> updateProfilePhoto(List<int> fileBytes, String fileName) async {
+    return await remoteDataSource.updateProfilePhoto(fileBytes, fileName);
+  }
 }

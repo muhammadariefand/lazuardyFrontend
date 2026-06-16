@@ -247,7 +247,10 @@ class LazuardyApp extends StatelessWidget {
             create: (_) => sl<TutorProfileCubit>(),
             child: const ProfilTutorPage(),
           ),
-          '/tutor/edit-profil': (_) => const EditProfilTutorPage(),
+          '/tutor/edit-profil': (context) => BlocProvider<TutorProfileCubit>(
+            create: (_) => sl<TutorProfileCubit>(),
+            child: const EditProfilTutorPage(),
+          ),
 
           // ── Siswa: Menu Sidebar ────────────────────────────────────
           '/tutor/hubungi-kami': (_) => const HubungiKamiPage(),

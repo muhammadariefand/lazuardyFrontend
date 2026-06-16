@@ -54,6 +54,8 @@ import 'package:lazuadry_mobile_fe/domain/usecases/student/get_student_biodata_u
 import 'package:lazuadry_mobile_fe/domain/usecases/student/update_student_biodata_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/student/update_profile_photo_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_tutor_dashboard_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor/update_tutor_biodata_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor/update_tutor_profile_photo_usecase.dart';
 
 // State Management / Cubit
 import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
@@ -304,8 +306,12 @@ Future<void> initDependencies() async {
     () => TutorProfileRepositoryImpl(remoteDataSource: sl()),
   );
   sl.registerLazySingleton(() => GetTutorProfileUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateTutorBiodataUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateTutorProfilePhotoUseCase(sl()));
   sl.registerFactory(() => TutorProfileCubit(
     getTutorProfileUseCase: sl(),
+    updateTutorBiodataUseCase: sl(),
+    updateTutorProfilePhotoUseCase: sl(),
   ));
 
   // Parent Dashboard
