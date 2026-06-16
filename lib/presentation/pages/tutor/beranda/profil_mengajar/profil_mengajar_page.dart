@@ -1,34 +1,25 @@
-// lib/presentation/pages/tutor/profil_mengajar_page.dart
-// — AppBar icon pensil, semua read-only
-// — AppBar icon simpan, slot aktif bisa dihapus (×),
-//                       slot tersedia bisa ditambah (+)
-// Sections:
-//  1. Deskripsi Mengajar  (card, teks)
-//  2. Metode Mengajar     (card, toggle Online / Offline)
-//  3. Atur Slot Ketersediaan
-//     - 7 tombol hari (Sen–Min) dengan badge jumlah slot
-//     - "Slot Aktif - <hari>" → chips jam aktif (view: plain, edit: + ×)
-//     - "Tambah slot"        → grid jam yang bisa diklik (hanya edit mode)
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/profil_mengajar/profil_mengajar_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/profil_mengajar/profil_mengajar_state.dart';
 
 const _teal = Color(0xFF3AAFA9);
 
-// ── Slot per hari ─────────────────────────────────────────────────
 class _HariSlot {
-  final String label; // 'Sen', 'Sel', …
-  final String namaLengkap; // 'Senin', 'Selasa', …
-  List<String> aktif; // jam yang sudah dipilih
+  final String label;
+  final String namaLengkap;
+  final String englishName;
+  List<String> aktif;
 
   _HariSlot({
     required this.label,
     required this.namaLengkap,
+    required this.englishName,
     required this.aktif,
   });
 }
 
-// ── Page ──────────────────────────────────────────────────────────
 class ProfilMengajarPage extends StatefulWidget {
   const ProfilMengajarPage({super.key});
 
@@ -37,15 +28,13 @@ class ProfilMengajarPage extends StatefulWidget {
 }
 
 class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
-  // ── State ─────────────────────────────────────────────────────
   bool _isEditMode = false;
   bool _onlineAktif = false;
-  bool _offlineAktif = true;
+  bool _offlineAktif = false;
   int _selectedHariIdx = 0;
 
   late final TextEditingController _deskripsiCtrl;
 
-  // Semua jam yang tersedia untuk ditambahkan
   static const _allSlots = [
     '08:00', '09:00', '10:00', '11:00',
     '12:00', '13:00', '14:00', '15:00',
@@ -53,25 +42,25 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
     '20:00', '21:00',
   ];
 
-  final List<_HariSlot> _hariList = [
-    _HariSlot(label: 'Sen', namaLengkap: 'Senin',  aktif: ['14:00', '16:00']),
-    _HariSlot(label: 'Sel', namaLengkap: 'Selasa', aktif: []),
-    _HariSlot(label: 'Rab', namaLengkap: 'Rabu',   aktif: []),
-    _HariSlot(label: 'Kam', namaLengkap: 'Kamis',  aktif: []),
-    _HariSlot(label: 'Jum', namaLengkap: 'Jumat',  aktif: ['16:00']),
-    _HariSlot(label: 'Sab', namaLengkap: 'Sabtu',  aktif: []),
-    _HariSlot(label: 'Min', namaLengkap: 'Minggu', aktif: ['16:00']),
-  ];
+  late List<_HariSlot> _hariList;
 
   @override
   void initState() {
     super.initState();
-    _deskripsiCtrl = TextEditingController(
-      text:
-          'Saya adalah tutor Matematika dan Fisika berpengalaman 5 tahun. '
-          'Mengajar dengan metode yang menyenangkan dan mudah dipahami. '
-          'Fokus pada pemahaman konsep, bukan hafalan.',
-    );
+    _deskripsiCtrl = TextEditingController();
+    _initHariList();
+  }
+
+  void _initHariList() {
+    _hariList = [
+      _HariSlot(label: 'Sen', namaLengkap: 'Senin', englishName: 'monday', aktif: []),
+      _HariSlot(label: 'Sel', namaLengkap: 'Selasa', englishName: 'tuesday', aktif: []),
+      _HariSlot(label: 'Rab', namaLengkap: 'Rabu', englishName: 'wednesday', aktif: []),
+      _HariSlot(label: 'Kam', namaLengkap: 'Kamis', englishName: 'thursday', aktif: []),
+      _HariSlot(label: 'Jum', namaLengkap: 'Jumat', englishName: 'friday', aktif: []),
+      _HariSlot(label: 'Sab', namaLengkap: 'Sabtu', englishName: 'saturday', aktif: []),
+      _HariSlot(label: 'Min', namaLengkap: 'Minggu', englishName: 'sunday', aktif: []),
+    ];
   }
 
   @override
@@ -80,7 +69,6 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
     super.dispose();
   }
 
-  // ── Slot helpers ──────────────────────────────────────────────
   _HariSlot get _selectedHari => _hariList[_selectedHariIdx];
 
   List<String> get _availableSlots => _allSlots
@@ -89,61 +77,152 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
 
   void _addSlot(String jam) {
     setState(() {
-      _selectedHari.aktif = [..._selectedHari.aktif, jam]
-        ..sort();
+      _selectedHari.aktif = [..._selectedHari.aktif, jam]..sort();
     });
   }
 
   void _removeSlot(String jam) {
     setState(() {
-      _selectedHari.aktif =
-          _selectedHari.aktif.where((s) => s != jam).toList();
+      _selectedHari.aktif = _selectedHari.aktif.where((s) => s != jam).toList();
     });
   }
 
-  // ── Save ─────────────────────────────────────────────────────
-  void _simpan() {
-    setState(() => _isEditMode = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Profil mengajar berhasil disimpan'),
-        backgroundColor: _teal,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  void _populateData(ProfilMengajarLoaded state) {
+    if (_isEditMode) return;
+
+    _deskripsiCtrl.text = state.tutorProfile.description ?? '';
+    final methods = state.tutorProfile.learningMethods;
+    _onlineAktif = methods.contains('online');
+    _offlineAktif = methods.contains('offline');
+
+    _initHariList();
+    for (var schedule in state.schedules) {
+      final slotStr = schedule.time.length >= 5 ? schedule.time.substring(0, 5) : schedule.time;
+      final dayStr = schedule.day.toLowerCase();
+      for (var hari in _hariList) {
+        if (hari.englishName == dayStr) {
+          if (!hari.aktif.contains(slotStr)) {
+            hari.aktif.add(slotStr);
+          }
+          hari.aktif.sort();
+          break;
+        }
+      }
+    }
   }
 
-  // ─────────────────────────────────────────────────────────────
+  void _simpan() {
+    final List<String> selectedMethods = [];
+    if (_onlineAktif) selectedMethods.add('online');
+    if (_offlineAktif) selectedMethods.add('offline');
+
+    final List<Map<String, String>> schedules = [];
+    for (var hari in _hariList) {
+      for (var jam in hari.aktif) {
+        schedules.add({
+          'day': hari.englishName,
+          'time': jam,
+        });
+      }
+    }
+
+    context.read<ProfilMengajarCubit>().saveProfile(
+          description: _deskripsiCtrl.text.trim(),
+          learningMethods: selectedMethods,
+          schedules: schedules,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          _buildAppBar(),
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.all(16),
+      body: BlocConsumer<ProfilMengajarCubit, ProfilMengajarState>(
+        listener: (context, state) {
+          if (state is ProfilMengajarLoaded) {
+            if (state.submitSuccessMessage != null) {
+              setState(() => _isEditMode = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.submitSuccessMessage!),
+                  backgroundColor: _teal,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              context.read<ProfilMengajarCubit>().clearMessages();
+            } else if (state.submitErrorMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.submitErrorMessage!),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              context.read<ProfilMengajarCubit>().clearMessages();
+            }
+          }
+        },
+        builder: (context, state) {
+          if (state is ProfilMengajarLoading || state is ProfilMengajarInitial) {
+            return const Center(child: CircularProgressIndicator(color: _teal));
+          } else if (state is ProfilMengajarError) {
+            return Center(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildDeskripsiCard(),
-                  const SizedBox(height: 14),
-                  _buildMetodeCard(),
-                  const SizedBox(height: 14),
-                  _buildSlotCard(),
-                  const SizedBox(height: 32),
+                  Text(state.message, style: const TextStyle(color: Colors.red)),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => context.read<ProfilMengajarCubit>().fetchProfileData(),
+                    style: ElevatedButton.styleFrom(backgroundColor: _teal),
+                    child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
+                  )
                 ],
               ),
-            ),
-          ),
-        ],
+            );
+          } else if (state is ProfilMengajarLoaded) {
+            _populateData(state);
+
+            return Stack(
+              children: [
+                Column(
+                  children: [
+                    _buildAppBar(state.isSubmitting),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            _buildDeskripsiCard(),
+                            const SizedBox(height: 14),
+                            _buildMetodeCard(),
+                            const SizedBox(height: 14),
+                            _buildSlotCard(),
+                            const SizedBox(height: 32),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (state.isSubmitting)
+                  Container(
+                    color: Colors.black.withOpacity(0.3),
+                    child: const Center(
+                      child: CircularProgressIndicator(color: _teal),
+                    ),
+                  ),
+              ],
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
 
-  // ── AppBar ────────────────────────────────────────────────────
-  Widget _buildAppBar() {
+  Widget _buildAppBar(bool isSubmitting) {
     return Container(
       color: _teal,
       padding: EdgeInsets.only(
@@ -155,9 +234,24 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back_rounded,
-                color: Colors.white, size: 24),
+            onPressed: () {
+              if (_isEditMode) {
+                setState(() {
+                  _isEditMode = false;
+                  final state = context.read<ProfilMengajarCubit>().state;
+                  if (state is ProfilMengajarLoaded) {
+                    _populateData(state);
+                  }
+                });
+              } else {
+                Navigator.pop(context);
+              }
+            },
+            icon: Icon(
+              _isEditMode ? Icons.close_rounded : Icons.arrow_back_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
           ),
           const Expanded(
             child: Text(
@@ -169,20 +263,19 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
               ),
             ),
           ),
-          // Pensil (view) ↔ Simpan (edit)
           IconButton(
-            onPressed: () {
-              if (_isEditMode) {
-                _simpan();
-              } else {
-                setState(() => _isEditMode = true);
-              }
-            },
+            onPressed: isSubmitting
+                ? null
+                : () {
+                    if (_isEditMode) {
+                      _simpan();
+                    } else {
+                      setState(() => _isEditMode = true);
+                    }
+                  },
             icon: Icon(
-              _isEditMode
-                  ? Icons.save_outlined
-                  : Icons.edit_outlined,
-              color: Colors.white,
+              _isEditMode ? Icons.save_outlined : Icons.edit_outlined,
+              color: isSubmitting ? Colors.white54 : Colors.white,
               size: 24,
             ),
           ),
@@ -191,7 +284,6 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
     );
   }
 
-  // ── Card: Deskripsi ───────────────────────────────────────────
   Widget _buildDeskripsiCard() {
     return _cardWrapper(
       child: Column(
@@ -212,30 +304,33 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
                   minLines: 4,
                   maxLines: 8,
                   style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
-                      height: 1.5),
+                      fontSize: 14, color: AppColors.textPrimary, height: 1.5),
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(12),
                     filled: true,
                     fillColor: Colors.white,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide:
-                          BorderSide(color: _teal.withOpacity(0.5)),
+                      borderSide: BorderSide(color: _teal.withOpacity(0.5)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide:
-                          const BorderSide(color: _teal, width: 1.5),
+                      borderSide: const BorderSide(color: _teal, width: 1.5),
                     ),
                   ),
                 )
               : Text(
-                  _deskripsiCtrl.text,
-                  style: const TextStyle(
+                  _deskripsiCtrl.text.isEmpty
+                      ? 'Belum ada deskripsi mengajar.'
+                      : _deskripsiCtrl.text,
+                  style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.textPrimary,
+                    color: _deskripsiCtrl.text.isEmpty
+                        ? AppColors.textSecondary
+                        : AppColors.textPrimary,
+                    fontStyle: _deskripsiCtrl.text.isEmpty
+                        ? FontStyle.italic
+                        : FontStyle.normal,
                     height: 1.6,
                   ),
                 ),
@@ -244,7 +339,6 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
     );
   }
 
-  // ── Card: Metode ──────────────────────────────────────────────
   Widget _buildMetodeCard() {
     return _cardWrapper(
       child: Column(
@@ -295,8 +389,7 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
           color: isActive ? _teal : Colors.white,
           borderRadius: BorderRadius.circular(30),
@@ -308,16 +401,14 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon,
-                size: 18,
-                color: isActive ? Colors.white : AppColors.textPrimary),
+                size: 18, color: isActive ? Colors.white : AppColors.textPrimary),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color:
-                    isActive ? Colors.white : AppColors.textPrimary,
+                color: isActive ? Colors.white : AppColors.textPrimary,
               ),
             ),
           ],
@@ -326,7 +417,6 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
     );
   }
 
-  // ── Card: Slot Ketersediaan ───────────────────────────────────
   Widget _buildSlotCard() {
     return _cardWrapper(
       child: Column(
@@ -341,12 +431,8 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
             ),
           ),
           const SizedBox(height: 14),
-
-          // ── 7 tombol hari ──────────────────────────────────
           _buildHariSelector(),
           const SizedBox(height: 18),
-
-          // ── Slot Aktif ─────────────────────────────────────
           Text(
             'Slot Aktif - ${_selectedHari.namaLengkap}',
             style: const TextStyle(
@@ -358,8 +444,6 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
           const SizedBox(height: 10),
           _buildAktifChips(),
           const SizedBox(height: 18),
-
-          // ── Tambah slot ────────────────────────────────────
           if (_availableSlots.isNotEmpty) ...[
             const Text(
               'Tambah slot',
@@ -377,7 +461,6 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
     );
   }
 
-  // 7 tombol hari
   Widget _buildHariSelector() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -405,8 +488,7 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color:
-                        isSelected ? Colors.white : AppColors.textPrimary,
+                    color: isSelected ? Colors.white : AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -427,7 +509,6 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
     );
   }
 
-  // Slot aktif — view: plain chip, edit: chip + tombol ×
   Widget _buildAktifChips() {
     final aktif = _selectedHari.aktif;
 
@@ -481,9 +562,7 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
     );
   }
 
-  // Grid jam yang bisa ditambahkan (hanya edit mode)
   Widget _buildTambahSlotGrid() {
-    // Di view mode tetap tampil tapi tidak bisa diklik
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -491,8 +570,7 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
         return GestureDetector(
           onTap: _isEditMode ? () => _addSlot(jam) : null,
           child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: const Color(0xFFF0F0F0),
               borderRadius: BorderRadius.circular(20),
@@ -524,7 +602,6 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
     );
   }
 
-  // ── Shared ────────────────────────────────────────────────────
   Widget _cardWrapper({required Widget child}) {
     return Container(
       width: double.infinity,

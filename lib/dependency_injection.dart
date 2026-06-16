@@ -115,6 +115,14 @@ import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_payout_history_usec
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/take_money_usecase.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tarik_saldo/tarik_saldo_cubit.dart';
 
+// Tutor: Profil Mengajar
+import 'package:lazuadry_mobile_fe/data/datasources/profil_mengajar_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/profil_mengajar_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/profil_mengajar_repository.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_tutor_schedules_usecase.dart'; // the file name is still the same
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor/update_teaching_profile_usecase.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/profil_mengajar/profil_mengajar_cubit.dart';
+
 // Parent Dashboard
 import 'package:lazuadry_mobile_fe/data/datasources/parent_dashboard_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/parent_dashboard_repository_impl.dart';
@@ -457,5 +465,20 @@ Future<void> initDependencies() async {
     getTutorProfileUseCase: sl(),
     getPayoutHistoryUseCase: sl(),
     takeMoneyUseCase: sl(),
+  ));
+
+  // Tutor: Profil Mengajar
+  sl.registerLazySingleton<ProfilMengajarRemoteDataSource>(
+    () => ProfilMengajarRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<ProfilMengajarRepository>(
+    () => ProfilMengajarRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton(() => GetTeachingSchedulesUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateTeachingProfileUseCase(sl()));
+  sl.registerFactory(() => ProfilMengajarCubit(
+    getTutorProfileUseCase: sl(),
+    getTutorSchedulesUseCase: sl(),
+    updateTeachingProfileUseCase: sl(),
   ));
 }
