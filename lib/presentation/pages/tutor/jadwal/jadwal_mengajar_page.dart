@@ -439,6 +439,30 @@ class _SesiCard extends StatelessWidget {
               ? _buildOnlineInfo()
               : _buildOfflineInfo(),
         ),
+
+        const SizedBox(height: 10),
+
+        // ── Tombol Batalkan Sesi ──────────────────────────────────
+        SizedBox(
+          width: double.infinity,
+          height: 40,
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.pushNamed(
+              context,
+              '/tutor/jadwal/batalkan',
+              arguments: {'schedule_id': schedule.id},
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: _red,
+              side: BorderSide(color: _red.withOpacity(0.5)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            icon: const Icon(Icons.cancel_outlined, size: 16),
+            label: const Text('Batalkan Sesi',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          ),
+        ),
       ]),
     );
   }

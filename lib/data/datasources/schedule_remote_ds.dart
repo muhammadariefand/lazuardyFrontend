@@ -29,6 +29,12 @@ abstract class ScheduleRemoteDataSource {
     required double rate,
     required String comment,
   });
+
+  /// POST /schedule/cancel
+  Future<void> cancelSchedule({
+    required int scheduleId,
+    required String reason,
+  });
 }
 
 class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
@@ -190,6 +196,41 @@ class ScheduleRemoteDataSourceImpl implements ScheduleRemoteDataSource {
         throw ServerException('Hanya siswa yang dapat memberikan rating');
       }
       throw ServerException(_extractMessage(e, 'Terjadi kesalahan saat mengirim rating'));
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> cancelSchedule({
+    required int scheduleId,
+    required String reason,
+  }) async {
+    try {
+      final response = await dio.post(
+        '/schedule/cancel',
+        data: {
+          'schedule_id': scheduleId,
+          'reason': reason,
+        },
+      );
+      final responseData = response.data as Map<String, dynamic>;
+      if (responseData['status'] != 'success') {
+        throw ServerException(responseData['message'] ?? 'Gagal membatalkan sesi');
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw ServerException('Sesi telah berakhir, silakan login kembali');
+      }
+      if (e.response?.statusCode == 403) {
+        throw ServerException('Anda tidak memiliki akses untuk membatalkan sesi ini');
+      }
+      if (e.response?.statusCode == 404) {
+        throw ServerException('Sesi tidak ditemukan');
+      }
+      throw ServerException(_extractMessage(e, 'Terjadi kesalahan saat membatalkan sesi'));
     } on ServerException {
       rethrow;
     } catch (e) {

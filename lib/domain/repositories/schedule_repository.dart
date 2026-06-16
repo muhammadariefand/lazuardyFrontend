@@ -23,5 +23,11 @@ abstract class ScheduleRepository {
     required double rate,
     required String comment,
   });
+
+  /// POST /schedule/cancel
+  Future<void> cancelSchedule({
+    required int scheduleId,
+    required String reason,
+  });
 }
 

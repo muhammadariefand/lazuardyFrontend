@@ -60,6 +60,8 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/parent_dashboar
 import 'package:lazuadry_mobile_fe/presentation/state_management/package/package_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_booking/booking_flow_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/riwayat_sesi/riwayat_sesi_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/pembatalan_sesi/pembatalan_sesi_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/pages/tutor/jadwal/pembatalan_sesi_page.dart';
 
 // ── Shared ─────────────────────────────────────────────────────────
 import 'package:lazuadry_mobile_fe/presentation/pages/splash_page.dart';
@@ -260,6 +262,10 @@ class LazuardyApp extends StatelessWidget {
           '/tutor/jadwal': (context) => BlocProvider<ScheduleCubit>(
             create: (_) => sl<ScheduleCubit>(),
             child: const JadwalMengajarPage(),
+          ),
+          '/tutor/jadwal/batalkan': (context) => BlocProvider<PembatalanSesiCubit>(
+            create: (_) => sl<PembatalanSesiCubit>(),
+            child: const PembatalanSesiPage(),
           ),
           '/tutor/konfirmasi-booking': (context) => MultiBlocProvider(
             providers: [
