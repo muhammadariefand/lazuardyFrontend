@@ -104,6 +104,9 @@ import 'package:lazuadry_mobile_fe/domain/repositories/tutor_profile_repository.
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_tutor_profile_usecase.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_cubit.dart';
 
+import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_siswa/ulasan_siswa_cubit.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_tutor_reviews_usecase.dart';
+
 // Parent Dashboard
 import 'package:lazuadry_mobile_fe/data/datasources/parent_dashboard_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/repositories/parent_dashboard_repository_impl.dart';
@@ -425,5 +428,11 @@ Future<void> initDependencies() async {
   // Siswa: Ulasan Tutor
   sl.registerFactory(() => UlasanTutorCubit(
     getStudentReviewsUseCase: sl(),
+  ));
+
+  // Tutor: Ulasan Siswa
+  sl.registerLazySingleton(() => GetTutorReviewsUseCase(sl()));
+  sl.registerFactory(() => UlasanSiswaCubit(
+    getTutorReviewsUseCase: sl(),
   ));
 }

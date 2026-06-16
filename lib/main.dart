@@ -95,6 +95,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedu
 import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_dashboard/tutor_dashboard_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_siswa/ulasan_siswa_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/parent_profile/parent_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_tutor/ulasan_tutor_cubit.dart';
 
@@ -306,9 +307,10 @@ class LazuardyApp extends StatelessWidget {
 
           // ── Tutor: Profil Mengajar ─────────────────────────────
           '/tutor/profil-mengajar': (_) => const ProfilMengajarPage(),
-
-          // ── Tutor: Ulasan Siswa ─────────────────────────────
-          '/tutor/ulasan-siswa': (_) => const UlasanSiswaPage(),
+          '/tutor/ulasan-siswa': (context) => BlocProvider<UlasanSiswaCubit>(
+                create: (_) => sl<UlasanSiswaCubit>()..fetchReviews(),
+                child: const UlasanSiswaPage(),
+              ),
 
           // ── Tutor: Tarik Saldo ─────────────────────────────
           '/tutor/tarik-saldo': (_) => const TarikSaldoPage(),

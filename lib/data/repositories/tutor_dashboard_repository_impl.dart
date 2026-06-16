@@ -1,7 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/tutor_dashboard_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/data/models/review_model.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/server_exception.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/tutor_dashboard_entity.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/tutor_review_response_entity.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/paginated_data_entity.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/review_entity.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/tutor_dashboard_repository.dart';
 
 class TutorDashboardRepositoryImpl implements TutorDashboardRepository {
@@ -41,6 +45,49 @@ class TutorDashboardRepositoryImpl implements TutorDashboardRepository {
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException('Terjadi kesalahan tidak terduga saat mengambil data homepage.');
+    }
+  }
+
+  @override
+  Future<TutorReviewResponseEntity> getTutorReviews({
+    int? studentId,
+    int? minRating,
+    int? maxRating,
+    int? page,
+    int pagination = 10,
+  }) async {
+    try {
+      final responseMap = await remoteDataSource.getTutorReviews(
+        studentId: studentId,
+        minRating: minRating,
+        maxRating: maxRating,
+        page: page,
+        pagination: pagination,
+      );
+
+      final avgRating = (responseMap['avg_rating'] as num?)?.toDouble() ?? 0.0;
+      final paginationData = responseMap['data'] as Map<String, dynamic>;
+      final itemsData = paginationData['data'] as List<dynamic>? ?? [];
+
+      final items = itemsData
+          .map((item) => ReviewModel.fromJson(item as Map<String, dynamic>))
+          .toList();
+
+      final paginatedReviews = PaginatedDataEntity<ReviewEntity>(
+        data: items,
+        currentPage: paginationData['current_page'] as int? ?? 1,
+        lastPage: paginationData['last_page'] as int? ?? 1,
+        total: paginationData['total'] as int? ?? 0,
+      );
+
+      return TutorReviewResponseEntity(
+        avgRating: avgRating,
+        reviews: paginatedReviews,
+      );
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan tidak terduga saat mengambil ulasan dari siswa.');
     }
   }
 }

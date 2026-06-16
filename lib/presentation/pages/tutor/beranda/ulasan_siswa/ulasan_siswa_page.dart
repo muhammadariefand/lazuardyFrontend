@@ -1,299 +1,291 @@
-// lib/presentation/pages/tutor/ulasan_siswa_page.dart
-// Ulasan Siswa
-// - AppBar teal "Ulasan Siswa"
-// - Subtitle "Lihat Feedback dari siswa Anda"
-// - Card rating besar: angka 4.8, bintang, "Dari N ulasan siswa"
-// - List card ulasan: avatar + nama + tanggal + bintang + komentar
+// lib/presentation/pages/tutor/beranda/ulasan_siswa/ulasan_siswa_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/review_entity.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_siswa/ulasan_siswa_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_siswa/ulasan_siswa_state.dart';
+import 'package:intl/intl.dart';
 
 const _teal = Color(0xFF3AAFA9);
-const _starColor = Color(0xFFFFA726);
+const _starYellow = Color(0xFFFFB800);
 
-// ── Model ─────────────────────────────────────────────────────────
-class _UlasanData {
-  final String nama;
-  final String tanggal;
-  final double rating;
-  final String komentar;
-
-  const _UlasanData({
-    required this.nama,
-    required this.tanggal,
-    required this.rating,
-    required this.komentar,
-  });
-}
-
-// ── Page ──────────────────────────────────────────────────────────
-class UlasanSiswaPage extends StatelessWidget {
+class UlasanSiswaPage extends StatefulWidget {
   const UlasanSiswaPage({super.key});
 
-  // ── Dummy data ─────────────────────────────────────────────────
-  static const _ulasanList = [
-    _UlasanData(
-      nama: 'Ahmad',
-      tanggal: '1 April 2026',
-      rating: 5,
-      komentar:
-          'Bu Sarah mengajarnya dengan sangat sabar dan jeas. Saya jadi lebih paham matematika',
-    ),
-    _UlasanData(
-      nama: 'Ahmad',
-      tanggal: '1 April 2026',
-      rating: 5,
-      komentar:
-          'Bu Sarah mengajarnya dengan sangat sabar dan jeas. Saya jadi lebih paham matematika',
-    ),
-    _UlasanData(
-      nama: 'Ahmad',
-      tanggal: '1 April 2026',
-      rating: 4,
-      komentar:
-          'Bu Sarah mengajarnya dengan sangat sabar dan jeas. Saya jadi lebih paham matematika',
-    ),
-    _UlasanData(
-      nama: 'Ahmad',
-      tanggal: '1 April 2026',
-      rating: 5,
-      komentar:
-          'Bu Sarah mengajarnya dengan sangat sabar dan jeas. Saya jadi lebih paham matematika',
-    ),
-    _UlasanData(
-      nama: 'Dewi',
-      tanggal: '28 Maret 2026',
-      rating: 5,
-      komentar:
-          'Penjelasannya sangat mudah dipahami. Saya jadi lebih percaya diri dalam pelajaran.',
-    ),
-  ];
+  @override
+  State<UlasanSiswaPage> createState() => _UlasanSiswaPageState();
+}
 
-  double get _rataRating =>
-      _ulasanList.map((u) => u.rating).reduce((a, b) => a + b) /
-      _ulasanList.length;
+class _UlasanSiswaPageState extends State<UlasanSiswaPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      final state = context.read<UlasanSiswaCubit>().state;
+      if (state is UlasanSiswaLoaded && !state.hasReachedMax) {
+        context.read<UlasanSiswaCubit>().fetchReviews();
+      }
+    }
+  }
+
+  Future<void> _onRefresh() async {
+    context.read<UlasanSiswaCubit>().refreshReviews();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildAppBar(context),
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.all(16),
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        backgroundColor: _teal,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        titleSpacing: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Ulasan Siswa',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        ),
+      ),
+      body: BlocBuilder<UlasanSiswaCubit, UlasanSiswaState>(
+        builder: (context, state) {
+          if (state is UlasanSiswaInitial || (state is UlasanSiswaLoading && state.isFirstFetch)) {
+            return const Center(child: CircularProgressIndicator(color: _teal));
+          } else if (state is UlasanSiswaError) {
+            return Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Lihat Feedback dari siswa Anda',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                    ),
+                  Text(state.message, style: const TextStyle(color: Colors.red)),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () => context.read<UlasanSiswaCubit>().refreshReviews(),
+                    style: ElevatedButton.styleFrom(backgroundColor: _teal),
+                    child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
                   ),
-                  const SizedBox(height: 16),
-
-                  // ── Kartu Rating Besar ──────────────────────
-                  _buildRatingCard(),
-                  const SizedBox(height: 16),
-
-                  // ── List Ulasan ─────────────────────────────
-                  ..._ulasanList.map(
-                    (u) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildUlasanCard(u),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+            );
+          } else if (state is UlasanSiswaLoaded || state is UlasanSiswaLoading) {
+            List<ReviewEntity> reviews = [];
+            double avgRating = 0.0;
+            bool hasReachedMax = false;
+            int totalReview = 0;
 
-  // ── AppBar ────────────────────────────────────────────────────
-  Widget _buildAppBar(BuildContext context) {
-    return Container(
-      color: _teal,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 12,
-        left: 4,
-        right: 20,
-        bottom: 16,
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back_rounded,
-                color: Colors.white, size: 24),
-          ),
-          const Text(
-            'Ulasan Siswa',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+            if (state is UlasanSiswaLoaded) {
+              reviews = state.reviews;
+              avgRating = state.avgRating;
+              hasReachedMax = state.hasReachedMax;
+              totalReview = reviews.length;
+            } else if (state is UlasanSiswaLoading) {
+              reviews = state.oldReviews;
+              avgRating = state.avgRating;
+              totalReview = reviews.length;
+            }
 
-  // ── Kartu Rating Besar ────────────────────────────────────────
-  Widget _buildRatingCard() {
-    final avg = _rataRating;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F0E8),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          // Angka besar
-          Text(
-            avg.toStringAsFixed(1),
-            style: const TextStyle(
-              fontSize: 52,
-              fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
-              height: 1,
-            ),
-          ),
-          const SizedBox(height: 10),
+            return RefreshIndicator(
+              onRefresh: _onRefresh,
+              color: _teal,
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // ── Rating Header ─────────────────────────────
+                  SliverToBoxAdapter(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                      margin: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4)),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            avgRating.toStringAsFixed(1),
+                            style: const TextStyle(
+                                fontSize: 48,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary,
+                                height: 1.1),
+                          ),
+                          const SizedBox(height: 8),
+                          _StarRow(rating: avgRating, size: 24),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Dari rating rata-rata ulasan',
+                            style: const TextStyle(
+                                fontSize: 13, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
-          // Bintang
-          _buildStars(avg, size: 32),
-          const SizedBox(height: 10),
-
-          // Jumlah ulasan
-          Text(
-            'Dari ${_ulasanList.length} ulasan siswa',
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
+                  // ── Empty State ─────────────────────────────
+                  if (reviews.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('⭐', style: TextStyle(fontSize: 48)),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Belum ada ulasan dari siswa',
+                              style: TextStyle(fontSize: 15, color: AppColors.textSecondary),
+                            ),
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    // ── List Ulasan ─────────────────────────────
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 16),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            if (index < reviews.length) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: _buildUlasanCard(reviews[index]),
+                              );
+                            } else {
+                              return const Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Center(child: CircularProgressIndicator(color: _teal)),
+                              );
+                            }
+                          },
+                          childCount: reviews.length + (hasReachedMax ? 0 : 1),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
 
   // ── Kartu Ulasan ──────────────────────────────────────────────
-  Widget _buildUlasanCard(_UlasanData u) {
+  Widget _buildUlasanCard(ReviewEntity u) {
+    final String studentName = 'Siswa';
+    final String formattedDate = DateFormat('d MMMM yyyy', 'id_ID').format(u.createdAt);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _teal.withOpacity(0.45)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: avatar + nama/tanggal + bintang
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildAvatar(u.nama),
+              // Avatar
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: _teal.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  studentName[0].toUpperCase(),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w700, color: _teal),
+                ),
+              ),
               const SizedBox(width: 12),
+              // Nama & tgl
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      u.nama,
+                      studentName,
                       style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
+                          fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      u.tanggal,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
+                      formattedDate,
+                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
               ),
-              _buildStars(u.rating, size: 18),
+              // Bintang pojok
+              _StarRow(rating: u.rate, size: 14),
             ],
           ),
-          const SizedBox(height: 10),
-
+          const SizedBox(height: 12),
           // Komentar
           Text(
-            u.komentar,
+            u.comment,
             style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textPrimary,
-              height: 1.5,
-            ),
+                fontSize: 13, color: AppColors.textPrimary, height: 1.5),
           ),
         ],
       ),
     );
   }
+}
 
-  // ── Helpers ───────────────────────────────────────────────────
-  Widget _buildAvatar(String nama) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8EAF6),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Center(
-        child: Text(
-          nama[0].toUpperCase(),
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF3949AB),
-          ),
-        ),
-      ),
-    );
-  }
+// ── Bintang ───────────────────────────────────────────────────
+class _StarRow extends StatelessWidget {
+  final double rating;
+  final double size;
+  const _StarRow({required this.rating, this.size = 16});
 
-  Widget _buildStars(double rating, {double size = 20}) {
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (i) {
-        final filled = i < rating.floor();
-        final half = !filled && i < rating;
-        return Icon(
-          half
-              ? Icons.star_half_rounded
-              : filled
-                  ? Icons.star_rounded
-                  : Icons.star_outline_rounded,
-          color: (filled || half) ? _starColor : const Color(0xFFCCCCCC),
-          size: size,
-        );
+        final starVal = i + 1;
+        IconData icon;
+        if (rating >= starVal) {
+          icon = Icons.star_rounded;
+        } else if (rating >= starVal - 0.5) {
+          icon = Icons.star_half_rounded;
+        } else {
+          icon = Icons.star_outline_rounded;
+        }
+        return Icon(icon, color: _starYellow, size: size);
       }),
     );
   }
