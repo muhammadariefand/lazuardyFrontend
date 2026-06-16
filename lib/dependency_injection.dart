@@ -57,6 +57,14 @@ import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_tutor_dashboard_use
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/update_tutor_biodata_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/update_tutor_profile_photo_usecase.dart';
 
+import 'package:lazuadry_mobile_fe/data/datasources/package_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/package_repository.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/package_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/student/get_packages_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/student/get_package_detail_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/student/order_packages_usecase.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/package/package_cubit.dart';
+
 // State Management / Cubit
 import 'package:lazuadry_mobile_fe/presentation/state_management/dashboard/dashboard_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
@@ -167,6 +175,11 @@ Future<void> initDependencies() async {
     () => TutorDashboardRemoteDataSourceImpl(dio: sl()),
   );
 
+  // Remote Data Source untuk Package
+  sl.registerLazySingleton<PackageRemoteDataSource>(
+    () => PackageRemoteDataSourceImpl(dio: sl()),
+  );
+
   // ── REPOSITORIES ────────────────────────────────────────────
   // Repository untuk Auth
   sl.registerLazySingleton<AuthRepository>(
@@ -206,6 +219,11 @@ Future<void> initDependencies() async {
     () => RegionRepositoryImpl(remoteDataSource: sl()),
   );   
 
+  // Repository untuk Package
+  sl.registerLazySingleton<PackageRepository>(
+    () => PackageRepositoryImpl(remoteDataSource: sl()),
+  );
+
   // ── USECASES ────────────────────────────────────────────────
   // Auth Usecases
   sl.registerLazySingleton(() => StudentRegisterOtpEmailUsecase(repository: sl()));
@@ -232,6 +250,9 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => UpdateStudentBiodataUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfilePhotoUseCase(sl()));
   sl.registerLazySingleton(() => RegisterOtpEmailAnakUsecase(repository: sl()));
+  sl.registerLazySingleton(() => GetPackagesUseCase(sl()));
+  sl.registerLazySingleton(() => GetPackageDetailUseCase(sl()));
+  sl.registerLazySingleton(() => OrderPackagesUseCase(sl()));
 
   sl.registerLazySingleton(() => VerifyOtpTautkanAkunAnakUsecase(repository: sl()));
 
@@ -280,6 +301,12 @@ Future<void> initDependencies() async {
     getStudentBiodataUseCase: sl(),
     updateStudentBiodataUseCase: sl(),
     updateProfilePhotoUseCase: sl(),
+  ));
+
+  sl.registerFactory(() => PackageCubit(
+    getPackagesUseCase: sl(),
+    getPackageDetailUseCase: sl(),
+    orderPackagesUseCase: sl(),
   ));
 
   sl.registerFactory(() => ParentProfileCubit(

@@ -56,6 +56,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/booking_confirmation_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/parent_dashboard/parent_dashboard_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/package/package_cubit.dart';
 
 // ── Shared ─────────────────────────────────────────────────────────
 import 'package:lazuadry_mobile_fe/presentation/pages/splash_page.dart';
@@ -179,7 +180,10 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/rekomendasi-tutor': (_) => const RekomendasiTutorPage(),
 
           // ── Siswa: Beli Paket ────────────────────────────────────────
-          '/siswa/beli-paket': (_) => BeliPaketPage(),
+          '/siswa/beli-paket': (context) => BlocProvider<PackageCubit>(
+            create: (_) => sl<PackageCubit>(),
+            child: const BeliPaketPage(),
+          ),
           '/siswa/pembayaran': (_) => PembayaranPage(),
           '/siswa/kode-pembayaran': (_) => KodePembayaranPage(),
           '/siswa/pembayaran-berhasil': (_) => PembayaranBerhasilPage(),

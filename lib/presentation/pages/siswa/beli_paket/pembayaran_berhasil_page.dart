@@ -12,6 +12,11 @@ class PembayaranBerhasilPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Ambil data dinamis dari arguments
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final paketNama = args?['paketNama'] ?? 'Paket';
+    final jumlahSesi = args?['jumlahSesi'] ?? 0;
+
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       // Tidak ada AppBar — full dialog style
@@ -61,16 +66,16 @@ class PembayaranBerhasilPage extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                // Deskripsi
-                const Text(
-                  'Paket 8 Sesi telah aktif',
-                  style: TextStyle(
+                // Deskripsi — dinamis dari data paket
+                Text(
+                  '$paketNama telah aktif',
+                  style: const TextStyle(
                       fontSize: 14, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  '8 sesi ditambahkan ke akun Anda',
-                  style: TextStyle(
+                Text(
+                  '$jumlahSesi sesi ditambahkan ke akun Anda',
+                  style: const TextStyle(
                       fontSize: 14, color: AppColors.textSecondary),
                 ),
 
