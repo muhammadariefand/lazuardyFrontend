@@ -172,7 +172,10 @@ class LazuardyApp extends StatelessWidget {
             create: (_) => sl<StudentProfileCubit>(),
             child: const ProfilSiswaPage(),
           ),
-          '/siswa/edit-profil': (_) => const EditProfilSiswaPage(),
+          '/siswa/edit-profil': (context) => BlocProvider<StudentProfileCubit>(
+            create: (_) => sl<StudentProfileCubit>(),
+            child: const EditProfilSiswaPage(),
+          ),
           '/siswa/rekomendasi-tutor': (_) => const RekomendasiTutorPage(),
 
           // ── Siswa: Beli Paket ────────────────────────────────────────

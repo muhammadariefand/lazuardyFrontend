@@ -37,4 +37,26 @@ class StudentRepositoryImpl implements StudentRepository {
       throw ServerException('Terjadi kesalahan tidak terduga saat mengambil biodata.');
     }
   }
+
+  @override
+  Future<void> updateStudentBiodata(Map<String, dynamic> data) async {
+    try {
+      return await remoteDataSource.updateStudentBiodata(data);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan tidak terduga saat memperbarui biodata.');
+    }
+  }
+
+  @override
+  Future<void> updateProfilePhoto(List<int> fileBytes, String fileName) async {
+    try {
+      return await remoteDataSource.updateProfilePhoto(fileBytes, fileName);
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Terjadi kesalahan tidak terduga saat memperbarui foto profil.');
+    }
+  }
 }

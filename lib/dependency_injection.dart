@@ -51,6 +51,8 @@ import 'package:lazuadry_mobile_fe/domain/usecases/auth/student_register_usecase
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/register_otp_email_anak_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_register_email_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/student/get_student_biodata_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/student/update_student_biodata_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/student/update_profile_photo_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/get_tutor_dashboard_usecase.dart';
 
 // State Management / Cubit
@@ -225,6 +227,8 @@ Future<void> initDependencies() async {
 
   // Student Usecases
   sl.registerLazySingleton(() => GetStudentBiodataUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateStudentBiodataUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateProfilePhotoUseCase(sl()));
   sl.registerLazySingleton(() => RegisterOtpEmailAnakUsecase(repository: sl()));
 
   sl.registerLazySingleton(() => VerifyOtpTautkanAkunAnakUsecase(repository: sl()));
@@ -272,6 +276,8 @@ Future<void> initDependencies() async {
 
   sl.registerFactory(() => StudentProfileCubit(
     getStudentBiodataUseCase: sl(),
+    updateStudentBiodataUseCase: sl(),
+    updateProfilePhotoUseCase: sl(),
   ));
 
   sl.registerFactory(() => ParentProfileCubit(
