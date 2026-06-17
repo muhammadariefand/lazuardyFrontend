@@ -78,4 +78,100 @@ class RegionCubit extends Cubit<RegionState> {
   void selectSubdistrict(RegionEntity subdistrict) {
     emit(state.copyWith(selectedSubdistrict: subdistrict));
   }
+
+  void prefillRegions({
+    String? provinceName,
+    String? regencyName,
+    String? districtName,
+    String? subdistrictName,
+  }) async {
+    emit(state.copyWith(isLoading: true));
+    try {
+      final provinces = await getProvincesUseCase.execute();
+      RegionEntity? selProv;
+      if (provinceName != null) {
+        for (var p in provinces) {
+          if (p.name.toUpperCase().trim() == provinceName.toUpperCase().trim()) {
+            selProv = p;
+            break;
+          }
+        }
+      }
+
+      if (selProv == null) {
+        emit(state.copyWith(isLoading: false, provinces: provinces));
+        return;
+      }
+
+      final regencies = await getRegenciesUseCase.execute(selProv.id);
+      RegionEntity? selReg;
+      if (regencyName != null) {
+        for (var r in regencies) {
+          if (r.name.toUpperCase().trim() == regencyName.toUpperCase().trim()) {
+            selReg = r;
+            break;
+          }
+        }
+      }
+
+      if (selReg == null) {
+        emit(state.copyWith(
+          isLoading: false,
+          provinces: provinces,
+          selectedProvince: selProv,
+          regencies: regencies,
+        ));
+        return;
+      }
+
+      final districts = await getDistrictsUseCase.execute(selReg.id);
+      RegionEntity? selDist;
+      if (districtName != null) {
+        for (var d in districts) {
+          if (d.name.toUpperCase().trim() == districtName.toUpperCase().trim()) {
+            selDist = d;
+            break;
+          }
+        }
+      }
+
+      if (selDist == null) {
+        emit(state.copyWith(
+          isLoading: false,
+          provinces: provinces,
+          selectedProvince: selProv,
+          regencies: regencies,
+          selectedRegency: selReg,
+          districts: districts,
+        ));
+        return;
+      }
+
+      final subdistricts = await getSubdistrictsUseCase.execute(selDist.id);
+      RegionEntity? selSub;
+      if (subdistrictName != null) {
+        for (var s in subdistricts) {
+          if (s.name.toUpperCase().trim() == subdistrictName.toUpperCase().trim()) {
+            selSub = s;
+            break;
+          }
+        }
+      }
+
+      emit(state.copyWith(
+        isLoading: false,
+        provinces: provinces,
+        selectedProvince: selProv,
+        regencies: regencies,
+        selectedRegency: selReg,
+        districts: districts,
+        selectedDistrict: selDist,
+        subdistricts: subdistricts,
+        selectedSubdistrict: selSub,
+      ));
+    } catch (e) {
+      print("Error prefillRegions: $e");
+      emit(state.copyWith(isLoading: false));
+    }
+  }
 }

@@ -169,6 +169,7 @@ Future<void> initDependencies() async {
           options.headers.remove('Authorization');
           options.headers.remove('Content-Type');
           options.headers.remove('Accept');
+          options.contentType = null; // Important for Dio to completely drop the header
         }
         
         return handler.next(options);

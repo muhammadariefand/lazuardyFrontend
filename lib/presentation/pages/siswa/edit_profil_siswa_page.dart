@@ -4,6 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_state.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_state.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/region_entity.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_state.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/region_entity.dart';
 
 
 class EditProfilSiswaPage extends StatefulWidget {
@@ -20,10 +26,6 @@ class _EditProfilSiswaPageState extends State<EditProfilSiswaPage> {
   int? _classId;
   String? _kelas;
   String? _jenisKelamin;
-  String? _provinsi;
-  String? _kota;
-  String? _kecamatan;
-  String? _desa;
 
   // We add 'kelas 1' to match JSON for simplicity, and some mock regions
   static const _kelasList = [
@@ -32,77 +34,47 @@ class _EditProfilSiswaPageState extends State<EditProfilSiswaPage> {
     'Kelas 10 SMA','Kelas 11 SMA','3 SMA',
   ];
   static const _jkList = ['Laki-laki','Perempuan'];
-  static const _provinsiList = ['DI Yogyakarta','DKI Jakarta','Jawa Barat','Jawa Tengah','Jawa Timur'];
-  
-  static const _kotaList = {
-    'DI Yogyakarta': ['Kota Yogyakarta','Kab. Sleman','Bantul','Kulon Progo','Gunungkidul'],
-    'DKI Jakarta': ['Jakarta Pusat', 'Jakarta Selatan', 'Jakarta Barat']
-  };
-  
-  static const _kecamatanList = {
-    'Kab. Sleman': ['Depok','Mlati','Gamping','Godean'],
-    'Jakarta Pusat': ['Tanah Abang', 'Menteng']
-  };
-  
-  static const _desaList = {
-    'Depok': ['Catur Tunggal','Condong Catur','Maguwoharjo','Caturtunggal'],
-    'Tanah Abang': ['Bendungan Hilir', 'Karet Tengsin']
-  };
 
   @override
   void initState() {
     super.initState();
-    _initData();
+    context.read<StudentProfileCubit>().loadProfile();
+    // Default fetch provinces immediately so the dropdown starts loading
+    context.read<RegionCubit>().fetchProvinces();
   }
 
-  void _initData() {
-    final state = context.read<StudentProfileCubit>().state;
-    if (state is StudentProfileLoaded) {
-      final bio = state.biodata;
-      _namaCtrl.text = bio.name ?? '';
-      _waCtrl.text = bio.telephoneNumber ?? '';
-      
-      if (bio.dateOfBirth != null && bio.dateOfBirth!.length >= 10) {
-        // Assume format YYYY-MM-DD HH:MM:SS from JSON, slice to YYYY-MM-DD
-        final ymd = bio.dateOfBirth!.substring(0, 10).split('-');
-        if (ymd.length == 3) {
-          _tglLahirCtrl.text = '${ymd[2]}/${ymd[1]}/${ymd[0]}';
-        }
+  void _initData(dynamic bio) {
+    _namaCtrl.text = bio.name ?? '';
+    _waCtrl.text = bio.telephoneNumber ?? '';
+    
+    if (bio.dateOfBirth != null && bio.dateOfBirth!.length >= 10) {
+      // Assume format YYYY-MM-DD HH:MM:SS from JSON, slice to YYYY-MM-DD
+      final ymd = bio.dateOfBirth!.substring(0, 10).split('-');
+      if (ymd.length == 3) {
+        _tglLahirCtrl.text = '${ymd[2]}/${ymd[1]}/${ymd[0]}';
       }
+    }
 
-      if (bio.className != null && _kelasList.contains(bio.className)) {
-        _kelas = bio.className;
+    if (bio.className != null && _kelasList.contains(bio.className)) {
+      _kelas = bio.className;
+    }
+    _classId = bio.classId;
+
+    if (bio.gender != null) {
+      if (bio.gender!.toLowerCase() == 'male' || bio.gender!.toLowerCase() == 'laki-laki') {
+        _jenisKelamin = 'Laki-laki';
+      } else if (bio.gender!.toLowerCase() == 'female' || bio.gender!.toLowerCase() == 'perempuan') {
+        _jenisKelamin = 'Perempuan';
       }
-      _classId = bio.classId;
+    }
 
-      if (bio.gender != null) {
-        if (bio.gender!.toLowerCase() == 'male' || bio.gender!.toLowerCase() == 'laki-laki') {
-          _jenisKelamin = 'Laki-laki';
-        } else if (bio.gender!.toLowerCase() == 'female' || bio.gender!.toLowerCase() == 'perempuan') {
-          _jenisKelamin = 'Perempuan';
-        }
-      }
-
-      if (bio.homeAddress != null) {
-        if (_provinsiList.contains(bio.homeAddress!.province)) {
-          _provinsi = bio.homeAddress!.province;
-        } else {
-          // just to ensure it shows if the list is limited
-          _provinsi = null; 
-        }
-
-        if (_provinsi != null && (_kotaList[_provinsi]?.contains(bio.homeAddress!.regency) ?? false)) {
-          _kota = bio.homeAddress!.regency;
-        }
-
-        if (_kota != null && (_kecamatanList[_kota]?.contains(bio.homeAddress!.district) ?? false)) {
-          _kecamatan = bio.homeAddress!.district;
-        }
-
-        if (_kecamatan != null && (_desaList[_kecamatan]?.contains(bio.homeAddress!.subdistrict) ?? false)) {
-          _desa = bio.homeAddress!.subdistrict;
-        }
-      }
+    if (bio.homeAddress != null) {
+      context.read<RegionCubit>().prefillRegions(
+        provinceName: bio.homeAddress!.province,
+        regencyName: bio.homeAddress!.regency,
+        districtName: bio.homeAddress!.district,
+        subdistrictName: bio.homeAddress!.subdistrict,
+      );
     }
   }
 
@@ -145,16 +117,22 @@ class _EditProfilSiswaPageState extends State<EditProfilSiswaPage> {
     if (_jenisKelamin == 'Laki-laki') genderVal = 'male';
     if (_jenisKelamin == 'Perempuan') genderVal = 'female';
 
+    final regionState = context.read<RegionCubit>().state;
+    final prov = regionState.selectedProvince?.name;
+    final reg = regionState.selectedRegency?.name;
+    final dist = regionState.selectedDistrict?.name;
+    final subdist = regionState.selectedSubdistrict?.name;
+
     final requestData = <String, dynamic>{
       if (_namaCtrl.text.isNotEmpty) 'name': _namaCtrl.text,
       if (_classId != null) 'class_id': _classId, // Ideally selected from dropdown mapping
       if (_waCtrl.text.isNotEmpty) 'telephone_number': _waCtrl.text,
       if (formattedDate != null) 'date_of_birth': formattedDate,
       if (genderVal != null) 'gender': genderVal,
-      if (_provinsi != null) 'province': _provinsi,
-      if (_kota != null) 'regency': _kota,
-      if (_kecamatan != null) 'district': _kecamatan,
-      if (_desa != null) 'subdistrict': _desa,
+      if (prov != null) 'province': prov,
+      if (reg != null) 'regency': reg,
+      if (dist != null) 'district': dist,
+      if (subdist != null) 'subdistrict': subdist,
       // Default to Islam for demo
       'religion': 'islam',
     };
@@ -217,7 +195,9 @@ class _EditProfilSiswaPageState extends State<EditProfilSiswaPage> {
   Widget build(BuildContext context) {
     return BlocListener<StudentProfileCubit, StudentProfileState>(
       listener: (context, state) {
-        if (state is StudentProfileUpdateSuccess) {
+        if (state is StudentProfileLoaded) {
+          _initData(state.biodata);
+        } else if (state is StudentProfileUpdateSuccess) {
           _showSuccessDialog(state.message);
         } else if (state is StudentProfileUpdateError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -365,25 +345,54 @@ class _EditProfilSiswaPageState extends State<EditProfilSiswaPage> {
 
               const SizedBox(height: 16),
 
-              // Detail Alamat
-              _buildCard('Detail Alamat', [
-                _dropdown('Provinsi', _provinsi, _provinsiList, (v) => setState(() {
-                      _provinsi = v;
-                      _kota = null;
-                      _kecamatan = null;
-                      _desa = null;
-                    })),
-                _dropdown('Kota/Kabupaten', _kota, _kotaList[_provinsi] ?? [], (v) => setState(() {
-                      _kota = v;
-                      _kecamatan = null;
-                      _desa = null;
-                    })),
-                _dropdown('Kecamatan', _kecamatan, _kecamatanList[_kota] ?? [], (v) => setState(() {
-                      _kecamatan = v;
-                      _desa = null;
-                    })),
-                _dropdown('Desa/Kelurahan', _desa, _desaList[_kecamatan] ?? [], (v) => setState(() => _desa = v)),
-              ]),
+              BlocBuilder<RegionCubit, RegionState>(
+                builder: (context, regionState) {
+                  return _buildCard('Detail Alamat', [
+                    _buildDropdownSection(
+                      label: 'Provinsi',
+                      hint: regionState.isLoading 
+                          ? 'Sedang memuat...' 
+                          : (regionState.provinces.isEmpty ? 'Gagal memuat data / Kosong' : 'Pilih Provinsi'),
+                      value: regionState.selectedProvince,
+                      items: regionState.provinces,
+                      isEnabled: !regionState.isLoading && regionState.provinces.isNotEmpty,
+                      onChanged: (val) {
+                        if (val != null) context.read<RegionCubit>().selectProvince(val);
+                      },
+                    ),
+                    _buildDropdownSection(
+                      label: 'Kota/Kabupaten',
+                      hint: 'Pilih Kota/Kabupaten',
+                      value: regionState.selectedRegency,
+                      items: regionState.regencies,
+                      isEnabled: regionState.regencies.isNotEmpty && regionState.selectedProvince != null,
+                      onChanged: (val) {
+                        if (val != null) context.read<RegionCubit>().selectRegency(val);
+                      },
+                    ),
+                    _buildDropdownSection(
+                      label: 'Kecamatan',
+                      hint: 'Pilih Kecamatan',
+                      value: regionState.selectedDistrict,
+                      items: regionState.districts,
+                      isEnabled: regionState.districts.isNotEmpty && regionState.selectedRegency != null,
+                      onChanged: (val) {
+                        if (val != null) context.read<RegionCubit>().selectDistrict(val);
+                      },
+                    ),
+                    _buildDropdownSection(
+                      label: 'Desa/Kelurahan',
+                      hint: 'Pilih Desa/Kelurahan',
+                      value: regionState.selectedSubdistrict,
+                      items: regionState.subdistricts,
+                      isEnabled: regionState.subdistricts.isNotEmpty && regionState.selectedDistrict != null,
+                      onChanged: (val) {
+                        if (val != null) context.read<RegionCubit>().selectSubdistrict(val);
+                      },
+                    ),
+                  ]);
+                },
+              ),
 
               const SizedBox(height: 24),
             ],
@@ -474,5 +483,40 @@ class _EditProfilSiswaPageState extends State<EditProfilSiswaPage> {
                 items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 13)))).toList(),
               )),
         ]));
+  }
+
+  Widget _buildDropdownSection({
+    required String label,
+    required String hint,
+    required RegionEntity? value,
+    required List<RegionEntity> items,
+    required bool isEnabled,
+    required ValueChanged<RegionEntity?> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _label(label),
+          Opacity(
+            opacity: isEnabled ? 1.0 : 0.45,
+            child: IgnorePointer(
+              ignoring: !isEnabled,
+              child: DropdownButtonFormField<RegionEntity>(
+                value: items.contains(value) ? value : null,
+                onChanged: onChanged,
+                decoration: _inputDeco(hint: hint),
+                icon: const Icon(Icons.keyboard_arrow_up_rounded, color: AppColors.textSecondary),
+                dropdownColor: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                isExpanded: true,
+                items: items.map((e) => DropdownMenuItem(value: e, child: Text(e.name, style: const TextStyle(fontSize: 13)))).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
