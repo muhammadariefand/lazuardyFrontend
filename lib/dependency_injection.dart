@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lazuadry_mobile_fe/core/constants/app_constants.dart';
 
 // Core & Network
 import 'package:lazuadry_mobile_fe/core/network/api_client.dart';
@@ -161,11 +162,13 @@ Future<void> initDependencies() async {
       onRequest: (options, handler) {
         // Cek secara pintar: Jika path TIDAK dimulai dengan 'http', atau path-nya mengandung backend Lazuardy
         final isBackendRequest = !options.path.startsWith('http') || 
-                                 options.path.contains('lazuardybackend-hexa.onrender.com');
+                                 options.path.startsWith(AppApiConstants.baseUrl);
 
         if (!isBackendRequest) {
           // Jika menembak ke API luar (seperti Emsifa), bersihkan header agar tidak memicu error jembatan
           options.headers.remove('Authorization');
+          options.headers.remove('Content-Type');
+          options.headers.remove('Accept');
         }
         
         return handler.next(options);
@@ -186,7 +189,7 @@ Future<void> initDependencies() async {
 
   // Remote Data Source untuk Wilayah/Region
   sl.registerLazySingleton<RegionRemoteDataSource>(
-    () => RegionRemoteDataSourceImpl(client: sl())
+    () => RegionRemoteDataSourceImpl(client: Dio()),
   );
 
   // Remote Data Source untuk Dashboard

@@ -12,7 +12,7 @@ class RegionRemoteDataSourceImpl implements RegionRemoteDataSource {
   final Dio client;
   
   // Menggunakan URL resmi dari Emsifa (sementara tanpa fork untuk mempercepat progres)
-  final String _baseUrl = 'https://emsifa.github.io/api-wilayah-indonesia/api';
+  final String _baseUrl = 'https://www.emsifa.com/api-wilayah-indonesia/api';
 
   RegionRemoteDataSourceImpl({required this.client});
 

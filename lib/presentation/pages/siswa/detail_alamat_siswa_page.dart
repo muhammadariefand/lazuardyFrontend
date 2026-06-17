@@ -107,7 +107,7 @@ class _DetailAlamatSiswaPageState extends State<DetailAlamatSiswaPage> {
       backgroundColor: AppColors.bgWhite,
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, authState) {
-          if (authState is AuthSuccess) {
+          if (authState is RegisterStudentSuccess || authState is AuthSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Registrasi Berhasil!'), backgroundColor: Colors.green),
             );
