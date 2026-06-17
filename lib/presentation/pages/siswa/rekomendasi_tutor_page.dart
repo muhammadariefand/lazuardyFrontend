@@ -1,19 +1,29 @@
 // lib/presentation/pages/siswa/rekomendasi_tutor_page.dart
-// Rekomendasi Tutor "Lihat semua" — list diurutkan rating+ulasan,
+// Rekomendasi Tutor "Lihat semua" — list diurutkan rating,
 // tap kartu → langsung ke pilih jadwal (skip kategori karena dari rekomendasi)
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import '../../../../domain/entities/tutor_entity.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/student_booking/booking_flow_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/student_booking/booking_flow_state.dart';
 
 
-class RekomendasiTutorPage extends StatelessWidget {
+class RekomendasiTutorPage extends StatefulWidget {
   const RekomendasiTutorPage({super.key});
 
-  static const _tutorList = [
-    _TutorItem('Ibu Sarah',  'Matematika', 4.9, 127, 'S', true,  true),
-    _TutorItem('Ibu Dewi',   'Matematika', 4.8, 98,  'D', true,  false),
-    _TutorItem('Ibu Indah',  'Matematika', 4.7, 64,  'I', false, true),
-  ];
+  @override
+  State<RekomendasiTutorPage> createState() => _RekomendasiTutorPageState();
+}
+
+class _RekomendasiTutorPageState extends State<RekomendasiTutorPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<BookingFlowCubit>().fetchTutorsByCriteria(page: 1);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,35 +60,56 @@ class RekomendasiTutorPage extends StatelessWidget {
                         color: AppColors.textPrimary),
                   ),
                   TextSpan(
-                      text: 'diurutkan rating tertinggi dan ulasan terbanyak'),
+                      text: 'diurutkan berdasarkan rating tertinggi'),
                 ],
               ),
             ),
           ),
 
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              physics: const BouncingScrollPhysics(),
-              itemCount: _tutorList.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (_, i) {
-                final t = _tutorList[i];
-                return _TutorCard(
-                  tutor: t,
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    '/siswa/booking/pilih-jadwal',
-                    arguments: {
-                      'tutor_nama': t.nama,
-                      'tutor_mapel': t.mapel,
-                      'tutor_rating': t.rating,
-                      'tutor_ulasan': t.ulasan,
-                      'tutor_inisial': t.inisial,
-                      'mapel': t.mapel,
+            child: BlocBuilder<BookingFlowCubit, BookingFlowState>(
+              builder: (context, state) {
+                if (state is BookingFlowLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is BookingFlowError) {
+                  return Center(
+                    child: Text(
+                      state.message,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                } else if (state is TutorsLoaded) {
+                  final tutorList = state.tutors;
+                  if (tutorList.isEmpty) {
+                    return const Center(
+                      child: Text('Belum ada tutor yang tersedia.'),
+                    );
+                  }
+
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: tutorList.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (_, i) {
+                      final t = tutorList[i];
+                      return _TutorCard(
+                        tutor: t,
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          '/siswa/booking/pilih-jadwal',
+                          arguments: {
+                            'tutor_id': int.tryParse(t.id),
+                          },
+                        ),
+                      );
                     },
-                  ),
-                );
+                  );
+                }
+                
+                // Fallback state
+                return const SizedBox.shrink();
               },
             ),
           ),
@@ -90,12 +121,29 @@ class RekomendasiTutorPage extends StatelessWidget {
 
 // ── Kartu tutor ───────────────────────────────────────────────────
 class _TutorCard extends StatelessWidget {
-  final _TutorItem tutor;
+  final TutorEntity tutor;
   final VoidCallback onTap;
+  
   const _TutorCard({required this.tutor, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    // Determine the subject to display (using the first available subject if any)
+    String subjectName = 'Umum';
+    if (tutor.subjects != null && tutor.subjects!.isNotEmpty) {
+      subjectName = tutor.subjects!.first['subject_name']?.toString() ?? 'Umum';
+    }
+
+    // Prepare Initials
+    String inisial = tutor.name.isNotEmpty ? tutor.name.substring(0, 1).toUpperCase() : '?';
+
+    // Methods
+    bool hasOnline = tutor.learningMethods.any((m) => m.toLowerCase() == 'online');
+    bool hasOffline = tutor.learningMethods.any((m) => m.toLowerCase() == 'offline');
+
+    // Rating (fallback to 0.0)
+    double rating = tutor.avgRate ?? 0.0;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -118,7 +166,7 @@ class _TutorCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
-            child: Text(tutor.inisial,
+            child: Text(inisial,
                 style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.secondary)),
           ),
           const SizedBox(width: 14),
@@ -126,21 +174,19 @@ class _TutorCard extends StatelessWidget {
           // Info
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(tutor.nama,
+              Text(tutor.name,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary)),
               const SizedBox(height: 2),
-              Text(tutor.mapel,
+              Text(subjectName,
                   style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
               const SizedBox(height: 6),
               Row(children: [
                 const Icon(Icons.star_rounded, color: AppColors.warningYellow, size: 15),
                 const SizedBox(width: 3),
-                Text('${tutor.rating}',
+                Text('$rating',
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary)),
-                Text('  (${tutor.ulasan} ulasan)',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ]),
             ]),
           ),
@@ -150,9 +196,9 @@ class _TutorCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (tutor.hasOnline)  _badge('Online',  AppColors.successGreen),
-              if (tutor.hasOnline && tutor.hasOffline) const SizedBox(height: 4),
-              if (tutor.hasOffline) _badge('Offline', AppColors.errorRed),
+              if (hasOnline)  _badge('Online',  AppColors.successGreen),
+              if (hasOnline && hasOffline) const SizedBox(height: 4),
+              if (hasOffline) _badge('Offline', AppColors.errorRed),
             ],
           ),
         ]),
@@ -169,14 +215,4 @@ class _TutorCard extends StatelessWidget {
     ),
     child: Text(label,
         style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)));
-}
-
-// ── Model ─────────────────────────────────────────────────────────
-class _TutorItem {
-  final String nama, mapel, inisial;
-  final double rating;
-  final int ulasan;
-  final bool hasOnline, hasOffline;
-  const _TutorItem(this.nama, this.mapel, this.rating, this.ulasan,
-      this.inisial, this.hasOnline, this.hasOffline);
 }
