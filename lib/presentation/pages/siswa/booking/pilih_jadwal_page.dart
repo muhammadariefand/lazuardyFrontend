@@ -10,9 +10,6 @@ import '../../../../domain/entities/tutor_availability_entity.dart';
 import '../../../state_management/student_booking/booking_flow_cubit.dart';
 import '../../../state_management/student_booking/booking_flow_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _starYellow = Color(0xFFFFB800);
-const _navy = Color(0xFF1E2D7D);
 
 class PilihJadwalPage extends StatefulWidget {
   const PilihJadwalPage({super.key});
@@ -105,7 +102,7 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
           : 'Lengkapi alamat dan link maps untuk sesi offline';
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(msg),
-        backgroundColor: const Color(0xFFE53E3E),
+        backgroundColor: AppColors.errorRed,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
       ));
@@ -159,7 +156,7 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
         if (state is BookingFlowError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
-            backgroundColor: const Color(0xFFE53E3E),
+            backgroundColor: AppColors.errorRed,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
           ));
@@ -179,7 +176,7 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            backgroundColor: _teal,
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             elevation: 0,
             titleSpacing: 0,
@@ -196,7 +193,7 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
               child: ElevatedButton(
                 onPressed: isLoading ? null : _onLanjutKonfirmasi,
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: _teal,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -254,7 +251,7 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
                   const Text('Pilih Jam',
                       style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary)),
-                  if (isLoading) const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: _teal, strokeWidth: 2)),
+                  if (isLoading) const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2)),
                 ],
               ),
               const SizedBox(height: 10),
@@ -302,14 +299,14 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
         borderSide: BorderSide(color: Colors.grey.shade300)),
     focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _teal, width: 1.5)),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
   );
 
   Widget _buildTutorCard(String nama, String mapel, double rating, int ulasan, String inisial, String? photoUrl) =>
     Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _teal.withOpacity(0.4)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)]),
       child: Row(children: [
         Container(
@@ -326,22 +323,22 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
           ),
           alignment: Alignment.center, 
           child: (photoUrl == null || photoUrl.isEmpty) 
-            ? Text(inisial, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF1E2D7D)))
+            ? Text(inisial, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AppColors.secondary))
             : null
         ),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(nama, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          Text(mapel, style: const TextStyle(fontSize: 12, color: _teal, fontWeight: FontWeight.w500)),
+          Text(mapel, style: const TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w500)),
           const SizedBox(height: 4),
           Row(children: [
-            const Icon(Icons.star_rounded, color: _starYellow, size: 14),
+            const Icon(Icons.star_rounded, color: AppColors.warningYellow, size: 14),
             const SizedBox(width: 3),
             Text('$rating', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
           ]),
         ])),
         Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(color: const Color(0xFF25D366), borderRadius: BorderRadius.circular(20)),
+          decoration: BoxDecoration(color: AppColors.successGreen, borderRadius: BorderRadius.circular(20)),
           child: const Row(mainAxisSize: MainAxisSize.min, children: [
             Icon(Icons.chat_rounded, size: 13, color: Colors.white),
             SizedBox(width: 5),
@@ -357,7 +354,7 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
         alignment: Alignment.center,
         decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.shade200)),
-        child: const CircularProgressIndicator(color: _teal),
+        child: const CircularProgressIndicator(color: AppColors.primary),
       );
     }
     
@@ -401,9 +398,9 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
           duration: const Duration(milliseconds: 150),
           height: 48,
           decoration: BoxDecoration(
-            color: _selectedMetode == 'online' ? _teal : Colors.white,
+            color: _selectedMetode == 'online' ? AppColors.primary : Colors.white,
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: _teal.withOpacity(0.4)),
+            border: Border.all(color: AppColors.primary.withOpacity(0.4)),
           ),
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(Icons.videocam_outlined, color: _selectedMetode == 'online' ? Colors.white : AppColors.textSecondary, size: 18),
@@ -420,9 +417,9 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
           duration: const Duration(milliseconds: 150),
           height: 48,
           decoration: BoxDecoration(
-            color: _selectedMetode == 'offline' ? _teal : Colors.white,
+            color: _selectedMetode == 'offline' ? AppColors.primary : Colors.white,
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: _teal.withOpacity(0.4)),
+            border: Border.all(color: AppColors.primary.withOpacity(0.4)),
           ),
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Icon(Icons.location_on_outlined, color: _selectedMetode == 'offline' ? Colors.white : AppColors.textSecondary, size: 18),
@@ -479,9 +476,9 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
             duration: const Duration(milliseconds: 180),
             width: 42, height: 60,
             decoration: BoxDecoration(
-              color: isPast ? Colors.grey.shade100 : (isSelected ? _teal : Colors.white),
+              color: isPast ? Colors.grey.shade100 : (isSelected ? AppColors.primary : Colors.white),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: isPast ? Colors.grey.shade200 : (isSelected ? _teal : _teal.withOpacity(0.4)), width: isSelected ? 1.5 : 1.2),
+              border: Border.all(color: isPast ? Colors.grey.shade200 : (isSelected ? AppColors.primary : AppColors.primary.withOpacity(0.4)), width: isSelected ? 1.5 : 1.2),
             ),
             child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text(_hariSingkat[e.key], style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500,
@@ -522,10 +519,10 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
             decoration: BoxDecoration(
-              color: isSelected ? _teal : Colors.white,
+              color: isSelected ? AppColors.primary : Colors.white,
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
-                color: isSelected ? _teal : _teal.withOpacity(0.4),
+                color: isSelected ? AppColors.primary : AppColors.primary.withOpacity(0.4),
                 width: isSelected ? 1.5 : 1.2,
               ),
             ),

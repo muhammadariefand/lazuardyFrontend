@@ -16,7 +16,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedu
 import 'package:lazuadry_mobile_fe/presentation/widgets/orangtua_bottom_nav.dart';
 import 'detail_sesi_orangtua_page.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 // ── Model ─────────────────────────────────────────────────────────
 class SesiJadwalData {
@@ -284,7 +283,7 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
   // ── AppBar ────────────────────────────────────────────────────
   Widget _buildAppBar() {
     return Container(
-      color: _teal,
+      color: AppColors.primary,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 12,
         left: 20,
@@ -366,10 +365,10 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
             width: (MediaQuery.of(context).size.width - 32 - 42) / 7,
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
-              color: isSelected ? _teal : Colors.white,
+              color: isSelected ? AppColors.primary : Colors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected ? _teal : const Color(0xFFCCCCCC),
+                color: isSelected ? AppColors.primary : const Color(0xFFCCCCCC),
               ),
             ),
             child: Column(
@@ -415,7 +414,7 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _teal.withOpacity(0.5)),
+          border: Border.all(color: AppColors.primary.withOpacity(0.5)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -441,7 +440,7 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: _teal,
+                          color: AppColors.primary,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -559,7 +558,7 @@ class _JadwalOrangtuaPageState extends State<JadwalOrangtuaPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFF25D366),
+          color: AppColors.successGreen,
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Row(

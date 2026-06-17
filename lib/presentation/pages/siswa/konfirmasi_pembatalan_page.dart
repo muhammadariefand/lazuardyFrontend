@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class KonfirmasiPembatalanPage extends StatelessWidget {
   const KonfirmasiPembatalanPage({super.key});
@@ -17,7 +16,7 @@ class KonfirmasiPembatalanPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal, foregroundColor: Colors.white, elevation: 0,
+        backgroundColor: AppColors.primary, foregroundColor: Colors.white, elevation: 0,
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
         title: const Text('Konfirmasi Pembatalan', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
       ),
@@ -34,7 +33,7 @@ class KonfirmasiPembatalanPage extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(child: SizedBox(height: 52, child: ElevatedButton(
             onPressed: () => Navigator.pushReplacementNamed(context, '/siswa/sesi-dibatalkan'),
-            style: ElevatedButton.styleFrom(backgroundColor: _teal, foregroundColor: Colors.white, elevation: 0,
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
             child: const Text('Ya, Batalkan Sesi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
           ))),
@@ -75,11 +74,11 @@ class KonfirmasiPembatalanPage extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(color: const Color(0xFFFFEBEE), borderRadius: BorderRadius.circular(12)),
             child: const Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Icon(Icons.warning_amber_rounded, color: Color(0xFFE53E3E), size: 18),
+              Icon(Icons.warning_amber_rounded, color: AppColors.errorRed, size: 18),
               SizedBox(width: 10),
               Expanded(child: Text(
                 'Pembatalan dilakukan kurang dari 12 jam sebelum sesi dimulai. Kuota sesi akan hangus dan tidak dapat dikembalikan.',
-                style: TextStyle(fontSize: 12, color: Color(0xFFE53E3E), height: 1.5))),
+                style: TextStyle(fontSize: 12, color: AppColors.errorRed, height: 1.5))),
             ]),
           ),
         ]),

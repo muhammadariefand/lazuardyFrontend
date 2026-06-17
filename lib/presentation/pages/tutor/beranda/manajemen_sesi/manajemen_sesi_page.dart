@@ -12,8 +12,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/laporan_sesi/la
 import 'package:lazuadry_mobile_fe/dependency_injection.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _red = Color(0xFFE53E3E);
 
 class ManajemenSesiPage extends StatefulWidget {
   const ManajemenSesiPage({super.key});
@@ -70,13 +68,13 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
           const SizedBox(height: 16),
           Expanded(
             child: RefreshIndicator(
-              color: _teal,
+              color: AppColors.primary,
               onRefresh: () async => _loadData(),
               child: BlocBuilder<ScheduleCubit, ScheduleState>(
                 builder: (context, state) {
                   if (state is ScheduleLoading || state is ScheduleInitial) {
                     return const Center(
-                      child: CircularProgressIndicator(color: _teal),
+                      child: CircularProgressIndicator(color: AppColors.primary),
                     );
                   }
 
@@ -85,11 +83,11 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(state.message, style: const TextStyle(color: _red)),
+                          Text(state.message, style: const TextStyle(color: AppColors.errorRed)),
                           const SizedBox(height: 12),
                           ElevatedButton(
                             onPressed: _loadData,
-                            style: ElevatedButton.styleFrom(backgroundColor: _teal),
+                            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                             child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
                           ),
                         ],
@@ -139,7 +137,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
   // ── AppBar ────────────────────────────────────────────────────
   Widget _buildAppBar() {
     return Container(
-      color: _teal,
+      color: AppColors.primary,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 12,
         left: 4,
@@ -237,7 +235,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _teal.withOpacity(0.5)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -313,7 +311,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: _teal,
+          backgroundColor: AppColors.primary,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -347,7 +345,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _teal.withOpacity(0.5)),
+          border: Border.all(color: AppColors.primary.withOpacity(0.5)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -479,7 +477,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
                     content,
                     style: TextStyle(
                       fontSize: 13,
-                      color: isLink ? _teal : AppColors.textPrimary,
+                      color: isLink ? AppColors.primary : AppColors.textPrimary,
                       decoration:
                           isLink ? TextDecoration.underline : TextDecoration.none,
                       height: 1.4,
@@ -532,13 +530,13 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
             },
             child: const Row(
               children: [
-                Icon(Icons.open_in_new_rounded, size: 14, color: _teal),
+                Icon(Icons.open_in_new_rounded, size: 14, color: AppColors.primary),
                 SizedBox(width: 4),
                 Text(
                   'Buka di Google Maps',
                   style: TextStyle(
                     fontSize: 13,
-                    color: _teal,
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -617,7 +615,7 @@ class _ManajemenSesiPageState extends State<ManajemenSesiPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: const Color(0xFF25D366),
+          color: AppColors.successGreen,
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Row(

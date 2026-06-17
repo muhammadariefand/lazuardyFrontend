@@ -8,9 +8,6 @@ import '../../../../domain/entities/tutor_entity.dart';
 import '../../../state_management/student_booking/booking_flow_cubit.dart';
 import '../../../state_management/student_booking/booking_flow_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _starYellow = Color(0xFFFFB800);
-const _navy = Color(0xFF1E2D7D);
 
 class PilihTutorPage extends StatefulWidget {
   const PilihTutorPage({super.key});
@@ -21,7 +18,7 @@ class PilihTutorPage extends StatefulWidget {
 
 class _PilihTutorPageState extends State<PilihTutorPage> {
   Map? args;
-  int? subjectId;
+  int? classId;
   String? mapel;
   String? jenjang;
   String? kategori;
@@ -30,16 +27,16 @@ class _PilihTutorPageState extends State<PilihTutorPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     args = ModalRoute.of(context)?.settings.arguments as Map?;
-    if (args != null && subjectId == null) {
-      subjectId = args?['subject_id'] as int?;
+    if (args != null && classId == null) {
+      classId = args?['class_id'] as int?;
       mapel = args?['mapel'] as String? ?? 'Mapel';
       jenjang = args?['jenjang'] as String?;
       kategori = args?['kategori'] as String? ?? 'akademik';
 
       // Fetch tutor by criteria
       context.read<BookingFlowCubit>().fetchTutorsByCriteria(
-            subjectId: subjectId,
-            subjectName: kategori == 'umum' ? mapel : null, // Jika umum, coba cari berdasarkan nama mapel juga
+            classId: kategori == 'akademik' ? classId : null,
+            subjectName: kategori == 'umum' ? mapel : null,
             level: jenjang,
           );
     }
@@ -50,7 +47,7 @@ class _PilihTutorPageState extends State<PilihTutorPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
@@ -87,7 +84,7 @@ class _PilihTutorPageState extends State<PilihTutorPage> {
                 current is BookingFlowError,
             builder: (context, state) {
               if (state is BookingFlowLoading) {
-                return const Center(child: CircularProgressIndicator(color: _teal));
+                return const Center(child: CircularProgressIndicator(color: AppColors.primary));
               } else if (state is BookingFlowError) {
                 return Center(
                   child: Padding(
@@ -106,12 +103,12 @@ class _PilihTutorPageState extends State<PilihTutorPage> {
                         ElevatedButton(
                           onPressed: () {
                             context.read<BookingFlowCubit>().fetchTutorsByCriteria(
-                                  subjectId: subjectId,
+                                  classId: kategori == 'akademik' ? classId : null,
                                   subjectName: kategori == 'umum' ? mapel : null,
                                   level: jenjang,
                                 );
                           },
-                          style: ElevatedButton.styleFrom(backgroundColor: _teal),
+                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                           child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
                         )
                       ],
@@ -182,7 +179,7 @@ class _TutorCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _teal.withOpacity(0.4), width: 1.2),
+          border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.2),
           boxShadow: [
             BoxShadow(
                 color: Colors.black.withOpacity(0.04),
@@ -210,7 +207,7 @@ class _TutorCard extends StatelessWidget {
                   style: const TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
-                      color: _navy))
+                      color: AppColors.secondary))
               : null,
           ),
           const SizedBox(width: 14),
@@ -229,7 +226,7 @@ class _TutorCard extends StatelessWidget {
                       fontSize: 13, color: AppColors.textSecondary)),
               const SizedBox(height: 6),
               Row(children: [
-                const Icon(Icons.star_rounded, color: _starYellow, size: 15),
+                const Icon(Icons.star_rounded, color: AppColors.warningYellow, size: 15),
                 const SizedBox(width: 3),
                 Text('${tutor.avgRate ?? 0.0}',
                     style: const TextStyle(
@@ -248,9 +245,9 @@ class _TutorCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (hasOnline) _badge('Online', const Color(0xFF4CAF50)),
+              if (hasOnline) _badge('Online', AppColors.successGreen),
               if (hasOnline && hasOffline) const SizedBox(height: 4),
-              if (hasOffline) _badge('Offline', const Color(0xFFE53E3E)),
+              if (hasOffline) _badge('Offline', AppColors.errorRed),
             ],
           ),
         ]),

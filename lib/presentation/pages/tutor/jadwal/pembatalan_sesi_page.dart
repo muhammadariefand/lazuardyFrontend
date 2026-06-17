@@ -14,10 +14,6 @@ import 'package:lazuadry_mobile_fe/domain/entities/schedule_entity.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/pembatalan_sesi/pembatalan_sesi_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/pembatalan_sesi/pembatalan_sesi_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _navy = Color(0xFF1E2D7D);
-const _red = Color(0xFFE53E3E);
-const _orange = Color(0xFFF59E0B);
 
 class PembatalanSesiPage extends StatefulWidget {
   const PembatalanSesiPage({super.key});
@@ -73,7 +69,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
     if (alasan.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text('Isi alasan pembatalan terlebih dahulu'),
-        backgroundColor: _orange,
+        backgroundColor: AppColors.warningYellow,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -110,7 +106,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
                   );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: _red,
+              backgroundColor: AppColors.errorRed,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -137,9 +133,9 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
               height: 68,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: _teal, width: 2.5),
+                border: Border.all(color: AppColors.primary, width: 2.5),
               ),
-              child: const Icon(Icons.check_rounded, color: _teal, size: 38),
+              child: const Icon(Icons.check_rounded, color: AppColors.primary, size: 38),
             ),
             const SizedBox(height: 20),
             const Text('Sesi Dibatalkan',
@@ -164,7 +160,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
                   Navigator.of(context).pop(true); // kembali ke jadwal, kirim true utk refresh
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _teal,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -195,7 +191,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
         if (state is PembatalanSesiError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
-            backgroundColor: _red,
+            backgroundColor: AppColors.errorRed,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
             shape:
@@ -211,7 +207,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            backgroundColor: _red,
+            backgroundColor: AppColors.errorRed,
             foregroundColor: Colors.white,
             elevation: 0,
             titleSpacing: 0,
@@ -233,7 +229,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
                     ? null
                     : _onBatalkanTap,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _red,
+                  backgroundColor: AppColors.errorRed,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -254,7 +250,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
           ),
 
           body: isDetailLoading && _schedule == null
-              ? const Center(child: CircularProgressIndicator(color: _teal))
+              ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
               : _schedule == null && state is PembatalanSesiError
                   ? _buildErrorState(context, state.message)
                   : _buildForm(charCount),
@@ -268,7 +264,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.error_outline, color: _red, size: 48),
+            const Icon(Icons.error_outline, color: AppColors.errorRed, size: 48),
             const SizedBox(height: 12),
             Text(message,
                 textAlign: TextAlign.center,
@@ -283,7 +279,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: _teal,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
@@ -306,18 +302,18 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: _red.withValues(alpha: 0.06),
+            color: AppColors.errorRed.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: _red.withValues(alpha: 0.25)),
+            border: Border.all(color: AppColors.errorRed.withValues(alpha: 0.25)),
           ),
           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Icon(Icons.warning_amber_rounded, color: _red, size: 20),
+            const Icon(Icons.warning_amber_rounded, color: AppColors.errorRed, size: 20),
             const SizedBox(width: 10),
             const Expanded(
               child: Text(
                 'Pembatalan sesi akan memberikan dampak pada siswa. '
                 'Pastikan Anda telah menghubungi siswa sebelum membatalkan.',
-                style: TextStyle(fontSize: 13, color: _red, height: 1.5),
+                style: TextStyle(fontSize: 13, color: AppColors.errorRed, height: 1.5),
               ),
             ),
           ]),
@@ -362,7 +358,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _red, width: 1.5),
+              borderSide: const BorderSide(color: AppColors.errorRed, width: 1.5),
             ),
           ),
         ),
@@ -377,7 +373,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
               style: TextStyle(
                 fontSize: 12,
                 color: charCount >= _maxChar * 0.9
-                    ? _red
+                    ? AppColors.errorRed
                     : Colors.grey.shade500,
               ),
             ),
@@ -416,7 +412,7 @@ class _PembatalanSesiPageState extends State<PembatalanSesiPage> {
           child: Text(
             _inisialSiswa,
             style: const TextStyle(
-                fontSize: 20, fontWeight: FontWeight.w700, color: _navy),
+                fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.secondary),
           ),
         ),
         const SizedBox(width: 12),

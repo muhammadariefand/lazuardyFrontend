@@ -6,9 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _priceRed = Color(0xFFE53E3E);
-const _orange = Color(0xFFF59E0B);
+const _priceRed = AppColors.errorRed;
 
 class KodePembayaranPage extends StatefulWidget {
   const KodePembayaranPage({super.key});
@@ -82,7 +80,7 @@ class _KodePembayaranPageState extends State<KodePembayaranPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Nomor VA berhasil disalin'),
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -105,7 +103,7 @@ class _KodePembayaranPageState extends State<KodePembayaranPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
@@ -122,7 +120,7 @@ class _KodePembayaranPageState extends State<KodePembayaranPage> {
           child: ElevatedButton(
             onPressed: _onSudahBayar,
             style: ElevatedButton.styleFrom(
-                backgroundColor: _teal,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -144,7 +142,7 @@ class _KodePembayaranPageState extends State<KodePembayaranPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: _teal.withOpacity(0.4)),
+              border: Border.all(color: AppColors.primary.withOpacity(0.4)),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -197,7 +195,7 @@ class _KodePembayaranPageState extends State<KodePembayaranPage> {
                           duration: const Duration(milliseconds: 200),
                           child: _copied
                               ? const Icon(Icons.check_circle_rounded,
-                                  color: Color(0xFF4CAF50), size: 22,
+                                  color: AppColors.successGreen, size: 22,
                                   key: ValueKey('check'))
                               : Icon(Icons.copy_rounded,
                                   color: Colors.grey.shade500, size: 22,
@@ -225,7 +223,7 @@ class _KodePembayaranPageState extends State<KodePembayaranPage> {
               // Countdown timer
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 const Icon(Icons.access_time_rounded,
-                    color: _orange, size: 18),
+                    color: AppColors.warningYellow, size: 18),
                 const SizedBox(width: 6),
                 RichText(
                   text: TextSpan(
@@ -235,14 +233,14 @@ class _KodePembayaranPageState extends State<KodePembayaranPage> {
                         style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: _orange),
+                            color: AppColors.warningYellow),
                       ),
                       TextSpan(
                         text: _timerText,
                         style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
-                            color: _orange),
+                            color: AppColors.warningYellow),
                       ),
                     ],
                   ),
@@ -259,7 +257,7 @@ class _KodePembayaranPageState extends State<KodePembayaranPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _teal.withOpacity(0.4)),
+              border: Border.all(color: AppColors.primary.withOpacity(0.4)),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withOpacity(0.04),
@@ -273,7 +271,7 @@ class _KodePembayaranPageState extends State<KodePembayaranPage> {
                   style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: _teal)),
+                      color: AppColors.primary)),
               const SizedBox(height: 10),
               ..._caraPembayaran.asMap().entries.map((e) => Padding(
                     padding: const EdgeInsets.only(bottom: 8),

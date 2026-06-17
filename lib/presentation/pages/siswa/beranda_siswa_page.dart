@@ -7,9 +7,6 @@ import 'package:lazuadry_mobile_fe/presentation/widgets/siswa_bottom_nav.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/siswa_drawer.dart';
 import '../../../domain/entities/dashboard_entity.dart';
 
-const _navy = Color(0xFF24326B);
-const _teal = Color(0xFF2C8AA4);
-const _starYellow = Color(0xFFFFB800);
 
 class BerandaSiswaPage extends StatefulWidget {
   const BerandaSiswaPage({super.key});
@@ -31,7 +28,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: _teal,
+      backgroundColor: AppColors.primary,
       // Drawer dan BottomNav tetap menggunakan data dinamis nanti jika diperlukan, 
       // untuk saat ini kita biarkan statis sesuai desain awal.
       drawer: const SiswaDrawer(nama: 'Siswa', inisial: 'S'),
@@ -248,7 +245,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
               value: progress,
               minHeight: 10,
               backgroundColor: Colors.grey.shade200,
-              valueColor: const AlwaysStoppedAnimation<Color>(_navy),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.secondary),
             ),
           ),
           const SizedBox(height: 14),
@@ -260,7 +257,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
                 Navigator.pushNamed(context, '/siswa/beli-paket');
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: _navy,
+                  backgroundColor: AppColors.secondary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -370,10 +367,10 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
                             width: 38,
                             height: 38,
                             decoration: BoxDecoration(
-                                color: _teal.withOpacity(0.1),
+                                color: AppColors.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(9)),
                             child: const Icon(Icons.notifications_active,
-                                color: _teal, size: 18)), // Placeholder Icon
+                                color: AppColors.primary, size: 18)), // Placeholder Icon
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -495,7 +492,7 @@ class _BerandaSiswaPageState extends State<BerandaSiswaPage> {
                                 Row(
                                   children: [
                                     const Icon(Icons.star_rounded,
-                                        color: _starYellow, size: 13),
+                                        color: AppColors.warningYellow, size: 13),
                                     const SizedBox(width: 2),
                                     Text('${t.avgRate ?? 0.0}',
                                         style: const TextStyle(

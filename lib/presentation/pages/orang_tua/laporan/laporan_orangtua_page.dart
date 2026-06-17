@@ -12,7 +12,6 @@ import 'package:lazuadry_mobile_fe/presentation/widgets/orangtua_bottom_nav.dart
 import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 
 // ── Page ──────────────────────────────────────────────────────────
@@ -120,7 +119,7 @@ class _LaporanOrangtuaPageState extends State<LaporanOrangtuaPage> {
   // ── AppBar ────────────────────────────────────────────────────
   Widget _buildAppBar(BuildContext context) {
     return Container(
-      color: _teal,
+      color: AppColors.primary,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 12,
         left: 20,
@@ -158,7 +157,7 @@ class _LaporanOrangtuaPageState extends State<LaporanOrangtuaPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _teal.withOpacity(0.5)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -176,7 +175,7 @@ class _LaporanOrangtuaPageState extends State<LaporanOrangtuaPage> {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: _teal,
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 2),

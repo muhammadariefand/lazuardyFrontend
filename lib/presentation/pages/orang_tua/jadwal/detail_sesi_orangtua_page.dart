@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'jadwal_orangtua_page.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class DetailSesiOrangtuaPage extends StatelessWidget {
   final SesiJadwalData sesi;
@@ -61,7 +60,7 @@ class DetailSesiOrangtuaPage extends StatelessWidget {
   // ── AppBar ────────────────────────────────────────────────────
   Widget _buildAppBar(BuildContext context) {
     return Container(
-      color: _teal,
+      color: AppColors.primary,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 12,
         left: 4,
@@ -122,7 +121,7 @@ class DetailSesiOrangtuaPage extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: _teal,
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -197,13 +196,13 @@ class DetailSesiOrangtuaPage extends StatelessWidget {
             onTap: () {/* TODO: Google Maps */},
             child: const Row(
               children: [
-                Icon(Icons.open_in_new_rounded, size: 14, color: _teal),
+                Icon(Icons.open_in_new_rounded, size: 14, color: AppColors.primary),
                 SizedBox(width: 4),
                 Text(
                   'Buka di Google Maps',
                   style: TextStyle(
                     fontSize: 13,
-                    color: _teal,
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -240,7 +239,7 @@ class DetailSesiOrangtuaPage extends StatelessWidget {
               sesi.linkMeeting!,
               style: const TextStyle(
                 fontSize: 13,
-                color: _teal,
+                color: AppColors.primary,
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -287,7 +286,7 @@ class DetailSesiOrangtuaPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _teal.withOpacity(0.5)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -348,7 +347,7 @@ class DetailSesiOrangtuaPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFF25D366),
+          color: AppColors.successGreen,
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Row(

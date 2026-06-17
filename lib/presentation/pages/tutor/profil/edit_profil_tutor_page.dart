@@ -5,8 +5,6 @@ import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_state.dart';
 
-const _teal  = Color(0xFF3AAFA9);
-const _green = Color(0xFF4CAF50);
 
 class EditProfilTutorPage extends StatefulWidget {
   const EditProfilTutorPage({super.key});
@@ -103,7 +101,7 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
       builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(colorScheme: const ColorScheme.light(primary: _teal)),
+        data: Theme.of(ctx).copyWith(colorScheme: const ColorScheme.light(primary: AppColors.primary)),
         child: child!,
       ),
     );
@@ -159,9 +157,9 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
                 height: 68,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: _green, width: 2.5),
+                  border: Border.all(color: AppColors.successGreen, width: 2.5),
                 ),
-                child: const Icon(Icons.check_rounded, color: _green, size: 38),
+                child: const Icon(Icons.check_rounded, color: AppColors.successGreen, size: 38),
               ),
               const SizedBox(height: 20),
               const Text('Berhasil!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
@@ -179,7 +177,7 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _teal,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -227,7 +225,7 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: _teal,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
@@ -261,7 +259,7 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
                       child: ElevatedButton(
                         onPressed: isLoading ? null : _onSimpan,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _teal,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -314,7 +312,7 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
                           width: 28,
                           height: 28,
                           decoration: BoxDecoration(
-                            color: _teal,
+                            color: AppColors.primary,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 2),
                           ),
@@ -381,7 +379,7 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _teal.withOpacity(0.4)),
+          border: Border.all(color: AppColors.primary.withOpacity(0.4)),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)],
         ),
         child: Column(
@@ -405,7 +403,7 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade300)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: _teal, width: 1.5)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
       );
 
   Widget _field(String label, TextEditingController ctrl, {String? hint, TextInputType? keyboardType, List<TextInputFormatter>? inputFormatters}) => Padding(

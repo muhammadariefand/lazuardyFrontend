@@ -8,10 +8,6 @@ import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import '../../../state_management/riwayat_sesi/riwayat_sesi_cubit.dart';
 import '../../../state_management/riwayat_sesi/riwayat_sesi_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _navy = Color(0xFF1E2D7D);
-const _starYellow = Color(0xFFFFB800);
-const _green = Color(0xFF4CAF50);
 
 class RatingTutorPage extends StatefulWidget {
   const RatingTutorPage({super.key});
@@ -53,7 +49,7 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Pilih rating bintang terlebih dahulu'),
-          backgroundColor: Color(0xFFE53E3E),
+          backgroundColor: AppColors.errorRed,
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.all(16),
         ),
@@ -65,7 +61,7 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Data tutor tidak valid'),
-          backgroundColor: Color(0xFFE53E3E),
+          backgroundColor: AppColors.errorRed,
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.all(16),
         ),
@@ -95,9 +91,9 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
               height: 68,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: _green, width: 2.5),
+                border: Border.all(color: AppColors.successGreen, width: 2.5),
               ),
-              child: const Icon(Icons.check_rounded, color: _green, size: 38),
+              child: const Icon(Icons.check_rounded, color: AppColors.successGreen, size: 38),
             ),
             const SizedBox(height: 20),
 
@@ -125,7 +121,7 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
                       context, '/siswa/riwayat-sesi', (_) => false);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _teal,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -155,10 +151,10 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
               height: 68,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFE53E3E), width: 2.5),
+                border: Border.all(color: AppColors.errorRed, width: 2.5),
               ),
               child: const Icon(Icons.close_rounded,
-                  color: Color(0xFFE53E3E), size: 38),
+                  color: AppColors.errorRed, size: 38),
             ),
             const SizedBox(height: 20),
 
@@ -182,7 +178,7 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
               child: ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE53E3E),
+                  backgroundColor: AppColors.errorRed,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -219,7 +215,7 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
           return Scaffold(
             backgroundColor: Colors.white,
             appBar: AppBar(
-              backgroundColor: _teal,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               elevation: 0,
               titleSpacing: 0,
@@ -239,7 +235,7 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
                 child: ElevatedButton(
                   onPressed: isLoading ? null : _onKirimRating,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _teal,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -271,7 +267,7 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: _teal.withOpacity(0.4)),
+                    border: Border.all(color: AppColors.primary.withOpacity(0.4)),
                     boxShadow: [
                       BoxShadow(
                           color: Colors.black.withOpacity(0.04),
@@ -292,7 +288,7 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
                         style: const TextStyle(
                             fontSize: 30,
                             fontWeight: FontWeight.w700,
-                            color: _navy),
+                            color: AppColors.secondary),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -350,7 +346,7 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
                               key: ValueKey('$starIndex-$isFilled'),
                               size: 44,
                               color: isFilled
-                                  ? _starYellow
+                                  ? AppColors.warningYellow
                                   : Colors.grey.shade400,
                             ),
                           ),
@@ -368,7 +364,7 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
                     style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: _starYellow),
+                        color: AppColors.warningYellow),
                   ),
                 ],
 
@@ -401,12 +397,12 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide:
-                          BorderSide(color: _teal.withOpacity(0.4)),
+                          BorderSide(color: AppColors.primary.withOpacity(0.4)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide:
-                          const BorderSide(color: _teal, width: 1.5),
+                          const BorderSide(color: AppColors.primary, width: 1.5),
                     ),
                   ),
                 ),
@@ -420,7 +416,7 @@ class _RatingTutorPageState extends State<RatingTutorPage> {
                       style: TextStyle(
                         fontSize: 12,
                         color: charCount >= _maxChar * 0.9
-                            ? const Color(0xFFE53E3E)
+                            ? AppColors.errorRed
                             : Colors.grey.shade500,
                       ),
                     ),

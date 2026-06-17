@@ -6,8 +6,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/package/package
 import 'package:lazuadry_mobile_fe/presentation/state_management/package/package_state.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/package_entity.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _priceRed = Color(0xFFE53E3E);
+const _priceRed = AppColors.errorRed;
 
 class BeliPaketPage extends StatefulWidget {
   const BeliPaketPage({super.key});
@@ -39,7 +38,7 @@ class _BeliPaketPageState extends State<BeliPaketPage> {
     if (_selectedPackage == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Pilih paket terlebih dahulu'),
-        backgroundColor: Color(0xFFE53E3E),
+        backgroundColor: AppColors.errorRed,
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.all(16),
       ));
@@ -60,7 +59,7 @@ class _BeliPaketPageState extends State<BeliPaketPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Tidak dapat membuka halaman pembayaran'),
-          backgroundColor: Color(0xFFE53E3E),
+          backgroundColor: AppColors.errorRed,
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.all(16),
         ));
@@ -98,7 +97,7 @@ class _BeliPaketPageState extends State<BeliPaketPage> {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            backgroundColor: const Color(0xFFE53E3E),
+            backgroundColor: AppColors.errorRed,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
           ));
@@ -110,7 +109,7 @@ class _BeliPaketPageState extends State<BeliPaketPage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: _teal,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           titleSpacing: 0,
@@ -134,7 +133,7 @@ class _BeliPaketPageState extends State<BeliPaketPage> {
                       return ElevatedButton(
                         onPressed: isOrdering ? null : _onLanjutkan,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _teal,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -166,7 +165,7 @@ class _BeliPaketPageState extends State<BeliPaketPage> {
           builder: (context, state) {
             if (state is PackageLoading) {
               return const Center(
-                child: CircularProgressIndicator(color: _teal),
+                child: CircularProgressIndicator(color: AppColors.primary),
               );
             } else if (state is PackageError) {
               return Center(
@@ -185,7 +184,7 @@ class _BeliPaketPageState extends State<BeliPaketPage> {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () => context.read<PackageCubit>().fetchPackages(),
-                        style: ElevatedButton.styleFrom(backgroundColor: _teal),
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                         child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
                       )
                     ],
@@ -232,13 +231,13 @@ class _BeliPaketPageState extends State<BeliPaketPage> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: isSelected ? _teal : _teal.withOpacity(0.35),
+                              color: isSelected ? AppColors.primary : AppColors.primary.withOpacity(0.35),
                               width: isSelected ? 1.8 : 1.2,
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color: isSelected
-                                    ? _teal.withOpacity(0.1)
+                                    ? AppColors.primary.withOpacity(0.1)
                                     : Colors.black.withOpacity(0.04),
                                 blurRadius: 10,
                                 offset: const Offset(0, 3),
@@ -298,10 +297,10 @@ class _BeliPaketPageState extends State<BeliPaketPage> {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: isSelected ? _teal : Colors.grey.shade400,
+                                        color: isSelected ? AppColors.primary : Colors.grey.shade400,
                                         width: isSelected ? 0 : 1.5,
                                       ),
-                                      color: isSelected ? _teal : Colors.white,
+                                      color: isSelected ? AppColors.primary : Colors.white,
                                     ),
                                     child: isSelected
                                         ? const Icon(Icons.check_rounded,

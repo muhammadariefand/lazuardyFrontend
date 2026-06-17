@@ -8,7 +8,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/laporan_sesi/la
 import 'package:lazuadry_mobile_fe/presentation/state_management/laporan_sesi/laporan_sesi_state.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class LaporanSesiPage extends StatefulWidget {
   final ScheduleEntity sesi;
@@ -80,7 +79,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: _teal,
+              backgroundColor: AppColors.primary,
             ),
           );
           Navigator.pop(context); // kembali ke ManajemenSesiPage
@@ -181,7 +180,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
   // ── AppBar ────────────────────────────────────────────────────
   Widget _buildAppBar() {
     return Container(
-      color: _teal,
+      color: AppColors.primary,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 12,
         left: 4,
@@ -223,7 +222,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _teal.withOpacity(0.5)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -312,11 +311,11 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
         fillColor: enabled ? Colors.white : Colors.grey[100],
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: _teal.withOpacity(0.6)),
+          borderSide: BorderSide(color: AppColors.primary.withOpacity(0.6)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: _teal, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -347,7 +346,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
               onPressed: isLoading ? null : () => Navigator.pop(context),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                side: const BorderSide(color: _teal),
+                side: const BorderSide(color: AppColors.primary),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -357,7 +356,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: _teal,
+                  color: AppColors.primary,
                 ),
               ),
             ),
@@ -370,7 +369,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
             child: ElevatedButton(
               onPressed: isLoading ? null : _kirimLaporan,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _teal,
+                backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -453,7 +452,7 @@ class _LaporanSesiPageState extends State<LaporanSesiPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: const Color(0xFF25D366),
+          color: AppColors.successGreen,
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Row(

@@ -14,11 +14,6 @@ import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_buttom_nav.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal   = Color(0xFF3AAFA9);
-const _navy   = Color(0xFF1E2D7D);
-const _green  = Color(0xFF4CAF50);
-const _red    = Color(0xFFE53E3E);
-const _orange = Color(0xFFF59E0B);
 
 class KonfirmasiBookingTutorPage extends StatefulWidget {
   const KonfirmasiBookingTutorPage({super.key});
@@ -80,7 +75,7 @@ class _KonfirmasiBookingTutorPageState
             Container(
               width: 68, height: 68,
               decoration: const BoxDecoration(color: Color(0xFFFFEBEE), shape: BoxShape.circle),
-              child: const Icon(Icons.warning_rounded, color: _red, size: 38),
+              child: const Icon(Icons.warning_rounded, color: AppColors.errorRed, size: 38),
             ),
             const SizedBox(height: 20),
             const Text('Tolak Booking?',
@@ -118,7 +113,7 @@ class _KonfirmasiBookingTutorPageState
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _red,
+                  backgroundColor: AppColors.errorRed,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -161,7 +156,7 @@ class _KonfirmasiBookingTutorPageState
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: _green,
+              backgroundColor: AppColors.successGreen,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -170,7 +165,7 @@ class _KonfirmasiBookingTutorPageState
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: _red,
+              backgroundColor: AppColors.errorRed,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -189,7 +184,7 @@ class _KonfirmasiBookingTutorPageState
         body: Column(children: [
           // ── Teal Header ──────────────────────────────────────────
           Container(
-            color: _teal,
+            color: AppColors.primary,
             padding: const EdgeInsets.fromLTRB(20, 56, 20, 20),
             child: const Align(
               alignment: Alignment.centerLeft,
@@ -201,7 +196,7 @@ class _KonfirmasiBookingTutorPageState
 
           // ── Body ─────────────────────────────────────────────────
           Expanded(child: RefreshIndicator(
-            color: _teal,
+            color: AppColors.primary,
             onRefresh: () async => _loadData(),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -222,7 +217,7 @@ class _KonfirmasiBookingTutorPageState
                     if (state is ScheduleLoading || state is ScheduleInitial) {
                       return const Padding(
                         padding: EdgeInsets.symmetric(vertical: 60),
-                        child: Center(child: CircularProgressIndicator(color: _teal)),
+                        child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
                       );
                     }
 
@@ -232,7 +227,7 @@ class _KonfirmasiBookingTutorPageState
                         child: Center(
                           child: Column(
                             children: [
-                              Text(state.message, style: const TextStyle(color: _red)),
+                              Text(state.message, style: const TextStyle(color: AppColors.errorRed)),
                               const SizedBox(height: 12),
                               ElevatedButton(
                                 onPressed: _loadData,
@@ -381,16 +376,16 @@ class _BookingCard extends StatelessWidget {
     final inisial = item.studentName.isNotEmpty ? item.studentName[0].toUpperCase() : '?';
 
     // Badge status mapping
-    Color statusColor = _orange;
+    Color statusColor = AppColors.warningYellow;
     String statusText = item.status;
     if (item.status == 'accepted') {
-      statusColor = _green;
+      statusColor = AppColors.successGreen;
       statusText = 'Diterima';
     } else if (item.status == 'rejected') {
-      statusColor = _red;
+      statusColor = AppColors.errorRed;
       statusText = 'Ditolak';
     } else if (item.status == 'pending') {
-      statusColor = _orange;
+      statusColor = AppColors.warningYellow;
       statusText = 'Pending';
     } else {
       statusColor = AppColors.textSecondary;
@@ -402,7 +397,7 @@ class _BookingCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF3AAFA9).withOpacity(0.4), width: 1.2),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.2),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -417,7 +412,7 @@ class _BookingCard extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(inisial,
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700,
-                    color: _navy)),
+                    color: AppColors.secondary)),
           ),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -452,14 +447,14 @@ class _BookingCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
             decoration: BoxDecoration(
-              color: _isOffline ? _red.withOpacity(0.08) : _green.withOpacity(0.08),
+              color: _isOffline ? AppColors.errorRed.withOpacity(0.08) : AppColors.successGreen.withOpacity(0.08),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: _isOffline ? _red.withOpacity(0.3) : _green.withOpacity(0.3)),
+                color: _isOffline ? AppColors.errorRed.withOpacity(0.3) : AppColors.successGreen.withOpacity(0.3)),
             ),
             child: Text(_isOffline ? 'Offline' : 'Online',
                 style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                    color: _isOffline ? _red : _green)),
+                    color: _isOffline ? AppColors.errorRed : AppColors.successGreen)),
           ),
           const SizedBox(width: 8),
           // WA badge
@@ -469,7 +464,7 @@ class _BookingCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                    color: const Color(0xFF25D366),
+                    color: AppColors.successGreen,
                     borderRadius: BorderRadius.circular(20)),
                 child: const Row(mainAxisSize: MainAxisSize.min, children: [
                   Icon(Icons.chat_rounded, size: 12, color: Colors.white),
@@ -506,10 +501,10 @@ class _BookingCard extends StatelessWidget {
               GestureDetector(
                 onTap: onOpenMaps,
                 child: const Row(children: [
-                  Icon(Icons.open_in_new_rounded, size: 13, color: _teal),
+                  Icon(Icons.open_in_new_rounded, size: 13, color: AppColors.primary),
                   SizedBox(width: 4),
                   Text('Buka di Google Maps',
-                      style: TextStyle(fontSize: 12, color: _teal,
+                      style: TextStyle(fontSize: 12, color: AppColors.primary,
                           fontWeight: FontWeight.w500)),
                 ]),
               ),
@@ -533,7 +528,7 @@ class _BookingCard extends StatelessWidget {
                     label: const Text('Terima',
                         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _teal,
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -550,13 +545,13 @@ class _BookingCard extends StatelessWidget {
                 builder: (context, state) {
                   return ElevatedButton.icon(
                     onPressed: state is BookingConfirmationLoading ? null : onTolak,
-                    icon: Icon(Icons.cancel_outlined, size: 18, color: _red),
+                    icon: Icon(Icons.cancel_outlined, size: 18, color: AppColors.errorRed),
                     label: Text('Tolak',
                         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
-                            color: _red)),
+                            color: AppColors.errorRed)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _red.withOpacity(0.1),
-                      foregroundColor: _red,
+                      backgroundColor: AppColors.errorRed.withOpacity(0.1),
+                      foregroundColor: AppColors.errorRed,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),

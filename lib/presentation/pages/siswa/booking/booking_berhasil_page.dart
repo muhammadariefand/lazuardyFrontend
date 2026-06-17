@@ -4,9 +4,6 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _green = Color(0xFF4CAF50);
-const _orange = Color(0xFFF59E0B);
 
 class BookingBerhasilPage extends StatelessWidget {
   const BookingBerhasilPage({super.key});
@@ -31,7 +28,7 @@ class BookingBerhasilPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: _teal.withOpacity(0.35)),
+              border: Border.all(color: AppColors.primary.withOpacity(0.35)),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withOpacity(0.06),
@@ -46,8 +43,8 @@ class BookingBerhasilPage extends StatelessWidget {
                 width: 68, height: 68,
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: _green, width: 2.5)),
-                child: const Icon(Icons.check_rounded, color: _green, size: 38),
+                    border: Border.all(color: AppColors.successGreen, width: 2.5)),
+                child: const Icon(Icons.check_rounded, color: AppColors.successGreen, size: 38),
               ),
 
               const SizedBox(height: 20),
@@ -97,7 +94,7 @@ class BookingBerhasilPage extends StatelessWidget {
                   onPressed: () => Navigator.pushNamedAndRemoveUntil(
                       context, '/siswa/beranda', (_) => false),
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: _teal,
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(

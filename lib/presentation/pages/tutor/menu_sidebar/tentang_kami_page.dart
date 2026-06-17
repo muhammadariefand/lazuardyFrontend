@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:lazuadry_mobile_fe/core/constants/app_assets.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
 const _fbBlue = Color(0xFF1877F2);
 const _igGradStart = Color(0xFFF58529);
 const _igGradEnd = Color(0xFF833AB4);
@@ -29,7 +28,7 @@ class TentangKamiPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,

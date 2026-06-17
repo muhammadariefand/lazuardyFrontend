@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
+import 'package:lazuadry_mobile_fe/core/constants/app_assets.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
 
 class TaglinePage extends StatelessWidget {
@@ -29,7 +30,7 @@ class TaglinePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset(
-                    'images/logo_lazuardi_noText.png',
+                    AppAssets.logoIcon,
                     height: 50,
                   ),
                   const SizedBox(width: 16),

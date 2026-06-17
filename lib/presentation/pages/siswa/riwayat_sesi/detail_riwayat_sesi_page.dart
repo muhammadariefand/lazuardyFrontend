@@ -14,11 +14,6 @@ import '../../../../domain/entities/schedule_entity.dart';
 import '../../../state_management/riwayat_sesi/riwayat_sesi_cubit.dart';
 import '../../../state_management/riwayat_sesi/riwayat_sesi_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _navy = Color(0xFF1E2D7D);
-const _green = Color(0xFF4CAF50);
-const _orange = Color(0xFFF59E0B);
-const _red = Color(0xFFE53E3E);
 const _purple = Color(0xFF8B5CF6);
 
 class DetailRiwayatSesiPage extends StatefulWidget {
@@ -77,7 +72,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
         if (state is RiwayatSesiError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
-            backgroundColor: _red,
+            backgroundColor: AppColors.errorRed,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -86,7 +81,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
         if (state is MarkCompleteSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: const Text('Sesi berhasil dikonfirmasi selesai'),
-            backgroundColor: _green,
+            backgroundColor: AppColors.successGreen,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -101,7 +96,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            backgroundColor: _teal,
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             elevation: 0,
             titleSpacing: 0,
@@ -120,7 +115,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
               _schedule != null ? _buildBottomBar(context, _schedule!, isMarkCompleteLoading) : null,
 
           body: isLoading && _schedule == null
-              ? const Center(child: CircularProgressIndicator(color: _teal))
+              ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
               : _schedule == null
                   ? _buildErrorState(context)
                   : _buildBody(_schedule!),
@@ -133,7 +128,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, color: _red, size: 48),
+            const Icon(Icons.error_outline, color: AppColors.errorRed, size: 48),
             const SizedBox(height: 12),
             const Text('Gagal memuat detail sesi',
                 style: TextStyle(color: AppColors.textSecondary)),
@@ -145,7 +140,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: _teal,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
@@ -217,7 +212,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
               },
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: _teal,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -245,19 +240,19 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
         badgeLabel = 'Menunggu Konfirmasi';
         break;
       case 'completed':
-        badgeColor = _green;
+        badgeColor = AppColors.successGreen;
         badgeLabel = 'Selesai';
         break;
       case 'cancelled':
-        badgeColor = _red;
+        badgeColor = AppColors.errorRed;
         badgeLabel = 'Dibatalkan';
         break;
       case 'ongoing':
-        badgeColor = _teal;
+        badgeColor = AppColors.primary;
         badgeLabel = 'Sedang Berlangsung';
         break;
       default:
-        badgeColor = _orange;
+        badgeColor = AppColors.warningYellow;
         badgeLabel = 'Menunggu';
     }
 
@@ -266,7 +261,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _teal.withOpacity(0.4)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4)),
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)
         ],
@@ -283,7 +278,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
           child: Text(
             _tutorInisial,
             style: const TextStyle(
-                fontSize: 22, fontWeight: FontWeight.w700, color: _navy),
+                fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.secondary),
           ),
         ),
         const SizedBox(width: 12),
@@ -327,7 +322,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
   Widget _buildDibatalkanBanner() => Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: _red.withOpacity(0.08),
+          color: AppColors.errorRed.withOpacity(0.08),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -336,8 +331,8 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
             height: 28,
             decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: _red, width: 1.5)),
-            child: const Icon(Icons.close_rounded, color: _red, size: 16),
+                border: Border.all(color: AppColors.errorRed, width: 1.5)),
+            child: const Icon(Icons.close_rounded, color: AppColors.errorRed, size: 16),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -348,11 +343,11 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
                     style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: _red)),
+                        color: AppColors.errorRed)),
                 SizedBox(height: 4),
                 Text(
                     'Sesi ini telah dibatalkan. Hubungi admin jika ada pertanyaan.',
-                    style: TextStyle(fontSize: 13, color: _red, height: 1.4)),
+                    style: TextStyle(fontSize: 13, color: AppColors.errorRed, height: 1.4)),
               ],
             ),
           ),
@@ -365,7 +360,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _teal.withOpacity(0.4)),
+          border: Border.all(color: AppColors.primary.withOpacity(0.4)),
           boxShadow: [
             BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)
           ],
@@ -464,7 +459,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Row(children: [
-              Icon(Icons.info_outline_rounded, color: _orange, size: 20),
+              Icon(Icons.info_outline_rounded, color: AppColors.warningYellow, size: 20),
               SizedBox(width: 8),
               Text('Konfirmasi Penyelesaian',
                   style: TextStyle(
@@ -485,7 +480,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
               child: ElevatedButton.icon(
                 onPressed: isLoading ? null : _onKonfirmasiSelesai,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _teal,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -516,7 +511,7 @@ class _DetailRiwayatSesiPageState extends State<DetailRiwayatSesiPage> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFF25D366),
+            color: AppColors.successGreen,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(mainAxisSize: MainAxisSize.min, children: [

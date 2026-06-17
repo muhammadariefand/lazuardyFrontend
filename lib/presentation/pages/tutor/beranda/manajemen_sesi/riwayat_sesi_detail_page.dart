@@ -5,7 +5,6 @@ import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/schedule_entity.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class RiwayatSesiDetailPage extends StatelessWidget {
   final ScheduleEntity sesi;
@@ -73,7 +72,7 @@ class RiwayatSesiDetailPage extends StatelessWidget {
   // ── AppBar ────────────────────────────────────────────────────
   Widget _buildAppBar(BuildContext context) {
     return Container(
-      color: _teal,
+      color: AppColors.primary,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 12,
         left: 4,
@@ -208,13 +207,13 @@ class RiwayatSesiDetailPage extends StatelessWidget {
             },
             child: const Row(
               children: [
-                Icon(Icons.open_in_new_rounded, size: 14, color: _teal),
+                Icon(Icons.open_in_new_rounded, size: 14, color: AppColors.primary),
                 SizedBox(width: 4),
                 Text(
                   'Buka di Google Maps',
                   style: TextStyle(
                     fontSize: 13,
-                    color: _teal,
+                    color: AppColors.primary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -257,7 +256,7 @@ class RiwayatSesiDetailPage extends StatelessWidget {
               sesi.meetingLink ?? '-',
               style: const TextStyle(
                 fontSize: 13,
-                color: _teal,
+                color: AppColors.primary,
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -275,7 +274,7 @@ class RiwayatSesiDetailPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _teal.withOpacity(0.5)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -374,7 +373,7 @@ class RiwayatSesiDetailPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: const Color(0xFF25D366),
+          color: AppColors.successGreen,
           borderRadius: BorderRadius.circular(20),
         ),
         child: const Row(

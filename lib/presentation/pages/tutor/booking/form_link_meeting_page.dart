@@ -13,10 +13,6 @@ import 'package:lazuadry_mobile_fe/domain/entities/schedule_entity.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/booking_confirmation_cubit.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const _teal   = Color(0xFF3AAFA9);
-const _navy   = Color(0xFF1E2D7D);
-const _green  = Color(0xFF4CAF50);
-const _orange = Color(0xFFF59E0B);
 
 // ── Status banner ─────────────────────────────────────────────────
 enum _BannerState { info, success }
@@ -61,7 +57,7 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
     if (link.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Masukkan link meeting terlebih dahulu'),
-        backgroundColor: Color(0xFFE53E3E),
+        backgroundColor: AppColors.errorRed,
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.all(16),
       ));
@@ -70,7 +66,7 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
     if (!_isValidUrl(link)) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Link tidak valid, harus diawali http:// atau https://'),
-        backgroundColor: Color(0xFFE53E3E),
+        backgroundColor: AppColors.errorRed,
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.all(16),
       ));
@@ -121,7 +117,7 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
         } else if (state is BookingConfirmationError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
-            backgroundColor: const Color(0xFFE53E3E),
+            backgroundColor: AppColors.errorRed,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
           ));
@@ -133,7 +129,7 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            backgroundColor: _teal,
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             elevation: 0,
             titleSpacing: 0,
@@ -163,7 +159,7 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
               Expanded(child: SizedBox(height: 52, child: ElevatedButton(
                 onPressed: isLoading ? null : (_bannerState == _BannerState.success ? () => Navigator.pop(context) : _onSimpan),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _teal,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -194,7 +190,7 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: _teal.withOpacity(0.4)),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.4)),
                   boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
                 ),
                 child: Column(children: [
@@ -209,7 +205,7 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
                       alignment: Alignment.center,
                       child: Text(inisial,
                           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700,
-                              color: _navy)),
+                              color: AppColors.secondary)),
                     ),
                     const SizedBox(width: 12),
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -223,13 +219,13 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF4CAF50).withOpacity(0.1),
+                        color: AppColors.successGreen.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFF4CAF50).withOpacity(0.3)),
+                        border: Border.all(color: AppColors.successGreen.withOpacity(0.3)),
                       ),
                       child: const Text('Online',
                           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                              color: Color(0xFF4CAF50))),
+                              color: AppColors.successGreen)),
                     ),
                   ]),
                   const SizedBox(height: 10),
@@ -245,7 +241,7 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                              color: const Color(0xFF25D366),
+                              color: AppColors.successGreen,
                               borderRadius: BorderRadius.circular(20)),
                           child: const Row(mainAxisSize: MainAxisSize.min, children: [
                             Icon(Icons.chat_rounded, size: 12, color: Colors.white),
@@ -292,11 +288,11 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: _teal.withOpacity(0.4)),
+                    borderSide: BorderSide(color: AppColors.primary.withOpacity(0.4)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _teal, width: 1.5),
+                    borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                   ),
                   disabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -322,7 +318,7 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
                         ),
                         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           const Icon(Icons.warning_amber_rounded,
-                              color: _orange, size: 18),
+                              color: AppColors.warningYellow, size: 18),
                           const SizedBox(width: 10),
                           const Expanded(child: Text(
                             'Pastikan link yang Anda masukkan valid dan dapat diakses oleh siswa pada waktu sesi berlangsung.',
@@ -335,13 +331,13 @@ class _FormLinkMeetingPageState extends State<FormLinkMeetingPage> {
                         key: const ValueKey('success'),
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: _green.withOpacity(0.08),
+                          color: AppColors.successGreen.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: _green.withOpacity(0.3)),
+                          border: Border.all(color: AppColors.successGreen.withOpacity(0.3)),
                         ),
                         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                           const Icon(Icons.check_circle_outline_rounded,
-                              color: _green, size: 18),
+                              color: AppColors.successGreen, size: 18),
                           const SizedBox(width: 10),
                           const Expanded(child: Text(
                             'Link meeting berhasil dikirim ke siswa dan siap digunakan untuk sesi pembelajaran.',

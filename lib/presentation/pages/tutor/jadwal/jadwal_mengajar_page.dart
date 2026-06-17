@@ -16,10 +16,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedu
 import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_buttom_nav.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const _teal  = Color(0xFF3AAFA9);
-const _navy  = Color(0xFF1E2D7D);
-const _green = Color(0xFF4CAF50);
-const _red   = Color(0xFFE53E3E);
 
 class JadwalMengajarPage extends StatefulWidget {
   const JadwalMengajarPage({super.key});
@@ -116,7 +112,7 @@ class _JadwalMengajarPageState extends State<JadwalMengajarPage> {
       body: Column(children: [
         // ── Teal Header ─────────────────────────────────────────
         Container(
-          color: _teal,
+          color: AppColors.primary,
           padding: const EdgeInsets.fromLTRB(20, 56, 20, 20),
           child: const Align(
             alignment: Alignment.centerLeft,
@@ -155,7 +151,7 @@ class _JadwalMengajarPageState extends State<JadwalMengajarPage> {
           return const Center(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 48),
-              child: CircularProgressIndicator(color: _teal),
+              child: CircularProgressIndicator(color: AppColors.primary),
             ),
           );
         }
@@ -241,10 +237,10 @@ class _JadwalMengajarPageState extends State<JadwalMengajarPage> {
               duration: const Duration(milliseconds: 180),
               width: 44, height: 62,
               decoration: BoxDecoration(
-                color: isSelected ? _teal : Colors.white,
+                color: isSelected ? AppColors.primary : Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? _teal : _teal.withOpacity(0.4),
+                  color: isSelected ? AppColors.primary : AppColors.primary.withOpacity(0.4),
                   width: isSelected ? 1.5 : 1.2,
                 ),
               ),
@@ -298,7 +294,7 @@ class _JadwalMengajarPageState extends State<JadwalMengajarPage> {
         ElevatedButton(
           onPressed: _loadSchedules,
           style: ElevatedButton.styleFrom(
-            backgroundColor: _teal,
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -341,7 +337,7 @@ class _SesiCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _teal.withOpacity(0.4), width: 1.2),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.2),
         boxShadow: [BoxShadow(
             color: Colors.black.withOpacity(0.04), blurRadius: 8)],
       ),
@@ -357,7 +353,7 @@ class _SesiCard extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(inisial,
                 style: const TextStyle(
-                    fontSize: 22, fontWeight: FontWeight.w700, color: _navy)),
+                    fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.secondary)),
           ),
           const SizedBox(width: 12),
           Expanded(child: Column(
@@ -375,13 +371,13 @@ class _SesiCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(
               color: isOnline
-                  ? _green.withOpacity(0.1)
-                  : _red.withOpacity(0.1),
+                  ? AppColors.successGreen.withOpacity(0.1)
+                  : AppColors.errorRed.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isOnline
-                    ? _green.withOpacity(0.3)
-                    : _red.withOpacity(0.3),
+                    ? AppColors.successGreen.withOpacity(0.3)
+                    : AppColors.errorRed.withOpacity(0.3),
               ),
             ),
             child: Text(
@@ -389,7 +385,7 @@ class _SesiCard extends StatelessWidget {
               style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: isOnline ? _green : _red),
+                  color: isOnline ? AppColors.successGreen : AppColors.errorRed),
             ),
           ),
         ]),
@@ -410,7 +406,7 @@ class _SesiCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFF25D366),
+                color: AppColors.successGreen,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Row(mainAxisSize: MainAxisSize.min, children: [
@@ -453,8 +449,8 @@ class _SesiCard extends StatelessWidget {
               arguments: {'schedule_id': schedule.id},
             ),
             style: OutlinedButton.styleFrom(
-              foregroundColor: _red,
-              side: BorderSide(color: _red.withOpacity(0.5)),
+              foregroundColor: AppColors.errorRed,
+              side: BorderSide(color: AppColors.errorRed.withOpacity(0.5)),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
             ),
@@ -487,7 +483,7 @@ class _SesiCard extends StatelessWidget {
         },
         child: Text(link,
             style: const TextStyle(
-                fontSize: 12, color: _teal,
+                fontSize: 12, color: AppColors.primary,
                 fontWeight: FontWeight.w500)),
       ),
     ]);
@@ -515,11 +511,11 @@ class _SesiCard extends StatelessWidget {
         onTap: () => onOpenLink(mapsLink),
         child: const Row(children: [
           Icon(Icons.open_in_new_rounded,
-              size: 13, color: _teal),
+              size: 13, color: AppColors.primary),
           SizedBox(width: 4),
           Text('Buka di Google Maps',
               style: TextStyle(
-                  fontSize: 12, color: _teal,
+                  fontSize: 12, color: AppColors.primary,
                   fontWeight: FontWeight.w500)),
         ]),
       ),

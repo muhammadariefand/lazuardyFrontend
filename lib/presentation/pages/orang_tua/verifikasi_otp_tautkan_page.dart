@@ -6,7 +6,6 @@ import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class VerifikasiOtpTautkanPage extends StatefulWidget {
   final String? email;
@@ -115,7 +114,7 @@ class _VerifikasiOtpTautkanPageState extends State<VerifikasiOtpTautkanPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Kode OTP telah dikirim ulang'),
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -133,7 +132,7 @@ class _VerifikasiOtpTautkanPageState extends State<VerifikasiOtpTautkanPage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: _teal.withOpacity(0.4)),
+            border: Border.all(color: AppColors.primary.withOpacity(0.4)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -187,7 +186,7 @@ class _VerifikasiOtpTautkanPageState extends State<VerifikasiOtpTautkanPage> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _teal,
+                    backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
@@ -263,7 +262,7 @@ class _VerifikasiOtpTautkanPageState extends State<VerifikasiOtpTautkanPage> {
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
-                            color: _teal,
+                            color: AppColors.primary,
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -316,8 +315,8 @@ class _VerifikasiOtpTautkanPageState extends State<VerifikasiOtpTautkanPage> {
                                     childEmail: childEmailArg,
                                   ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _teal,
-                              disabledBackgroundColor: _teal.withOpacity(0.4),
+                              backgroundColor: AppColors.primary,
+                              disabledBackgroundColor: AppColors.primary.withOpacity(0.4),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
@@ -360,8 +359,8 @@ class _VerifikasiOtpTautkanPageState extends State<VerifikasiOtpTautkanPage> {
                                   text: 'Kirim Lagi',
                                   style: TextStyle(
                                     color: _timerExpired
-                                        ? _teal
-                                        : _teal.withOpacity(0.4),
+                                        ? AppColors.primary
+                                        : AppColors.primary.withOpacity(0.4),
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -452,14 +451,14 @@ class _VerifikasiOtpTautkanPageState extends State<VerifikasiOtpTautkanPage> {
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
                 color: _otpCtrl[index].text.isNotEmpty
-                    ? _teal
-                    : _teal.withOpacity(0.35),
+                    ? AppColors.primary
+                    : AppColors.primary.withOpacity(0.35),
                 width: _otpCtrl[index].text.isNotEmpty ? 2 : 1.5,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: _teal, width: 2),
+              borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
           ),
         ),

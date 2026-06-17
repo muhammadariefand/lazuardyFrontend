@@ -9,8 +9,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_tutor/ul
 import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_tutor/ulasan_tutor_state.dart';
 import 'package:intl/intl.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _starYellow = Color(0xFFFFB800);
 
 class UlasanTutorPage extends StatefulWidget {
   const UlasanTutorPage({super.key});
@@ -52,7 +50,7 @@ class _UlasanTutorPageState extends State<UlasanTutorPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
@@ -67,7 +65,7 @@ class _UlasanTutorPageState extends State<UlasanTutorPage> {
         builder: (context, state) {
           if (state is UlasanTutorInitial || (state is UlasanTutorLoading && state.isFirstFetch)) {
             return const Center(
-              child: CircularProgressIndicator(color: _teal),
+              child: CircularProgressIndicator(color: AppColors.primary),
             );
           } else if (state is UlasanTutorError) {
             return Center(
@@ -78,7 +76,7 @@ class _UlasanTutorPageState extends State<UlasanTutorPage> {
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () => context.read<UlasanTutorCubit>().fetchReviews(),
-                    style: ElevatedButton.styleFrom(backgroundColor: _teal),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                     child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
                   ),
                 ],
@@ -101,7 +99,7 @@ class _UlasanTutorPageState extends State<UlasanTutorPage> {
 
             return RefreshIndicator(
               onRefresh: _onRefresh,
-              color: _teal,
+              color: AppColors.primary,
               child: ListView.separated(
                 controller: _scrollController,
                 padding: const EdgeInsets.all(16),
@@ -114,7 +112,7 @@ class _UlasanTutorPageState extends State<UlasanTutorPage> {
                     return const Center(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: CircularProgressIndicator(color: _teal),
+                        child: CircularProgressIndicator(color: AppColors.primary),
                       ),
                     );
                   }
@@ -131,7 +129,7 @@ class _UlasanTutorPageState extends State<UlasanTutorPage> {
 
   Widget _buildEmpty() => RefreshIndicator(
     onRefresh: _onRefresh,
-    color: _teal,
+    color: AppColors.primary,
     child: ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
@@ -168,7 +166,7 @@ class _UlasanCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _teal.withOpacity(0.4), width: 1.2),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.2),
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8,
               offset: const Offset(0, 2)),
@@ -182,7 +180,7 @@ class _UlasanCard extends StatelessWidget {
             Expanded(
               child: Text(tutorName,
                   style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w700, color: _teal),
+                      fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis),
             ),
@@ -235,8 +233,8 @@ class _StarRow extends StatelessWidget {
         } else {
           icon = Icons.star_outline_rounded;   // kosong
         }
-        return Icon(icon, color: _starYellow, size: 16);
+        return Icon(icon, color: AppColors.warningYellow, size: 16);
       }),
     );
   }
-}
+}

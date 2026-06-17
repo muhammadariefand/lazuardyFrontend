@@ -10,7 +10,6 @@ import 'package:lazuadry_mobile_fe/presentation/widgets/orangtua_drawer.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/parent_dashboard/parent_dashboard_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/parent_dashboard/parent_dashboard_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class BerandaOrangtuaPage extends StatefulWidget {
   const BerandaOrangtuaPage({super.key});
@@ -54,7 +53,7 @@ class _BerandaOrangtuaPageState extends State<BerandaOrangtuaPage> {
           return OrangtuaDrawer(nama: nama, inisial: inisial);
         },
       ),
-      backgroundColor: _teal,
+      backgroundColor: AppColors.primary,
       bottomNavigationBar: OrangTuaBottomNav(
         currentIndex: 0,
         onTap: (i) {
@@ -213,7 +212,7 @@ class _BerandaOrangtuaPageState extends State<BerandaOrangtuaPage> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
-                          color: _teal,
+                          color: AppColors.primary,
                         )),
                   ),
                 ),
@@ -226,7 +225,7 @@ class _BerandaOrangtuaPageState extends State<BerandaOrangtuaPage> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: _teal,
+                        color: AppColors.primary,
                       ),
                     ),
                     Text(
@@ -352,10 +351,10 @@ class _BerandaOrangtuaPageState extends State<BerandaOrangtuaPage> {
                           width: 38,
                           height: 38,
                           decoration: BoxDecoration(
-                            color: _teal.withOpacity(0.1),
+                            color: AppColors.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(9),
                           ),
-                          child: const Icon(Icons.notifications_rounded, color: _teal, size: 18),
+                          child: const Icon(Icons.notifications_rounded, color: AppColors.primary, size: 18),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -521,7 +520,7 @@ class _BerandaOrangtuaPageState extends State<BerandaOrangtuaPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF25D366),
+                        color: AppColors.successGreen,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Row(

@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class BatalkanSesiPage extends StatefulWidget {
   const BatalkanSesiPage({super.key});
@@ -33,7 +32,7 @@ class _BatalkanSesiPageState extends State<BatalkanSesiPage> {
     if (_selectedAlasan == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Pilih alasan pembatalan'),
-        backgroundColor: Color(0xFFE53E3E),
+        backgroundColor: AppColors.errorRed,
         behavior: SnackBarBehavior.floating,
       ));
       return;
@@ -57,7 +56,7 @@ class _BatalkanSesiPageState extends State<BatalkanSesiPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal, foregroundColor: Colors.white, elevation: 0,
+        backgroundColor: AppColors.primary, foregroundColor: Colors.white, elevation: 0,
         leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
         title: const Text('Batalkan Sesi', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
       ),
@@ -65,7 +64,7 @@ class _BatalkanSesiPageState extends State<BatalkanSesiPage> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         child: SizedBox(height: 52, child: ElevatedButton(
           onPressed: _onKonfirmasi,
-          style: ElevatedButton.styleFrom(backgroundColor: _teal, foregroundColor: Colors.white, elevation: 0,
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
           child: const Text('Konfirmasi Pembatalan', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         )),
@@ -96,7 +95,7 @@ class _BatalkanSesiPageState extends State<BatalkanSesiPage> {
   Widget _buildSesiSummary() => Container(
     padding: const EdgeInsets.all(14),
     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: _teal.withOpacity(0.4)),
+      border: Border.all(color: AppColors.primary.withOpacity(0.4)),
       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)]),
     child: Column(children: [
       Row(children: [
@@ -104,16 +103,16 @@ class _BatalkanSesiPageState extends State<BatalkanSesiPage> {
           alignment: Alignment.center, child: Text('S', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.grey.shade500))),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Ibu Sarah', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: _teal)),
+          const Text('Ibu Sarah', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
           const Text('Matematika', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
           const SizedBox(height: 4),
           Row(children: [
-            _pill('Offline', const Color(0xFFFFEBEE), const Color(0xFFE53E3E)),
+            _pill('Offline', const Color(0xFFFFEBEE), AppColors.errorRed),
             const SizedBox(width: 8),
-            _pill('WhatsApp', const Color(0xFF25D366), Colors.white, icon: Icons.chat_rounded),
+            _pill('WhatsApp', AppColors.successGreen, Colors.white, icon: Icons.chat_rounded),
           ]),
         ])),
-        _pill('Terjadwal', const Color(0xFFFFF8E1), const Color(0xFFF59E0B)),
+        _pill('Terjadwal', const Color(0xFFFFF8E1), AppColors.warningYellow),
       ]),
       const SizedBox(height: 10),
       Row(children: [
@@ -160,10 +159,10 @@ class _BatalkanSesiPageState extends State<BatalkanSesiPage> {
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Text('Kebijakan Pembatalan', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
       const SizedBox(height: 10),
-      _kebijakanRow(Icons.check_circle_outline, const Color(0xFF4CAF50), 'Cancel ≥ 12 jam: Kuota dikembalikan, tanpa penalti'),
-      _kebijakanRow(Icons.cancel_outlined, const Color(0xFFE53E3E), 'Cancel < 12 jam: Kuota hangus, tanpa warning'),
-      _kebijakanRow(Icons.warning_amber_rounded, const Color(0xFFF59E0B), 'No Show: Kuota hangus + 1 warning'),
-      _kebijakanRow(Icons.warning_amber_rounded, const Color(0xFFF59E0B), '3 warning = Suspend 7 hari'),
+      _kebijakanRow(Icons.check_circle_outline, AppColors.successGreen, 'Cancel ≥ 12 jam: Kuota dikembalikan, tanpa penalti'),
+      _kebijakanRow(Icons.cancel_outlined, AppColors.errorRed, 'Cancel < 12 jam: Kuota hangus, tanpa warning'),
+      _kebijakanRow(Icons.warning_amber_rounded, AppColors.warningYellow, 'No Show: Kuota hangus + 1 warning'),
+      _kebijakanRow(Icons.warning_amber_rounded, AppColors.warningYellow, '3 warning = Suspend 7 hari'),
     ]),
   );
 
@@ -194,7 +193,7 @@ class _BatalkanSesiPageState extends State<BatalkanSesiPage> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: isSelected ? _teal : Colors.grey.shade100,
+                color: isSelected ? AppColors.primary : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(alasan, style: TextStyle(

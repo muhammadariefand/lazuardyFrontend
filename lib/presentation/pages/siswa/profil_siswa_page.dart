@@ -7,7 +7,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/siswa_bottom_nav.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class ProfilSiswaPage extends StatefulWidget {
   const ProfilSiswaPage({super.key});
@@ -35,7 +34,7 @@ class _ProfilSiswaPageState extends State<ProfilSiswaPage> {
         if (i == 2) Navigator.pushReplacementNamed(context, '/siswa/laporan');
       }),
       body: Column(children: [
-        Container(color: _teal, padding: const EdgeInsets.fromLTRB(20, 56, 20, 20),
+        Container(color: AppColors.primary, padding: const EdgeInsets.fromLTRB(20, 56, 20, 20),
           child: const Align(alignment: Alignment.centerLeft,
             child: Text('Profil', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)))),
 
@@ -80,7 +79,7 @@ class _ProfilSiswaPageState extends State<ProfilSiswaPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: _teal.withOpacity(0.4)),
+                        border: Border.all(color: AppColors.primary.withOpacity(0.4)),
                         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)]),
                       child: Row(children: [
                         if (biodata.profilePhotoUrl != null && biodata.profilePhotoUrl!.isNotEmpty)
@@ -108,7 +107,7 @@ class _ProfilSiswaPageState extends State<ProfilSiswaPage> {
                           const SizedBox(height: 8),
                           SizedBox(width: 100, height: 32, child: ElevatedButton(
                             onPressed: () => Navigator.pushNamed(context, '/siswa/edit-profil'),
-                            style: ElevatedButton.styleFrom(backgroundColor: _teal, foregroundColor: Colors.white, elevation: 0,
+                            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, elevation: 0,
                               padding: EdgeInsets.zero, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
                             child: const Text('Edit Profil', style: TextStyle(fontSize: 12)),
                           )),
@@ -153,7 +152,7 @@ class _ProfilSiswaPageState extends State<ProfilSiswaPage> {
   Widget _buildSection(String title, List<_FieldView> fields) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: _teal.withOpacity(0.4)),
+      border: Border.all(color: AppColors.primary.withOpacity(0.4)),
       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)]),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),

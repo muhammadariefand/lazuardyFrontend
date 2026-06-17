@@ -8,7 +8,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_c
 import 'package:lazuadry_mobile_fe/presentation/state_management/report/report_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/siswa_bottom_nav.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class LaporanSiswaPage extends StatefulWidget {
   const LaporanSiswaPage({super.key});
@@ -54,7 +53,7 @@ class _LaporanSiswaPageState extends State<LaporanSiswaPage> {
       body: Column(
         children: [
           Container(
-            color: _teal,
+            color: AppColors.primary,
             padding: const EdgeInsets.fromLTRB(20, 56, 20, 20),
             child: const Align(
               alignment: Alignment.centerLeft,
@@ -181,7 +180,7 @@ class _LaporanCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _teal.withOpacity(0.4), width: 1.2),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.2),
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)
         ],
@@ -191,7 +190,7 @@ class _LaporanCard extends StatelessWidget {
         children: [
           Text(
             laporan.studentName,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _teal),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary),
           ),
           const SizedBox(height: 3),
           Text(

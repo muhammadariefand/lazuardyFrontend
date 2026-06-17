@@ -8,7 +8,6 @@ import '../../../../domain/entities/subject_entity.dart';
 import '../../../state_management/student_booking/booking_flow_cubit.dart';
 import '../../../state_management/student_booking/booking_flow_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class PilihKategoriPage extends StatefulWidget {
   const PilihKategoriPage({super.key});
@@ -82,7 +81,7 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
     if (_selectedSubject == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Pilih mata pelajaran terlebih dahulu'),
-        backgroundColor: Color(0xFFE53E3E),
+        backgroundColor: AppColors.errorRed,
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.all(16),
       ));
@@ -93,7 +92,7 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
         arguments: {
           'kategori': _expandedKategori,
           'jenjang': _selectedJenjang, // bisa null untuk umum
-          'subject_id': _selectedSubject!.id,
+          'class_id': _selectedSubject!.id,   // id kelas dari API /getClassByLevel
           'mapel': _selectedSubject!.name,
         });
   }
@@ -105,7 +104,7 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
         if (state is BookingFlowError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
-            backgroundColor: const Color(0xFFE53E3E),
+            backgroundColor: AppColors.errorRed,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
           ));
@@ -125,7 +124,7 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            backgroundColor: _teal,
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             elevation: 0,
             titleSpacing: 0,
@@ -143,7 +142,7 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
                     child: ElevatedButton(
                       onPressed: _onLanjutkan,
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: _teal,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -224,13 +223,13 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: isExpanded ? _teal : _teal.withOpacity(0.4),
+            color: isExpanded ? AppColors.primary : AppColors.primary.withOpacity(0.4),
             width: isExpanded ? 1.8 : 1.2,
           ),
           boxShadow: [
             BoxShadow(
                 color: isExpanded
-                    ? _teal.withOpacity(0.1)
+                    ? AppColors.primary.withOpacity(0.1)
                      : Colors.black.withOpacity(0.04),
                 blurRadius: 8,
                 offset: const Offset(0, 2))
@@ -262,7 +261,7 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
   // ── Chip jenjang SD/SMP/SMA ─────────────────────────────────────
   Widget _buildJenjangSection(bool isLoading) {
     if (_jenjangList.isEmpty && isLoading) {
-      return const Center(child: CircularProgressIndicator(color: _teal));
+      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
     } else if (_jenjangList.isEmpty) {
       return const Text('Tidak ada jenjang tersedia', style: TextStyle(color: AppColors.textSecondary));
     }
@@ -283,10 +282,10 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
             decoration: BoxDecoration(
-              color: isSelected ? _teal : Colors.white,
+              color: isSelected ? AppColors.primary : Colors.white,
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
-                  color: isSelected ? _teal : _teal.withOpacity(0.5),
+                  color: isSelected ? AppColors.primary : AppColors.primary.withOpacity(0.5),
                   width: isSelected ? 1.5 : 1.2),
             ),
             child: Text(j,
@@ -303,13 +302,13 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
   // ── Chip mapel ──────────────────────────────────────────────────
   Widget _buildMapelSection(bool isLoading) {
     if (_expandedKategori == 'akademik' && isLoading && _mapelList.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: _teal));
+      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
     } else if (_mapelList.isEmpty) {
       return const Text('Tidak ada mata pelajaran tersedia', style: TextStyle(color: AppColors.textSecondary));
     }
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('Pilih Mata Pelajaran',
+      const Text('Pilih Kelas',
           style: TextStyle(
               fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
       const SizedBox(height: 10),
@@ -324,10 +323,10 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
               decoration: BoxDecoration(
-                color: isSelected ? _teal : Colors.white,
+                color: isSelected ? AppColors.primary : Colors.white,
                 borderRadius: BorderRadius.circular(30),
                 border: Border.all(
-                    color: isSelected ? _teal : _teal.withOpacity(0.5),
+                    color: isSelected ? AppColors.primary : AppColors.primary.withOpacity(0.5),
                     width: isSelected ? 1.5 : 1.2),
               ),
               child: Text(mapel.name,

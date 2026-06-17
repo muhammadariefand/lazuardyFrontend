@@ -2,8 +2,8 @@
 // Bottom navigation bar reusable untuk semua halaman Siswa
 
 import 'package:flutter/material.dart';
+import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class SiswaBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -33,11 +33,11 @@ class SiswaBottomNav extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(e.value.$1, size: 26, color: isActive ? _teal : Colors.grey.shade400),
+                  Icon(e.value.$1, size: 26, color: isActive ? AppColors.primary : Colors.grey.shade400),
                   const SizedBox(height: 4),
                   Text(e.value.$2, style: TextStyle(fontSize: 11,
                     fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                    color: isActive ? _teal : Colors.grey.shade400)),
+                    color: isActive ? AppColors.primary : Colors.grey.shade400)),
                 ]),
               ),
             );

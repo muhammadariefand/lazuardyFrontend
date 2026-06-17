@@ -5,7 +5,6 @@ import 'package:lazuadry_mobile_fe/presentation/widgets/orangtua_bottom_nav.dart
 import 'package:lazuadry_mobile_fe/presentation/state_management/parent_profile/parent_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/student_biodata.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class ProfilAnakPage extends StatefulWidget {
   const ProfilAnakPage({super.key});
@@ -42,7 +41,7 @@ class _ProfilAnakPageState extends State<ProfilAnakPage> {
               builder: (context, state) {
                 if (state is ParentProfileLoading || state is ParentProfileInitial) {
                   return const Center(
-                    child: CircularProgressIndicator(color: _teal),
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   );
                 }
 
@@ -57,7 +56,7 @@ class _ProfilAnakPageState extends State<ProfilAnakPage> {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () => context.read<ParentProfileCubit>().loadProfile(),
-                          style: ElevatedButton.styleFrom(backgroundColor: _teal),
+                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                           child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
                         ),
                       ],
@@ -122,7 +121,7 @@ class _ProfilAnakPageState extends State<ProfilAnakPage> {
   // ── AppBar ────────────────────────────────────────────────────
   Widget _buildAppBar(BuildContext context) {
     return Container(
-      color: _teal,
+      color: AppColors.primary,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 12,
         left: 20,
@@ -173,7 +172,7 @@ class _ProfilAnakPageState extends State<ProfilAnakPage> {
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w700,
-                            color: _teal,
+                            color: AppColors.primary,
                           ),
                         ),
                       ),
@@ -185,7 +184,7 @@ class _ProfilAnakPageState extends State<ProfilAnakPage> {
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
-                        color: _teal,
+                        color: AppColors.primary,
                       ),
                     ),
                   ),
@@ -287,7 +286,7 @@ class _ProfilAnakPageState extends State<ProfilAnakPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _teal.withOpacity(0.45)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.45)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),

@@ -14,7 +14,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_dashboard
 import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_buttom_nav.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_drawer.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class BerandaTutorPage extends StatefulWidget {
   const BerandaTutorPage({super.key});
@@ -60,7 +59,7 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
           return const TutorDrawer(nama: 'Tutor', inisial: 'T');
         },
       ),
-      backgroundColor: _teal,
+      backgroundColor: AppColors.primary,
       bottomNavigationBar: TutorBottomNav(
         currentIndex: 0,
         onTap: (i) {
@@ -411,10 +410,10 @@ class _BerandaTutorPageState extends State<BerandaTutorPage> {
                 Container(
                   width: 38, height: 38,
                   decoration: BoxDecoration(
-                    color: _teal.withOpacity(0.1),
+                    color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(9),
                   ),
-                  child: const Icon(Icons.notifications_active, color: _teal, size: 18),
+                  child: const Icon(Icons.notifications_active, color: AppColors.primary, size: 18),
                 ),
                 const SizedBox(width: 12),
                 Expanded(child: Column(

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class DetailSesiPage extends StatelessWidget {
   const DetailSesiPage({super.key});
@@ -14,7 +13,7 @@ class DetailSesiPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
@@ -39,7 +38,7 @@ class DetailSesiPage extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Info pengingat
-          _buildInfoBanner('Pengingat otomatis akan dikirim 1 jam sebelum sesi dimulai.', const Color(0xFFFFF8E1), const Color(0xFFF59E0B)),
+          _buildInfoBanner('Pengingat otomatis akan dikirim 1 jam sebelum sesi dimulai.', const Color(0xFFFFF8E1), AppColors.warningYellow),
           const SizedBox(height: 24),
 
           // Tombol batalkan
@@ -47,8 +46,8 @@ class DetailSesiPage extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: () => Navigator.pushNamed(context, '/siswa/batalkan-sesi'),
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFFE53E3E), width: 1.5),
-                foregroundColor: const Color(0xFFE53E3E),
+                side: const BorderSide(color: AppColors.errorRed, width: 1.5),
+                foregroundColor: AppColors.errorRed,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               icon: const Icon(Icons.cancel_outlined, size: 20),
@@ -63,19 +62,19 @@ class DetailSesiPage extends StatelessWidget {
   Widget _buildTutorCard() => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: _teal.withOpacity(0.4)),
+      border: Border.all(color: AppColors.primary.withOpacity(0.4)),
       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)]),
     child: Row(children: [
       Container(width: 56, height: 56, decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(10)),
         alignment: Alignment.center, child: Text('S', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.grey.shade500))),
       const SizedBox(width: 12),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('Ibu Sarah', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _teal)),
+        const Text('Ibu Sarah', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary)),
         Row(children: [
           const Text('Matematika', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
           const SizedBox(width: 8),
           Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-            decoration: BoxDecoration(color: const Color(0xFF25D366), borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(color: AppColors.successGreen, borderRadius: BorderRadius.circular(20)),
             child: const Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(Icons.chat_rounded, size: 12, color: Colors.white),
               SizedBox(width: 4),
@@ -85,14 +84,14 @@ class DetailSesiPage extends StatelessWidget {
       ])),
       Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(color: const Color(0xFFFFF8E1), borderRadius: BorderRadius.circular(20)),
-        child: const Text('Terjadwal', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFF59E0B)))),
+        child: const Text('Terjadwal', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.warningYellow))),
     ]),
   );
 
   Widget _buildInfoCard() => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: _teal.withOpacity(0.4)),
+      border: Border.all(color: AppColors.primary.withOpacity(0.4)),
       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)]),
     child: Column(children: [
       _infoRow(Icons.access_time_outlined, 'Tanggal', 'Rabu, 1 April 2026'),
@@ -115,7 +114,7 @@ class DetailSesiPage extends StatelessWidget {
   Widget _buildAlamatCard(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: _teal.withOpacity(0.4)),
+      border: Border.all(color: AppColors.primary.withOpacity(0.4)),
       boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)]),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Row(children: [
@@ -133,9 +132,9 @@ class DetailSesiPage extends StatelessWidget {
           if (await canLaunchUrl(uri)) launchUrl(uri);
         },
         child: const Row(children: [
-          Icon(Icons.open_in_new_rounded, size: 14, color: _teal),
+          Icon(Icons.open_in_new_rounded, size: 14, color: AppColors.primary),
           SizedBox(width: 4),
-          Text('Buka di Google Maps', style: TextStyle(fontSize: 13, color: _teal, fontWeight: FontWeight.w500)),
+          Text('Buka di Google Maps', style: TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w500)),
         ]),
       ),
     ]),

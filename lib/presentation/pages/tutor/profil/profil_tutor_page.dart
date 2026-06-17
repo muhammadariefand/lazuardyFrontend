@@ -6,8 +6,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/t
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/tutor_buttom_nav.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _navy = Color(0xFF1E2D7D);
 
 class ProfilTutorPage extends StatefulWidget {
   const ProfilTutorPage({super.key});
@@ -40,7 +38,7 @@ class _ProfilTutorPageState extends State<ProfilTutorPage> {
       body: Column(children: [
         // ── Teal header ─────────────────────────────────────────
         Container(
-          color: _teal,
+          color: AppColors.primary,
           padding: const EdgeInsets.fromLTRB(20, 56, 20, 20),
           child: const Align(
             alignment: Alignment.centerLeft,
@@ -54,7 +52,7 @@ class _ProfilTutorPageState extends State<ProfilTutorPage> {
           child: BlocBuilder<TutorProfileCubit, TutorProfileState>(
             builder: (context, state) {
               if (state is TutorProfileLoading || state is TutorProfileInitial) {
-                return const Center(child: CircularProgressIndicator(color: _teal));
+                return const Center(child: CircularProgressIndicator(color: AppColors.primary));
               }
 
               if (state is TutorProfileError) {
@@ -91,7 +89,7 @@ class _ProfilTutorPageState extends State<ProfilTutorPage> {
                 ];
 
                 return RefreshIndicator(
-                  color: _teal,
+                  color: AppColors.primary,
                   onRefresh: () async => context.read<TutorProfileCubit>().fetchProfile(),
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -105,7 +103,7 @@ class _ProfilTutorPageState extends State<ProfilTutorPage> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: _teal.withOpacity(0.4)),
+                          border: Border.all(color: AppColors.primary.withOpacity(0.4)),
                           boxShadow: [BoxShadow(
                               color: Colors.black.withOpacity(0.05), blurRadius: 8)],
                         ),
@@ -119,7 +117,7 @@ class _ProfilTutorPageState extends State<ProfilTutorPage> {
                             child: Text(inisial,
                                 style: const TextStyle(
                                     fontSize: 28, fontWeight: FontWeight.w700,
-                                    color: _navy)),
+                                    color: AppColors.secondary)),
                           ),
                           const SizedBox(width: 16),
                           Expanded(child: Column(
@@ -140,7 +138,7 @@ class _ProfilTutorPageState extends State<ProfilTutorPage> {
                                 onPressed: () => Navigator.pushNamed(
                                     context, '/tutor/edit-profil'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: _teal,
+                                  backgroundColor: AppColors.primary,
                                   foregroundColor: Colors.white,
                                   elevation: 0,
                                   padding: EdgeInsets.zero,
@@ -184,7 +182,7 @@ class _ProfilTutorPageState extends State<ProfilTutorPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _teal.withOpacity(0.4)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4)),
         boxShadow: [BoxShadow(
             color: Colors.black.withOpacity(0.05), blurRadius: 8)],
       ),

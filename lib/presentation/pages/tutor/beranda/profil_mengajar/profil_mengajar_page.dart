@@ -4,7 +4,6 @@ import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/profil_mengajar/profil_mengajar_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/profil_mengajar/profil_mengajar_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class _HariSlot {
   final String label;
@@ -145,7 +144,7 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.submitSuccessMessage!),
-                  backgroundColor: _teal,
+                  backgroundColor: AppColors.primary,
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -164,7 +163,7 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
         },
         builder: (context, state) {
           if (state is ProfilMengajarLoading || state is ProfilMengajarInitial) {
-            return const Center(child: CircularProgressIndicator(color: _teal));
+            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
           } else if (state is ProfilMengajarError) {
             return Center(
               child: Column(
@@ -174,7 +173,7 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => context.read<ProfilMengajarCubit>().fetchProfileData(),
-                    style: ElevatedButton.styleFrom(backgroundColor: _teal),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                     child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
                   )
                 ],
@@ -210,7 +209,7 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
                   Container(
                     color: Colors.black.withOpacity(0.3),
                     child: const Center(
-                      child: CircularProgressIndicator(color: _teal),
+                      child: CircularProgressIndicator(color: AppColors.primary),
                     ),
                   ),
               ],
@@ -224,7 +223,7 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
 
   Widget _buildAppBar(bool isSubmitting) {
     return Container(
-      color: _teal,
+      color: AppColors.primary,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 12,
         left: 4,
@@ -311,11 +310,11 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
                     fillColor: Colors.white,
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: _teal.withOpacity(0.5)),
+                      borderSide: BorderSide(color: AppColors.primary.withOpacity(0.5)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: _teal, width: 1.5),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                     ),
                   ),
                 )
@@ -391,10 +390,10 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: isActive ? _teal : Colors.white,
+          color: isActive ? AppColors.primary : Colors.white,
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
-            color: isActive ? _teal : const Color(0xFFCCCCCC),
+            color: isActive ? AppColors.primary : const Color(0xFFCCCCCC),
           ),
         ),
         child: Row(
@@ -474,10 +473,10 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
             width: 40,
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
-              color: isSelected ? _teal : Colors.white,
+              color: isSelected ? AppColors.primary : Colors.white,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: isSelected ? _teal : const Color(0xFFCCCCCC),
+                color: isSelected ? AppColors.primary : const Color(0xFFCCCCCC),
               ),
             ),
             child: Column(
@@ -530,21 +529,21 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: _teal.withOpacity(0.08),
+            color: AppColors.primary.withOpacity(0.08),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: _teal.withOpacity(0.4)),
+            border: Border.all(color: AppColors.primary.withOpacity(0.4)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.schedule_rounded, size: 15, color: _teal),
+              Icon(Icons.schedule_rounded, size: 15, color: AppColors.primary),
               const SizedBox(width: 5),
               Text(
                 jam,
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: _teal,
+                  color: AppColors.primary,
                 ),
               ),
               if (_isEditMode) ...[
@@ -609,7 +608,7 @@ class _ProfilMengajarPageState extends State<ProfilMengajarPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _teal.withOpacity(0.5)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),

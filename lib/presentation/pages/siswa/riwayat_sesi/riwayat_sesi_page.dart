@@ -9,8 +9,6 @@ import '../../../../domain/entities/schedule_entity.dart';
 import '../../../state_management/riwayat_sesi/riwayat_sesi_cubit.dart';
 import '../../../state_management/riwayat_sesi/riwayat_sesi_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _navy = Color(0xFF1E2D7D);
 
 class RiwayatSesiPage extends StatefulWidget {
   const RiwayatSesiPage({super.key});
@@ -31,7 +29,7 @@ class _RiwayatSesiPageState extends State<RiwayatSesiPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
@@ -48,7 +46,7 @@ class _RiwayatSesiPageState extends State<RiwayatSesiPage> {
         builder: (context, state) {
           if (state is RiwayatSesiLoading) {
             return const Center(
-              child: CircularProgressIndicator(color: _teal),
+              child: CircularProgressIndicator(color: AppColors.primary),
             );
           }
 
@@ -59,7 +57,7 @@ class _RiwayatSesiPageState extends State<RiwayatSesiPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline, color: Color(0xFFE53E3E), size: 48),
+                    const Icon(Icons.error_outline, color: AppColors.errorRed, size: 48),
                     const SizedBox(height: 12),
                     Text(
                       state.message,
@@ -71,7 +69,7 @@ class _RiwayatSesiPageState extends State<RiwayatSesiPage> {
                       onPressed: () =>
                           context.read<RiwayatSesiCubit>().fetchRiwayatSesi(),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _teal,
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
@@ -89,7 +87,7 @@ class _RiwayatSesiPageState extends State<RiwayatSesiPage> {
               return _buildEmptyState();
             }
             return RefreshIndicator(
-              color: _teal,
+              color: AppColors.primary,
               onRefresh: () =>
                   context.read<RiwayatSesiCubit>().fetchRiwayatSesi(),
               child: ListView.separated(
@@ -144,15 +142,15 @@ class _SesiCard extends StatelessWidget {
   _StatusInfo get _statusInfo {
     switch (sesi.status.toLowerCase()) {
       case 'completed':
-        return _StatusInfo('Selesai', const Color(0xFF4CAF50));
+        return _StatusInfo('Selesai', AppColors.successGreen);
       case 'cancelled':
-        return _StatusInfo('Dibatalkan', const Color(0xFFE53E3E));
+        return _StatusInfo('Dibatalkan', AppColors.errorRed);
       case 'reported':
         return _StatusInfo('Menunggu Konfirmasi', const Color(0xFF8B5CF6));
       case 'ongoing':
-        return _StatusInfo('Sedang Berlangsung', const Color(0xFF3AAFA9));
+        return _StatusInfo('Sedang Berlangsung', AppColors.primary);
       default:
-        return _StatusInfo('Menunggu', const Color(0xFFF59E0B));
+        return _StatusInfo('Menunggu', AppColors.warningYellow);
     }
   }
 
@@ -212,7 +210,7 @@ class _SesiCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: _navy,
+                  color: AppColors.secondary,
                 ),
               ),
             ),

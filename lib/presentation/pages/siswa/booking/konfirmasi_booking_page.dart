@@ -9,8 +9,6 @@ import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import '../../../state_management/student_booking/booking_flow_cubit.dart';
 import '../../../state_management/student_booking/booking_flow_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _orange = Color(0xFFF59E0B);
 
 class KonfirmasiBookingPage extends StatefulWidget {
   const KonfirmasiBookingPage({super.key});
@@ -23,7 +21,7 @@ class _KonfirmasiBookingPageState extends State<KonfirmasiBookingPage> {
   void _onKonfirmasi(Map args) {
     context.read<BookingFlowCubit>().submitBooking(
       tutorId: args['tutor_id'] as int,
-      subjectId: args['subject_id'] as int,
+      subjectId: args['class_id'] as int,
       date: args['date'] as String,
       time: args['time'] as String,
       learningMethod: args['metode'] as String,
@@ -48,7 +46,7 @@ class _KonfirmasiBookingPageState extends State<KonfirmasiBookingPage> {
         if (state is BookingFlowError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(state.message),
-            backgroundColor: const Color(0xFFE53E3E),
+            backgroundColor: AppColors.errorRed,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
           ));
@@ -63,7 +61,7 @@ class _KonfirmasiBookingPageState extends State<KonfirmasiBookingPage> {
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            backgroundColor: _teal,
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             elevation: 0,
             titleSpacing: 0,
@@ -80,7 +78,7 @@ class _KonfirmasiBookingPageState extends State<KonfirmasiBookingPage> {
               child: ElevatedButton(
                 onPressed: isLoading ? null : () => _onKonfirmasi(args),
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: _teal,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -142,7 +140,7 @@ class _KonfirmasiBookingPageState extends State<KonfirmasiBookingPage> {
                   border: Border.all(color: const Color(0xFFFFE082)),
                 ),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Icon(Icons.menu_book_outlined, color: _orange, size: 20),
+                  const Icon(Icons.menu_book_outlined, color: AppColors.warningYellow, size: 20),
                   const SizedBox(width: 10),
                   const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text('Kuota Sesi',

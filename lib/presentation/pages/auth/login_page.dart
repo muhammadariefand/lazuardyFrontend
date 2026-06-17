@@ -361,7 +361,7 @@ class _InfoBanner extends StatelessWidget {
         children: [
           const Icon(
             Icons.info_outline_rounded,
-            color: Color(0xFFF59E0B),
+            color: AppColors.warningYellow,
             size: 18,
           ),
           const SizedBox(width: 10),

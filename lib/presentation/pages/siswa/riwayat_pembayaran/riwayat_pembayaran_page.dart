@@ -4,9 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _priceRed = Color(0xFFE53E3E);
-const _green = Color(0xFF4CAF50);
+const _priceRed = AppColors.errorRed;
 
 enum _PaymentStatus { berhasil, gagal, menunggu }
 
@@ -52,7 +50,7 @@ class RiwayatPembayaranPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
@@ -93,9 +91,9 @@ class _PaymentCard extends StatelessWidget {
 
   Color get _badgeColor {
     switch (item.status) {
-      case _PaymentStatus.berhasil: return _green;
+      case _PaymentStatus.berhasil: return AppColors.successGreen;
       case _PaymentStatus.gagal:    return _priceRed;
-      case _PaymentStatus.menunggu: return const Color(0xFFF59E0B);
+      case _PaymentStatus.menunggu: return AppColors.warningYellow;
     }
   }
 
@@ -114,7 +112,7 @@ class _PaymentCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _teal.withOpacity(0.4), width: 1.2),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.2),
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8,
               offset: const Offset(0, 2)),
@@ -127,7 +125,7 @@ class _PaymentCard extends StatelessWidget {
           children: [
             Text(item.paket,
                 style: const TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w700, color: _teal)),
+                    fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary)),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(

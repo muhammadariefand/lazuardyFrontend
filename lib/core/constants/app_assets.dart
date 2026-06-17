@@ -4,25 +4,41 @@
 class AppAssets {
   AppAssets._();
 
-  static const String _base = 'assets/images';
+  static const String _images = 'assets/images';
+  static const String _icons = 'assets/icons';
+
+  // =====================
+  // LOGOS & BRANDING
+  // =====================
 
   /// Logo ikon + nama "Bimbel Lazuardy" + tagline (background hitam)
-  /// Digunakan di: SplashPage
-  static const String logoFull = '$_base/logo_lazuardi.png';
+  static const String logoFull = '$_images/logo_lazuardi.png';
 
   /// Logo ikon + nama di samping kanan (horizontal, transparan)
-  /// Digunakan di: OnboardingPage, DetailPribadiPage, DetailAlamatPage,
-  ///              FormulirPendaftaranTutorPage, FormulirProfilTutorPage, dst.
-  static const String logoHorizontal = '$_base/logo_memanjang.png';
+  static const String logoHorizontal = '$_images/logo_memanjang.png';
 
   /// Logo ikon saja tanpa teks (transparan)
-  /// Digunakan di: LoginPage, RegisterPage, OtpPage, ForgotPasswordPage,
-  ///              ResetPasswordPage, DetailPribadiSiswaPage
-  static const String logoIcon = '$_base/logo_lazuardi_noText.png';
+  static const String logoIcon = '$_images/logo_lazuardi_noText.png';
+
+  // =====================
+  // ICONS
+  // =====================
 
   /// Google logo untuk OAuth button
-  static const String googleLogo = '$_base/google_logo.png';
+  static const String googleLogo = '$_images/google_logo.png';
 
   /// Facebook logo untuk OAuth button
-  static const String facebookLogo = '$_base/facebook_logo.png';
+  static const String facebookLogo = '$_images/facebook_logo.png';
+
+  /// Dashboard Menu Icons (Illustrations)
+  static const String iconBooking = '$_icons/icon_booking.png';
+  static const String iconRiwayatSesi = '$_icons/icon_riwayat_sesi.png';
+  static const String iconRiwayatUlasan = '$_icons/icon_riwayat_ulasan.png';
+  static const String iconRiwayatPembayaran = '$_icons/icon_riwayat_pembayaran.png';
+
+  // =====================
+  // ILLUSTRATIONS / OTHERS
+  // =====================
+  
+  // (Tambahkan ilustrasi kosong, empty state, dll di sini nanti)
 }

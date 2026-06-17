@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class SesiDibatalkanPage extends StatelessWidget {
   const SesiDibatalkanPage({super.key});
@@ -18,13 +17,13 @@ class SesiDibatalkanPage extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: _teal.withOpacity(0.3)),
+              border: Border.all(color: AppColors.primary.withOpacity(0.3)),
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 16)]),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               // Icon X merah
               Container(width: 72, height: 72,
-                decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFFE53E3E), width: 2)),
-                child: const Icon(Icons.close_rounded, color: Color(0xFFE53E3E), size: 38)),
+                decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.errorRed, width: 2)),
+                child: const Icon(Icons.close_rounded, color: AppColors.errorRed, size: 38)),
               const SizedBox(height: 20),
               const Text('Sesi Dibatalkan', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               const SizedBox(height: 12),
@@ -39,13 +38,13 @@ class SesiDibatalkanPage extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(color: const Color(0xFFFFEBEE), borderRadius: BorderRadius.circular(12)),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Icon(Icons.warning_amber_rounded, color: Color(0xFFE53E3E), size: 18),
+                  const Icon(Icons.warning_amber_rounded, color: AppColors.errorRed, size: 18),
                   const SizedBox(width: 10),
                   const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('Kuota sesi hangus', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFFE53E3E))),
+                    Text('Kuota sesi hangus', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.errorRed)),
                     SizedBox(height: 4),
                     Text('Pembatalan dilakukan kurang dari 12 jam sebelum sesi. Kuota sesi tidak dikembalikan.',
-                      style: TextStyle(fontSize: 12, color: Color(0xFFE53E3E), height: 1.4)),
+                      style: TextStyle(fontSize: 12, color: AppColors.errorRed, height: 1.4)),
                   ])),
                 ]),
               ),
@@ -53,7 +52,7 @@ class SesiDibatalkanPage extends StatelessWidget {
               SizedBox(width: double.infinity, height: 48,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushNamedAndRemoveUntil(context, '/siswa/beranda', (_) => false),
-                  style: ElevatedButton.styleFrom(backgroundColor: _teal, foregroundColor: Colors.white, elevation: 0,
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                   child: const Text('Kembali ke Beranda', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                 )),

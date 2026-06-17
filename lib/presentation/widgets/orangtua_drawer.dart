@@ -7,8 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _navy = Color(0xFF1E2D7D);
 
 class OrangtuaDrawer extends StatelessWidget {
   final String nama;
@@ -70,7 +68,7 @@ class OrangtuaDrawer extends StatelessWidget {
                       style: const TextStyle(
                           fontSize: 34,
                           fontWeight: FontWeight.w700,
-                          color: _navy)),
+                          color: AppColors.secondary)),
                 ),
                 const SizedBox(height: 12),
                 Text(nama,
@@ -190,7 +188,7 @@ class OrangtuaDrawer extends StatelessWidget {
                       context, '/login', (_) => false);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _teal,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -231,7 +229,7 @@ class _MenuItem extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _teal.withOpacity(0.4), width: 1.2),
+          border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.2),
         ),
         child: Row(children: [
           Icon(icon, size: 22, color: AppColors.textPrimary),

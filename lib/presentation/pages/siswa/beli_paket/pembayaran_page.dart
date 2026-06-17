@@ -4,8 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _priceRed = Color(0xFFE53E3E);
+const _priceRed = AppColors.errorRed;
 
 class PembayaranPage extends StatefulWidget {
   const PembayaranPage({super.key});
@@ -47,7 +46,7 @@ class _PembayaranPageState extends State<PembayaranPage> {
     if (_selectedBank == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Pilih metode pembayaran'),
-        backgroundColor: Color(0xFFE53E3E),
+        backgroundColor: AppColors.errorRed,
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.all(16),
       ));
@@ -67,7 +66,7 @@ class _PembayaranPageState extends State<PembayaranPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
@@ -97,7 +96,7 @@ class _PembayaranPageState extends State<PembayaranPage> {
             child: ElevatedButton(
               onPressed: _onLanjutBayar,
               style: ElevatedButton.styleFrom(
-                  backgroundColor: _teal,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -120,7 +119,7 @@ class _PembayaranPageState extends State<PembayaranPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _teal.withOpacity(0.4)),
+              border: Border.all(color: AppColors.primary.withOpacity(0.4)),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withOpacity(0.04),
@@ -177,7 +176,7 @@ class _PembayaranPageState extends State<PembayaranPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: _teal.withOpacity(0.4)),
+              border: Border.all(color: AppColors.primary.withOpacity(0.4)),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withOpacity(0.04),
@@ -208,12 +207,12 @@ class _PembayaranPageState extends State<PembayaranPage> {
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: _selectedBank == bank.kode
-                                    ? _teal
+                                    ? AppColors.primary
                                     : Colors.grey.shade400,
                                 width: _selectedBank == bank.kode ? 0 : 1.5,
                               ),
                               color: _selectedBank == bank.kode
-                                  ? _teal
+                                  ? AppColors.primary
                                   : Colors.white,
                             ),
                             child: _selectedBank == bank.kode
@@ -228,11 +227,11 @@ class _PembayaranPageState extends State<PembayaranPage> {
                             width: 44,
                             height: 28,
                             decoration: BoxDecoration(
-                              color: (_bankColors[bank.kode] ?? _teal)
+                              color: (_bankColors[bank.kode] ?? AppColors.primary)
                                   .withOpacity(0.1),
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
-                                  color: (_bankColors[bank.kode] ?? _teal)
+                                  color: (_bankColors[bank.kode] ?? AppColors.primary)
                                       .withOpacity(0.3)),
                             ),
                             alignment: Alignment.center,
@@ -241,7 +240,7 @@ class _PembayaranPageState extends State<PembayaranPage> {
                                     fontSize: 9,
                                     fontWeight: FontWeight.w800,
                                     color:
-                                        _bankColors[bank.kode] ?? _teal)),
+                                        _bankColors[bank.kode] ?? AppColors.primary)),
                           ),
                           const SizedBox(width: 12),
 

@@ -9,7 +9,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedu
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/schedule_state.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/siswa_bottom_nav.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class JadwalSiswaPage extends StatefulWidget {
   const JadwalSiswaPage({super.key});
@@ -77,7 +76,7 @@ class _JadwalSiswaPageState extends State<JadwalSiswaPage> {
       }),
       body: Column(children: [
         Container(
-          color: _teal,
+          color: AppColors.primary,
           padding: const EdgeInsets.fromLTRB(20, 56, 20, 20),
           child: const Align(
             alignment: Alignment.centerLeft,
@@ -141,9 +140,9 @@ class _JadwalSiswaPageState extends State<JadwalSiswaPage> {
                           width: 44,
                           height: 62,
                           decoration: BoxDecoration(
-                            color: isSelected ? _teal : Colors.white,
+                            color: isSelected ? AppColors.primary : Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: isSelected ? _teal : Colors.grey.shade300, width: 1.2),
+                            border: Border.all(color: isSelected ? AppColors.primary : Colors.grey.shade300, width: 1.2),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -247,7 +246,7 @@ class _JadwalSiswaPageState extends State<JadwalSiswaPage> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _teal.withOpacity(0.4), width: 1.2),
+          border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.2),
           boxShadow: [
             BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2)),
           ],
@@ -274,7 +273,7 @@ class _JadwalSiswaPageState extends State<JadwalSiswaPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(displayName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _teal)),
+                      Text(displayName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary)),
                       Text(schedule.subjectName, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                       const SizedBox(height: 6),
                       Row(
@@ -294,7 +293,7 @@ class _JadwalSiswaPageState extends State<JadwalSiswaPage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(color: const Color(0xFFFFF8E1), borderRadius: BorderRadius.circular(20)),
-                  child: Text(schedule.status, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFF59E0B))),
+                  child: Text(schedule.status, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.warningYellow)),
                 ),
               ],
             ),
@@ -331,7 +330,7 @@ class _JadwalSiswaPageState extends State<JadwalSiswaPage> {
 
   Widget _whatsappBadge(String nomor) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(color: const Color(0xFF25D366), borderRadius: BorderRadius.circular(20)),
+        decoration: BoxDecoration(color: AppColors.successGreen, borderRadius: BorderRadius.circular(20)),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           const Icon(Icons.chat_rounded, size: 12, color: Colors.white),
           const SizedBox(width: 4),

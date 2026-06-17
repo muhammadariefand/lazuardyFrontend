@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 // ── Tipe notif ────────────────────────────────────────────────────
 enum _NotifType { sesiMulai, booking, laporan, sesiSelesai }
@@ -55,7 +54,7 @@ class NotifikasiTutorPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
@@ -107,7 +106,7 @@ class _NotifCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _teal.withOpacity(0.4), width: 1.2),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.2),
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.03),
               blurRadius: 6, offset: const Offset(0, 2)),
@@ -118,10 +117,10 @@ class _NotifCard extends StatelessWidget {
         Container(
           width: 38, height: 38,
           decoration: BoxDecoration(
-            color: _teal.withOpacity(0.08),
+            color: AppColors.primary.withOpacity(0.08),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(_icon, size: 20, color: _teal),
+          child: Icon(_icon, size: 20, color: AppColors.primary),
         ),
         const SizedBox(width: 12),
 

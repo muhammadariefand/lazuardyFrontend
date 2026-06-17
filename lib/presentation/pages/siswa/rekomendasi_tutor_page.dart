@@ -5,9 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _navy = Color(0xFF1E2D7D);
-const _starYellow = Color(0xFFFFB800);
 
 class RekomendasiTutorPage extends StatelessWidget {
   const RekomendasiTutorPage({super.key});
@@ -23,7 +20,7 @@ class RekomendasiTutorPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
@@ -106,7 +103,7 @@ class _TutorCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _teal.withOpacity(0.4), width: 1.2),
+          border: Border.all(color: AppColors.primary.withOpacity(0.4), width: 1.2),
           boxShadow: [
             BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8,
                 offset: const Offset(0, 2)),
@@ -122,7 +119,7 @@ class _TutorCard extends StatelessWidget {
             ),
             alignment: Alignment.center,
             child: Text(tutor.inisial,
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: _navy)),
+                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, color: AppColors.secondary)),
           ),
           const SizedBox(width: 14),
 
@@ -137,7 +134,7 @@ class _TutorCard extends StatelessWidget {
                   style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
               const SizedBox(height: 6),
               Row(children: [
-                const Icon(Icons.star_rounded, color: _starYellow, size: 15),
+                const Icon(Icons.star_rounded, color: AppColors.warningYellow, size: 15),
                 const SizedBox(width: 3),
                 Text('${tutor.rating}',
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
@@ -153,9 +150,9 @@ class _TutorCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (tutor.hasOnline)  _badge('Online',  const Color(0xFF4CAF50)),
+              if (tutor.hasOnline)  _badge('Online',  AppColors.successGreen),
               if (tutor.hasOnline && tutor.hasOffline) const SizedBox(height: 4),
-              if (tutor.hasOffline) _badge('Offline', const Color(0xFFE53E3E)),
+              if (tutor.hasOffline) _badge('Offline', AppColors.errorRed),
             ],
           ),
         ]),

@@ -10,7 +10,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/tarik_saldo/tar
 import 'package:lazuadry_mobile_fe/presentation/state_management/tarik_saldo/tarik_saldo_state.dart';
 import 'package:intl/intl.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class TarikSaldoPage extends StatefulWidget {
   const TarikSaldoPage({super.key});
@@ -147,7 +146,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _teal,
+                    backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -209,7 +208,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
 
   Widget _buildBody(TarikSaldoState state) {
     if (state is TarikSaldoInitial || (state is TarikSaldoLoading && state.isFirstFetch)) {
-      return const Center(child: CircularProgressIndicator(color: _teal));
+      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
     } else if (state is TarikSaldoError) {
       return Center(
         child: Column(
@@ -219,7 +218,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: () => context.read<TarikSaldoCubit>().initFetch(),
-              style: ElevatedButton.styleFrom(backgroundColor: _teal),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
             ),
           ],
@@ -246,7 +245,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
       onRefresh: () async {
         await context.read<TarikSaldoCubit>().initFetch();
       },
-      color: _teal,
+      color: AppColors.primary,
       child: ListView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
@@ -298,7 +297,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
           if (state is TarikSaldoLoaded && !state.hasReachedMax && payouts.isNotEmpty)
             const Padding(
               padding: EdgeInsets.all(16.0),
-              child: Center(child: CircularProgressIndicator(color: _teal)),
+              child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
             ),
             
           const SizedBox(height: 24),
@@ -310,7 +309,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
   // ── AppBar ────────────────────────────────────────────────────
   Widget _buildAppBar() {
     return Container(
-      color: _teal,
+      color: AppColors.primary,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 12,
         left: 4,
@@ -431,7 +430,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide:
-                    const BorderSide(color: _teal, width: 1.5),
+                    const BorderSide(color: AppColors.primary, width: 1.5),
               ),
             ),
           ),
@@ -460,7 +459,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _teal,
+                backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -548,7 +547,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _teal.withOpacity(0.4)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -614,7 +613,7 @@ class _TarikSaldoPageState extends State<TarikSaldoPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _teal.withOpacity(0.5)),
+        border: Border.all(color: AppColors.primary.withOpacity(0.5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),

@@ -8,8 +8,6 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_siswa/ul
 import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_siswa/ulasan_siswa_state.dart';
 import 'package:intl/intl.dart';
 
-const _teal = Color(0xFF3AAFA9);
-const _starYellow = Color(0xFFFFB800);
 
 class UlasanSiswaPage extends StatefulWidget {
   const UlasanSiswaPage({super.key});
@@ -51,7 +49,7 @@ class _UlasanSiswaPageState extends State<UlasanSiswaPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: _teal,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
@@ -67,7 +65,7 @@ class _UlasanSiswaPageState extends State<UlasanSiswaPage> {
       body: BlocBuilder<UlasanSiswaCubit, UlasanSiswaState>(
         builder: (context, state) {
           if (state is UlasanSiswaInitial || (state is UlasanSiswaLoading && state.isFirstFetch)) {
-            return const Center(child: CircularProgressIndicator(color: _teal));
+            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
           } else if (state is UlasanSiswaError) {
             return Center(
               child: Column(
@@ -77,7 +75,7 @@ class _UlasanSiswaPageState extends State<UlasanSiswaPage> {
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: () => context.read<UlasanSiswaCubit>().refreshReviews(),
-                    style: ElevatedButton.styleFrom(backgroundColor: _teal),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                     child: const Text('Coba Lagi', style: TextStyle(color: Colors.white)),
                   ),
                 ],
@@ -102,7 +100,7 @@ class _UlasanSiswaPageState extends State<UlasanSiswaPage> {
 
             return RefreshIndicator(
               onRefresh: _onRefresh,
-              color: _teal,
+              color: AppColors.primary,
               child: CustomScrollView(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -179,7 +177,7 @@ class _UlasanSiswaPageState extends State<UlasanSiswaPage> {
                             } else {
                               return const Padding(
                                 padding: EdgeInsets.all(16),
-                                child: Center(child: CircularProgressIndicator(color: _teal)),
+                                child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
                               );
                             }
                           },
@@ -219,14 +217,14 @@ class _UlasanSiswaPageState extends State<UlasanSiswaPage> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: _teal.withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   studentName[0].toUpperCase(),
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w700, color: _teal),
+                      fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary),
                 ),
               ),
               const SizedBox(width: 12),
@@ -285,7 +283,7 @@ class _StarRow extends StatelessWidget {
         } else {
           icon = Icons.star_outline_rounded;
         }
-        return Icon(icon, color: _starYellow, size: size);
+        return Icon(icon, color: AppColors.warningYellow, size: size);
       }),
     );
   }

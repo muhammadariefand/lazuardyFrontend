@@ -5,7 +5,6 @@ import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_state.dart';
 
-const _teal = Color(0xFF3AAFA9);
 
 class TautkanAkunAnakPage extends StatefulWidget {
   final String? email;
@@ -93,13 +92,13 @@ class _TautkanAkunAnakPageState extends State<TautkanAkunAnakPage> {
                             width: 80,
                             height: 80,
                             decoration: BoxDecoration(
-                              color: _teal.withOpacity(0.12),
+                              color: AppColors.primary.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Icon(
                               Icons.person_add_alt_1_rounded,
                               size: 44,
-                              color: _teal,
+                              color: AppColors.primary,
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -111,7 +110,7 @@ class _TautkanAkunAnakPageState extends State<TautkanAkunAnakPage> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
-                              color: _teal,
+                              color: AppColors.primary,
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -216,13 +215,13 @@ class _TautkanAkunAnakPageState extends State<TautkanAkunAnakPage> {
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide(
-                                  color: _teal.withOpacity(0.5),
+                                  color: AppColors.primary.withOpacity(0.5),
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: const BorderSide(
-                                  color: _teal,
+                                  color: AppColors.primary,
                                   width: 1.5,
                                 ),
                               ),
@@ -258,7 +257,7 @@ class _TautkanAkunAnakPageState extends State<TautkanAkunAnakPage> {
   // ── AppBar ────────────────────────────────────────────────────
   Widget _buildAppBar() {
     return Container(
-      color: _teal,
+      color: AppColors.primary,
       padding: const EdgeInsets.only(
         top:
             12, // PERBAIKAN: Hapus MediaQuery padding top karena sudah ada SafeArea di luar
@@ -308,7 +307,7 @@ class _TautkanAkunAnakPageState extends State<TautkanAkunAnakPage> {
         child: ElevatedButton(
           onPressed: isLoading ? null : _kirimOtp,
           style: ElevatedButton.styleFrom(
-            backgroundColor: _teal,
+            backgroundColor: AppColors.primary,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
