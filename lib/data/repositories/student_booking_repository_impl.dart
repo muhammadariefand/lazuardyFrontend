@@ -21,6 +21,11 @@ class StudentBookingRepositoryImpl implements StudentBookingRepository {
   }
 
   @override
+  Future<List<SubjectEntity>> getSubjectsByLevel(String level) {
+    return remoteDataSource.getSubjectsByLevel(level);
+  }
+
+  @override
   Future<PaginatedDataEntity<TutorEntity>> getTutorsByCriteria({
     int? subjectId,
     String? subjectName,

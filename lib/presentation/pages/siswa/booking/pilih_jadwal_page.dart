@@ -38,7 +38,7 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ];
   
-  static const _englishDays = ['', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  static const _apiDays = ['', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
 
   Map? args;
   int? tutorId;
@@ -75,7 +75,7 @@ class _PilihJadwalPageState extends State<PilihJadwalPage> {
 
   void _fetchSchedulesForDay(DateTime date) {
     if (tutorId != null) {
-      context.read<BookingFlowCubit>().fetchTutorSchedules(tutorId!, _englishDays[date.weekday]);
+      context.read<BookingFlowCubit>().fetchTutorSchedules(tutorId!, _apiDays[date.weekday]);
     }
   }
 

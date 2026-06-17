@@ -303,6 +303,7 @@ Future<void> initDependencies() async {
   // Student Booking
   sl.registerLazySingleton(() => GetJenjangUseCase(sl()));
   sl.registerLazySingleton(() => GetClassesByLevelUseCase(sl()));
+  sl.registerLazySingleton(() => GetSubjectsByLevelUseCase(sl()));
   sl.registerLazySingleton(() => GetTutorsByCriteriaUseCase(sl()));
   sl.registerLazySingleton(() => GetTutorByIdUseCase(sl()));
   sl.registerLazySingleton(() => GetTutorSchedulesUseCase(sl()));
@@ -371,6 +372,7 @@ Future<void> initDependencies() async {
   sl.registerFactory(() => BookingFlowCubit(
     getJenjangUseCase: sl(),
     getClassesByLevelUseCase: sl(),
+    getSubjectsByLevelUseCase: sl(),
     getTutorsByCriteriaUseCase: sl(),
     getTutorByIdUseCase: sl(),
     getTutorSchedulesUseCase: sl(),

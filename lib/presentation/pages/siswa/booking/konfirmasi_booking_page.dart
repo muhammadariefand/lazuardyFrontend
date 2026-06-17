@@ -21,7 +21,7 @@ class _KonfirmasiBookingPageState extends State<KonfirmasiBookingPage> {
   void _onKonfirmasi(Map args) {
     context.read<BookingFlowCubit>().submitBooking(
       tutorId: args['tutor_id'] as int,
-      subjectId: args['class_id'] as int,
+      subjectId: args['subject_id'] as int,
       date: args['date'] as String,
       time: args['time'] as String,
       learningMethod: args['metode'] as String,

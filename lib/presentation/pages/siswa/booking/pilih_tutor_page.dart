@@ -18,7 +18,7 @@ class PilihTutorPage extends StatefulWidget {
 
 class _PilihTutorPageState extends State<PilihTutorPage> {
   Map? args;
-  int? classId;
+  int? subjectId;
   String? mapel;
   String? jenjang;
   String? kategori;
@@ -27,15 +27,15 @@ class _PilihTutorPageState extends State<PilihTutorPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     args = ModalRoute.of(context)?.settings.arguments as Map?;
-    if (args != null && classId == null) {
-      classId = args?['class_id'] as int?;
+    if (args != null && subjectId == null) {
+      subjectId = args?['subject_id'] as int?;
       mapel = args?['mapel'] as String? ?? 'Mapel';
       jenjang = args?['jenjang'] as String?;
       kategori = args?['kategori'] as String? ?? 'akademik';
 
       // Fetch tutor by criteria
       context.read<BookingFlowCubit>().fetchTutorsByCriteria(
-            classId: kategori == 'akademik' ? classId : null,
+            subjectId: kategori == 'akademik' ? subjectId : null,
             subjectName: kategori == 'umum' ? mapel : null,
             level: jenjang,
           );
@@ -103,7 +103,7 @@ class _PilihTutorPageState extends State<PilihTutorPage> {
                         ElevatedButton(
                           onPressed: () {
                             context.read<BookingFlowCubit>().fetchTutorsByCriteria(
-                                  classId: kategori == 'akademik' ? classId : null,
+                                  subjectId: kategori == 'akademik' ? subjectId : null,
                                   subjectName: kategori == 'umum' ? mapel : null,
                                   level: jenjang,
                                 );

@@ -5,6 +5,7 @@ import 'booking_flow_state.dart';
 class BookingFlowCubit extends Cubit<BookingFlowState> {
   final GetJenjangUseCase getJenjangUseCase;
   final GetClassesByLevelUseCase getClassesByLevelUseCase;
+  final GetSubjectsByLevelUseCase getSubjectsByLevelUseCase;
   final GetTutorsByCriteriaUseCase getTutorsByCriteriaUseCase;
   final GetTutorByIdUseCase getTutorByIdUseCase;
   final GetTutorSchedulesUseCase getTutorSchedulesUseCase;
@@ -13,6 +14,7 @@ class BookingFlowCubit extends Cubit<BookingFlowState> {
   BookingFlowCubit({
     required this.getJenjangUseCase,
     required this.getClassesByLevelUseCase,
+    required this.getSubjectsByLevelUseCase,
     required this.getTutorsByCriteriaUseCase,
     required this.getTutorByIdUseCase,
     required this.getTutorSchedulesUseCase,
@@ -34,6 +36,16 @@ class BookingFlowCubit extends Cubit<BookingFlowState> {
     try {
       final classes = await getClassesByLevelUseCase.execute(level);
       emit(ClassesLoaded(classes));
+    } catch (e) {
+      emit(BookingFlowError(e.toString()));
+    }
+  }
+
+  Future<void> fetchSubjectsByLevel(String level) async {
+    emit(BookingFlowLoading());
+    try {
+      final subjects = await getSubjectsByLevelUseCase.execute(level);
+      emit(ClassesLoaded(subjects));
     } catch (e) {
       emit(BookingFlowError(e.toString()));
     }

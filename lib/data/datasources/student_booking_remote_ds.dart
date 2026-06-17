@@ -8,6 +8,7 @@ import '../models/paginated_data_model.dart';
 abstract class StudentBookingRemoteDataSource {
   Future<List<String>> getJenjang();
   Future<List<SubjectModel>> getClassesByLevel(String level);
+  Future<List<SubjectModel>> getSubjectsByLevel(String level);
   Future<PaginatedDataModel<TutorModel>> getTutorsByCriteria({
     int? subjectId,
     String? subjectName,
@@ -83,6 +84,28 @@ class StudentBookingRemoteDataSourceImpl implements StudentBookingRemoteDataSour
       }
     } on DioException catch (e) {
       throw ServerException(_extractErrorMessage(e, 'Terjadi kesalahan pada server saat mengambil mapel'));
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<List<SubjectModel>> getSubjectsByLevel(String level) async {
+    try {
+      final response = await dio.get('/getUniqueSubjectByLevel', queryParameters: {'level': level});
+      final responseData = response.data as Map<String, dynamic>;
+
+      // API ini mengembalikan key 'success' bukan 'status'
+      if (responseData['success'] == 'success') {
+        final dataMap = responseData['data'] as Map<String, dynamic>;
+        final listData = dataMap['data'] as List<dynamic>? ?? [];
+        return listData.map((e) => SubjectModel.fromJson(e as Map<String, dynamic>)).toList();
+      } else {
+        throw ServerException(responseData['message'] ?? 'Gagal mengambil data mata pelajaran');
+      }
+    } on DioException catch (e) {
+      throw ServerException(_extractErrorMessage(e, 'Terjadi kesalahan pada server saat mengambil mata pelajaran'));
     } catch (e) {
       if (e is ServerException) rethrow;
       throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');

@@ -54,7 +54,7 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
           _selectedSubject = null;
           _mapelList = [];
           if (_selectedJenjang != null) {
-            context.read<BookingFlowCubit>().fetchClasses(_selectedJenjang!);
+            context.read<BookingFlowCubit>().fetchSubjectsByLevel(_selectedJenjang!);
           }
         } else {
           // Kategori Umum
@@ -73,7 +73,7 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
         _selectedSubject = null;
         _mapelList = [];
       });
-      context.read<BookingFlowCubit>().fetchClasses(jenjang);
+      context.read<BookingFlowCubit>().fetchSubjectsByLevel(jenjang);
     }
   }
 
@@ -91,8 +91,8 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
     Navigator.pushNamed(context, '/siswa/booking/pilih-tutor',
         arguments: {
           'kategori': _expandedKategori,
-          'jenjang': _selectedJenjang, // bisa null untuk umum
-          'class_id': _selectedSubject!.id,   // id kelas dari API /getClassByLevel
+          'jenjang': _selectedJenjang,
+          'subject_id': _selectedSubject!.id,   // subject_id dari API /getUniqueSubjectByLevel
           'mapel': _selectedSubject!.name,
         });
   }
@@ -308,7 +308,7 @@ class _PilihKategoriPageState extends State<PilihKategoriPage> {
     }
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('Pilih Kelas',
+      const Text('Pilih Mata Pelajaran',
           style: TextStyle(
               fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
       const SizedBox(height: 10),

@@ -22,6 +22,15 @@ class GetClassesByLevelUseCase {
   }
 }
 
+class GetSubjectsByLevelUseCase {
+  final StudentBookingRepository repository;
+  GetSubjectsByLevelUseCase(this.repository);
+
+  Future<List<SubjectEntity>> execute(String level) {
+    return repository.getSubjectsByLevel(level);
+  }
+}
+
 class GetTutorsByCriteriaUseCase {
   final StudentBookingRepository repository;
   GetTutorsByCriteriaUseCase(this.repository);

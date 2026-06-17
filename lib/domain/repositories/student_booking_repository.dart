@@ -8,6 +8,8 @@ abstract class StudentBookingRepository {
   
   Future<List<SubjectEntity>> getClassesByLevel(String level);
   
+  Future<List<SubjectEntity>> getSubjectsByLevel(String level);
+  
   Future<PaginatedDataEntity<TutorEntity>> getTutorsByCriteria({
     int? subjectId,
     String? subjectName,
