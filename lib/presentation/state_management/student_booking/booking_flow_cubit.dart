@@ -85,7 +85,13 @@ class BookingFlowCubit extends Cubit<BookingFlowState> {
       final tutor = await getTutorByIdUseCase.execute(id);
       emit(TutorDetailLoaded(tutor));
     } catch (e) {
-      emit(BookingFlowError(e.toString()));
+      if (e.toString().contains('Gagal mengambil biodata tutor') ||
+          e.toString().contains('tidak ditemukan')) {
+        // Abaikan error biodata yang tidak ada agar user tetap bisa booking
+        emit(BookingFlowInitial());
+      } else {
+        emit(BookingFlowError(e.toString()));
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:lazuadry_mobile_fe/data/models/home_address_model.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/student_biodata.dart';
+import 'package:lazuadry_mobile_fe/core/constants/app_constants.dart';
 
 class StudentModel extends StudentBiodata {
   StudentModel({
@@ -39,7 +40,7 @@ class StudentModel extends StudentBiodata {
       sanction: json['sanction'] as String?,
       telephoneNumber: json['telephoneNumber'] as String?,
       telephoneVerifiedAt: json['telephoneVerifiedAt'] as String?,
-      profilePhotoUrl: json['profilePhotoUrl'] as String?,
+      profilePhotoUrl: AppApiConstants.getImageUrl(json['profilePhotoUrl'] as String?),
       dateOfBirth: json['dateOfBirth'] as String?,
       gender: json['gender'] as String?,
       religion: json['religion'] as String?,

@@ -1,4 +1,5 @@
 import '../../domain/entities/package_entity.dart';
+import '../../core/constants/app_constants.dart';
 
 class PackageModel extends PackageEntity {
   PackageModel({
@@ -19,7 +20,7 @@ class PackageModel extends PackageEntity {
       price: json['price'] is int ? json['price'] : int.tryParse(json['price']?.toString() ?? '0') ?? 0,
       discount: json['discount'] != null ? double.tryParse(json['discount'].toString()) : null,
       description: json['description'] ?? '',
-      imagePath: json['imagePath'],
+      imagePath: AppApiConstants.getImageUrl(json['imagePath']?.toString()),
     );
   }
 }

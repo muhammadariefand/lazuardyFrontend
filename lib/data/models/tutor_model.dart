@@ -1,5 +1,6 @@
 import 'package:lazuadry_mobile_fe/domain/entities/tutor_entity.dart';
 import 'package:lazuadry_mobile_fe/data/models/home_address_model.dart';
+import 'package:lazuadry_mobile_fe/core/constants/app_constants.dart';
 
 class TutorModel extends TutorEntity {
   TutorModel({
@@ -59,7 +60,7 @@ class TutorModel extends TutorEntity {
       name: json['name']?.toString() ?? '',
       email: json['email']?.toString(),
       telephoneNumber: json['telephoneNumber']?.toString(),
-      profilePhotoUrl: json['profilePhotoUrl']?.toString(),
+      profilePhotoUrl: AppApiConstants.getImageUrl(json['profilePhotoUrl']?.toString()),
       description: json['description']?.toString(),
       learningMethods: methods,
       education: parsedEducation,

@@ -1,26 +1,16 @@
-import 'package:dio/dio.dart';
+import 'dart:convert';
+import 'dart:io';
 
 void main() async {
-  final dio = Dio();
-  try {
-    final loginRes = await dio.post(
-      'https://lazuardybackend-hexa.onrender.com/api/login',
-      data: {'email': 'test500@test.com', 'password': 'password123'},
-      options: Options(headers: {'Accept': 'application/json'}),
-    );
-    print('LOGIN: ${loginRes.data}');
-    final token = loginRes.data['access_token'];
+  final url = Uri.parse('https://lazuardybackend-hexa.onrender.com/api/getTutorById?tutor_id=1');
+  final request = await HttpClient().getUrl(url);
+  final response = await request.close();
+  final responseBody = await response.transform(utf8.decoder).join();
+  print('GET /getTutorById: $responseBody');
 
-    final dashRes = await dio.get(
-      'https://lazuardybackend-hexa.onrender.com/api/tutor/dashboard/homepage',
-      options: Options(headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
-      }),
-    );
-    print('DASHBOARD: ${dashRes.data}');
-  } on DioException catch (e) {
-    print('STATUS: ${e.response?.statusCode}');
-    print('DATA: ${e.response?.data}');
-  }
+  final url2 = Uri.parse('https://lazuardybackend-hexa.onrender.com/api/schedule/getTutorSchedulesByDay?tutor_id=1&day=senin');
+  final request2 = await HttpClient().getUrl(url2);
+  final response2 = await request2.close();
+  final responseBody2 = await response2.transform(utf8.decoder).join();
+  print('GET /schedule/getTutorSchedulesByDay: $responseBody2');
 }

@@ -35,7 +35,8 @@ abstract class StudentBookingRemoteDataSource {
   });
 }
 
-class StudentBookingRemoteDataSourceImpl implements StudentBookingRemoteDataSource {
+class StudentBookingRemoteDataSourceImpl
+    implements StudentBookingRemoteDataSource {
   final Dio dio;
 
   StudentBookingRemoteDataSourceImpl({required this.dio});
@@ -44,7 +45,11 @@ class StudentBookingRemoteDataSourceImpl implements StudentBookingRemoteDataSour
     if (e.response?.data != null && e.response?.data is Map) {
       final data = e.response?.data as Map;
       if (data['message'] != null && data['message'].toString().isNotEmpty) {
-        return data['message'].toString();
+        String msg = data['message'].toString();
+        if (msg.contains('Gagal mengambil biodata tutor')) {
+          return 'Tutor belum melengkapi biodata sehingga tidak dapat dibooking.';
+        }
+        return msg;
       }
     }
     return fallback;
@@ -55,63 +60,99 @@ class StudentBookingRemoteDataSourceImpl implements StudentBookingRemoteDataSour
     try {
       final response = await dio.get('/jenjang');
       final responseData = response.data as Map<String, dynamic>;
-      
+
       if (responseData['status'] == 'success') {
         final levelData = responseData['level'] as List<dynamic>? ?? [];
         return levelData.map((e) => e.toString()).toList();
       } else {
-        throw ServerException(responseData['message'] ?? 'Gagal mengambil data jenjang');
+        throw ServerException(
+          responseData['message'] ?? 'Gagal mengambil data jenjang',
+        );
       }
     } on DioException catch (e) {
-      throw ServerException(_extractErrorMessage(e, 'Terjadi kesalahan pada server saat mengambil jenjang'));
+      throw ServerException(
+        _extractErrorMessage(
+          e,
+          'Terjadi kesalahan pada server saat mengambil jenjang',
+        ),
+      );
     } catch (e) {
       if (e is ServerException) rethrow;
-      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+      throw ServerException(
+        'Terjadi kesalahan yang tidak terduga: ${e.toString()}',
+      );
     }
   }
 
   @override
   Future<List<SubjectModel>> getClassesByLevel(String level) async {
     try {
-      final response = await dio.get('/getClassByLevel', queryParameters: {'level': level});
+      final response = await dio.get(
+        '/getClassByLevel',
+        queryParameters: {'level': level},
+      );
       final responseData = response.data as Map<String, dynamic>;
-      
+
       if (responseData['status'] == 'success') {
         final classData = responseData['classes'] as List<dynamic>? ?? [];
-        return classData.map((e) => SubjectModel.fromJson(e as Map<String, dynamic>)).toList();
+        return classData
+            .map((e) => SubjectModel.fromJson(e as Map<String, dynamic>))
+            .toList();
       } else {
-        throw ServerException(responseData['message'] ?? 'Gagal mengambil data mapel');
+        throw ServerException(
+          responseData['message'] ?? 'Gagal mengambil data mapel',
+        );
       }
     } on DioException catch (e) {
-      throw ServerException(_extractErrorMessage(e, 'Terjadi kesalahan pada server saat mengambil mapel'));
+      throw ServerException(
+        _extractErrorMessage(
+          e,
+          'Terjadi kesalahan pada server saat mengambil mapel',
+        ),
+      );
     } catch (e) {
       if (e is ServerException) rethrow;
-      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+      throw ServerException(
+        'Terjadi kesalahan yang tidak terduga: ${e.toString()}',
+      );
     }
   }
 
   @override
   Future<List<SubjectModel>> getSubjectsByLevel(String level) async {
     try {
-      final response = await dio.get('/getUniqueSubjectByLevel', queryParameters: {'level': level});
+      final response = await dio.get(
+        '/getUniqueSubjectByLevel',
+        queryParameters: {'level': level},
+      );
       final responseData = response.data as Map<String, dynamic>;
 
       // API ini mengembalikan key 'success' bukan 'status'
       if (responseData['success'] == 'success') {
         final dataMap = responseData['data'] as Map<String, dynamic>;
         final listData = dataMap['data'] as List<dynamic>? ?? [];
-        return listData.map((e) => SubjectModel.fromJson(e as Map<String, dynamic>)).toList();
+        return listData
+            .map((e) => SubjectModel.fromJson(e as Map<String, dynamic>))
+            .toList();
       } else {
-        throw ServerException(responseData['message'] ?? 'Gagal mengambil data mata pelajaran');
+        throw ServerException(
+          responseData['message'] ?? 'Gagal mengambil data mata pelajaran',
+        );
       }
     } on DioException catch (e) {
-      throw ServerException(_extractErrorMessage(e, 'Terjadi kesalahan pada server saat mengambil mata pelajaran'));
+      throw ServerException(
+        _extractErrorMessage(
+          e,
+          'Terjadi kesalahan pada server saat mengambil mata pelajaran',
+        ),
+      );
     } catch (e) {
       if (e is ServerException) rethrow;
-      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+      throw ServerException(
+        'Terjadi kesalahan yang tidak terduga: ${e.toString()}',
+      );
     }
   }
-
 
   @override
   Future<PaginatedDataModel<TutorModel>> getTutorsByCriteria({
@@ -127,55 +168,83 @@ class StudentBookingRemoteDataSourceImpl implements StudentBookingRemoteDataSour
     try {
       final params = <String, dynamic>{'page': page};
       if (subjectId != null) params['subject_id'] = subjectId;
-      if (subjectName != null && subjectName.isNotEmpty) params['subject_name'] = subjectName;
+      if (subjectName != null && subjectName.isNotEmpty)
+        params['subject_name'] = subjectName;
       if (classId != null) params['class_id'] = classId;
-      if (className != null && className.isNotEmpty) params['class_name'] = className;
+      if (className != null && className.isNotEmpty)
+        params['class_name'] = className;
       if (level != null && level.isNotEmpty) params['level'] = level;
       if (minRate != null) params['min_rate'] = minRate;
       if (maxRate != null) params['max_rate'] = maxRate;
 
-      final response = await dio.get('/getTutorByCriteria', queryParameters: params);
+      final response = await dio.get(
+        '/getTutorByCriteria',
+        queryParameters: params,
+      );
       final responseData = response.data as Map<String, dynamic>;
-      
+
       if (responseData['status'] == 'success') {
         final dataMap = responseData['data'] as Map<String, dynamic>;
         final listData = dataMap['data'] as List<dynamic>? ?? [];
-        final tutors = listData.map((e) => TutorModel.fromJson(e as Map<String, dynamic>)).toList();
+        final tutors = listData
+            .map((e) => TutorModel.fromJson(e as Map<String, dynamic>))
+            .toList();
         return PaginatedDataModel<TutorModel>.fromJson(dataMap, tutors);
       } else {
-        throw ServerException(responseData['message'] ?? 'Gagal mengambil data tutor');
+        throw ServerException(
+          responseData['message'] ?? 'Gagal mengambil data tutor',
+        );
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         throw ServerException('Sesi telah berakhir, silakan login kembali');
       }
-      throw ServerException(_extractErrorMessage(e, 'Terjadi kesalahan pada server saat memuat tutor'));
+      throw ServerException(
+        _extractErrorMessage(
+          e,
+          'Terjadi kesalahan pada server saat memuat tutor',
+        ),
+      );
     } catch (e) {
       if (e is ServerException) rethrow;
-      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+      throw ServerException(
+        'Terjadi kesalahan yang tidak terduga: ${e.toString()}',
+      );
     }
   }
 
   @override
   Future<TutorModel> getTutorById(int id) async {
     try {
-      final response = await dio.get('/getTutorById', queryParameters: {'tutor_id': id});
+      final response = await dio.get(
+        '/getTutorById',
+        queryParameters: {'id': id},
+      );
       final responseData = response.data as Map<String, dynamic>;
-      
+
       if (responseData['status'] == 'success') {
         final data = responseData['data'] as Map<String, dynamic>;
         return TutorModel.fromJson(data);
       } else {
-        throw ServerException(responseData['message'] ?? 'Gagal mengambil detail tutor');
+        throw ServerException(
+          responseData['message'] ?? 'Gagal mengambil detail tutor',
+        );
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         throw ServerException('Sesi telah berakhir, silakan login kembali');
       }
-      throw ServerException(_extractErrorMessage(e, 'Terjadi kesalahan pada server saat memuat detail tutor'));
+      throw ServerException(
+        _extractErrorMessage(
+          e,
+          'Terjadi kesalahan pada server saat memuat detail tutor',
+        ),
+      );
     } catch (e) {
       if (e is ServerException) rethrow;
-      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+      throw ServerException(
+        'Terjadi kesalahan yang tidak terduga: ${e.toString()}',
+      );
     }
   }
 
@@ -186,33 +255,49 @@ class StudentBookingRemoteDataSourceImpl implements StudentBookingRemoteDataSour
     int page = 1,
   }) async {
     try {
-      final params = <String, dynamic>{
-        'tutor_id': tutorId,
-        'page': page,
-      };
+      final params = <String, dynamic>{'tutor_id': tutorId, 'page': page};
       if (day != null && day.isNotEmpty) {
         params['day'] = day;
       }
 
-      final response = await dio.get('/schedule/getTutorSchedulesByDay', queryParameters: params);
+      final response = await dio.get(
+        '/schedule/getTutorSchedulesByDay',
+        queryParameters: params,
+      );
       final responseData = response.data as Map<String, dynamic>;
-      
+
       if (responseData['status'] == 'success') {
         final dataMap = responseData['data'] as Map<String, dynamic>;
         final listData = dataMap['data'] as List<dynamic>? ?? [];
-        final schedules = listData.map((e) => TutorAvailabilityModel.fromJson(e as Map<String, dynamic>)).toList();
-        return PaginatedDataModel<TutorAvailabilityModel>.fromJson(dataMap, schedules);
+        final schedules = listData
+            .map(
+              (e) => TutorAvailabilityModel.fromJson(e as Map<String, dynamic>),
+            )
+            .toList();
+        return PaginatedDataModel<TutorAvailabilityModel>.fromJson(
+          dataMap,
+          schedules,
+        );
       } else {
-        throw ServerException(responseData['message'] ?? 'Gagal mengambil jadwal tutor');
+        throw ServerException(
+          responseData['message'] ?? 'Gagal mengambil jadwal tutor',
+        );
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         throw ServerException('Sesi telah berakhir, silakan login kembali');
       }
-      throw ServerException(_extractErrorMessage(e, 'Terjadi kesalahan pada server saat memuat jadwal'));
+      throw ServerException(
+        _extractErrorMessage(
+          e,
+          'Terjadi kesalahan pada server saat memuat jadwal',
+        ),
+      );
     } catch (e) {
       if (e is ServerException) rethrow;
-      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+      throw ServerException(
+        'Terjadi kesalahan yang tidak terduga: ${e.toString()}',
+      );
     }
   }
 
@@ -226,18 +311,23 @@ class StudentBookingRemoteDataSourceImpl implements StudentBookingRemoteDataSour
     required String address,
   }) async {
     try {
-      final response = await dio.post('/schedule/takeMeeting', data: {
-        'tutor_id': tutorId,
-        'subject_id': subjectId,
-        'date': date,
-        'time': time,
-        'learning_method': learningMethod,
-        'address': address,
-      });
-      
+      final response = await dio.post(
+        '/schedule/takeMeeting',
+        data: {
+          'tutor_id': tutorId,
+          'subject_id': subjectId,
+          'date': date,
+          'time': time,
+          'learning_method': learningMethod,
+          'address': address,
+        },
+      );
+
       final responseData = response.data as Map<String, dynamic>;
       if (responseData['status'] != 'success') {
-        throw ServerException(responseData['message'] ?? 'Gagal melakukan booking');
+        throw ServerException(
+          responseData['message'] ?? 'Gagal melakukan booking',
+        );
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
@@ -249,11 +339,17 @@ class StudentBookingRemoteDataSourceImpl implements StudentBookingRemoteDataSour
       if (e.response?.statusCode == 409) {
         throw ServerException('Jadwal ini mungkin sudah terisi atau konflik');
       }
-      throw ServerException(_extractErrorMessage(e, 'Terjadi kesalahan pada server saat memproses booking'));
+      throw ServerException(
+        _extractErrorMessage(
+          e,
+          'Terjadi kesalahan pada server saat memproses booking',
+        ),
+      );
     } catch (e) {
       if (e is ServerException) rethrow;
-      throw ServerException('Terjadi kesalahan yang tidak terduga: ${e.toString()}');
+      throw ServerException(
+        'Terjadi kesalahan yang tidak terduga: ${e.toString()}',
+      );
     }
   }
 }
-
