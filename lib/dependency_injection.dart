@@ -504,6 +504,9 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<TutorRegistrationRepository>(
     () => TutorRegistrationRepositoryImpl(remoteDataSource: sl()),
   );
+  sl.registerLazySingleton<ProfilMengajarRemoteDataSource>(
+    () => ProfilMengajarRemoteDataSourceImpl(dio: sl()),
+  );
   sl.registerLazySingleton<ProfilMengajarRepository>(
     () => ProfilMengajarRepositoryImpl(remoteDataSource: sl()),
   );
