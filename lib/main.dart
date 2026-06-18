@@ -316,8 +316,11 @@ class LazuardyApp extends StatelessWidget {
             create: (_) => sl<TutorProfileCubit>(),
             child: const ProfilTutorPage(),
           ),
-          '/tutor/edit-profil': (context) => BlocProvider<TutorProfileCubit>(
-            create: (_) => sl<TutorProfileCubit>(),
+          '/tutor/edit-profil': (context) => MultiBlocProvider(
+            providers: [
+              BlocProvider<TutorProfileCubit>(create: (_) => sl<TutorProfileCubit>()),
+              BlocProvider<RegionCubit>(create: (_) => sl<RegionCubit>()),
+            ],
             child: const EditProfilTutorPage(),
           ),
 

@@ -1,3 +1,5 @@
+import 'package:lazuadry_mobile_fe/domain/entities/home_address.dart';
+
 class TutorEntity {
   final String id;
   final String name;
@@ -13,7 +15,7 @@ class TutorEntity {
   final String? dateOfBirth;
   final String? gender;
   final String? religion;
-  final String? homeAddress;
+  final HomeAddress? homeAddress;
   final String? bankCode;
   final String? accountNumber;
   final List<Map<String, dynamic>>? subjects;

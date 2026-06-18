@@ -1,4 +1,5 @@
-import '../../domain/entities/tutor_entity.dart';
+import 'package:lazuadry_mobile_fe/domain/entities/tutor_entity.dart';
+import 'package:lazuadry_mobile_fe/data/models/home_address_model.dart';
 
 class TutorModel extends TutorEntity {
   TutorModel({
@@ -68,7 +69,9 @@ class TutorModel extends TutorEntity {
       dateOfBirth: json['dateOfBirth']?.toString(),
       gender: json['gender']?.toString(),
       religion: json['religion']?.toString(),
-      homeAddress: json['homeAddress']?.toString(),
+      homeAddress: json['homeAddress'] != null
+          ? HomeAddressModel.fromJson(json['homeAddress'] as Map<String, dynamic>)
+          : null,
       bankCode: json['bankCode']?.toString(),
       accountNumber: json['accountNumber']?.toString(),
       subjects: parsedSubjects,

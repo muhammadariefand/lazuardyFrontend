@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_state.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/region/region_state.dart';
 
 
 class EditProfilTutorPage extends StatefulWidget {
@@ -30,58 +32,46 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
   // ── Lists ──────────────────────────────────────────────────────
   static const _jkList      = ['Laki-laki', 'Perempuan'];
   static const _bankList    = ['BCA', 'BRI', 'BNI', 'BSI', 'Mandiri', 'CIMB', 'Danamon'];
-  static const _provinsiList = ['DI Yogyakarta', 'DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur'];
-  
-  static const _kotaList     = {
-    'DI Yogyakarta': ['Kota Yogyakarta', 'Kab. Sleman', 'Bantul', 'Kulon Progo', 'Gunungkidul'],
-    'DKI Jakarta': ['Jakarta Pusat', 'Jakarta Selatan', 'Jakarta Barat']
-  };
-  
-  static const _kecamatanList = {
-    'Kab. Sleman': ['Depok', 'Mlati', 'Gamping', 'Godean'],
-    'Jakarta Pusat': ['Tanah Abang', 'Menteng', 'Kebayoran Baru']
-  };
-  
-  static const _desaList = {
-    'Depok': ['Catur Tunggal', 'Condong Catur', 'Maguwoharjo', 'Caturtunggal'],
-    'Kebayoran Baru': ['Gunung', 'Melawai', 'Petogogan']
-  };
 
   @override
   void initState() {
     super.initState();
-    _initData();
+    context.read<TutorProfileCubit>().fetchProfile();
+    context.read<RegionCubit>().fetchProvinces();
   }
 
-  void _initData() {
-    final state = context.read<TutorProfileCubit>().state;
-    if (state is TutorProfileLoaded) {
-      final bio = state.tutor;
-      _namaCtrl.text = bio.name;
-      _waCtrl.text = bio.telephoneNumber ?? '';
-      _rekeningCtrl.text = bio.accountNumber ?? '';
-      
-      if (bio.dateOfBirth != null && bio.dateOfBirth!.length >= 10) {
-        // Assume format YYYY-MM-DD, slice to YYYY-MM-DD
-        final ymd = bio.dateOfBirth!.substring(0, 10).split('-');
-        if (ymd.length == 3) {
-          _tglLahirCtrl.text = '${ymd[2]}/${ymd[1]}/${ymd[0]}';
-        }
+  void _initData(dynamic bio) {
+    _namaCtrl.text = bio.name;
+    _waCtrl.text = bio.telephoneNumber ?? '';
+    _rekeningCtrl.text = bio.accountNumber ?? '';
+    
+    if (bio.dateOfBirth != null && bio.dateOfBirth!.length >= 10) {
+      // Assume format YYYY-MM-DD, slice to YYYY-MM-DD
+      final ymd = bio.dateOfBirth!.substring(0, 10).split('-');
+      if (ymd.length == 3) {
+        _tglLahirCtrl.text = '${ymd[2]}/${ymd[1]}/${ymd[0]}';
       }
+    }
 
-      if (bio.gender != null) {
-        if (bio.gender!.toLowerCase() == 'male' || bio.gender!.toLowerCase() == 'laki-laki') {
-          _jenisKelamin = 'Laki-laki';
-        } else if (bio.gender!.toLowerCase() == 'female' || bio.gender!.toLowerCase() == 'perempuan') {
-          _jenisKelamin = 'Perempuan';
-        }
+    if (bio.gender != null) {
+      if (bio.gender!.toLowerCase() == 'male' || bio.gender!.toLowerCase() == 'laki-laki') {
+        _jenisKelamin = 'Laki-laki';
+      } else if (bio.gender!.toLowerCase() == 'female' || bio.gender!.toLowerCase() == 'perempuan') {
+        _jenisKelamin = 'Perempuan';
       }
+    }
 
-      if (bio.bankCode != null && _bankList.contains(bio.bankCode)) {
-        _bank = bio.bankCode;
-      }
-      
-      // We don't have structured address from TutorEntity currently, so we'll leave region fields null initially
+    if (bio.bankCode != null && _bankList.contains(bio.bankCode)) {
+      _bank = bio.bankCode;
+    }
+    
+    if (bio.homeAddress != null) {
+      context.read<RegionCubit>().prefillRegions(
+        provinceName: bio.homeAddress!.province,
+        regencyName: bio.homeAddress!.regency,
+        districtName: bio.homeAddress!.district,
+        subdistrictName: bio.homeAddress!.subdistrict,
+      );
     }
   }
 
@@ -125,6 +115,8 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
     if (_jenisKelamin == 'Laki-laki') genderVal = 'male';
     if (_jenisKelamin == 'Perempuan') genderVal = 'female';
 
+    final regionState = context.read<RegionCubit>().state;
+
     final requestData = <String, dynamic>{
       if (_namaCtrl.text.isNotEmpty) 'name': _namaCtrl.text,
       if (_waCtrl.text.isNotEmpty) 'telephone_number': _waCtrl.text,
@@ -132,10 +124,10 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
       if (genderVal != null) 'gender': genderVal,
       if (_bank != null) 'bank_code': _bank,
       if (_rekeningCtrl.text.isNotEmpty) 'account_number': _rekeningCtrl.text,
-      if (_provinsi != null) 'province': _provinsi,
-      if (_kota != null) 'regency': _kota,
-      if (_kecamatan != null) 'district': _kecamatan,
-      if (_desa != null) 'subdistrict': _desa,
+      if (regionState.selectedProvince != null) 'province': regionState.selectedProvince!.name,
+      if (regionState.selectedRegency != null) 'regency': regionState.selectedRegency!.name,
+      if (regionState.selectedDistrict != null) 'district': regionState.selectedDistrict!.name,
+      if (regionState.selectedSubdistrict != null) 'subdistrict': regionState.selectedSubdistrict!.name,
     };
 
     context.read<TutorProfileCubit>().updateBiodata(requestData);
@@ -196,7 +188,9 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
   Widget build(BuildContext context) {
     return BlocListener<TutorProfileCubit, TutorProfileState>(
       listener: (context, state) {
-        if (state is TutorProfileUpdateSuccess) {
+        if (state is TutorProfileLoaded) {
+          _initData(state.tutor);
+        } else if (state is TutorProfileUpdateSuccess) {
           _showSuccessDialog(state.message);
         } else if (state is TutorProfileUpdateError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -347,24 +341,64 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
               const SizedBox(height: 16),
 
               // Detail Alamat
-              _buildCard('Detail Alamat', [
-                _dropdown('Provinsi', _provinsi, _provinsiList, (v) => setState(() {
-                      _provinsi = v;
-                      _kota = null;
-                      _kecamatan = null;
-                      _desa = null;
-                    })),
-                _dropdown('Kota/Kabupaten', _kota, _kotaList[_provinsi] ?? [], (v) => setState(() {
-                      _kota = v;
-                      _kecamatan = null;
-                      _desa = null;
-                    })),
-                _dropdown('Kecamatan', _kecamatan, _kecamatanList[_kota] ?? [], (v) => setState(() {
-                      _kecamatan = v;
-                      _desa = null;
-                    })),
-                _dropdown('Desa/Kelurahan', _desa, _desaList[_kecamatan] ?? [], (v) => setState(() => _desa = v)),
-              ]),
+              BlocBuilder<RegionCubit, RegionState>(
+                builder: (context, regionState) {
+                  return _buildCard('Detail Alamat', [
+                    // Dropdown Provinsi
+                    _dropdownRegion<String>(
+                      'Provinsi',
+                      regionState.selectedProvince?.id,
+                      regionState.provinces.map((p) => DropdownMenuItem(value: p.id, child: Text(p.name, style: const TextStyle(fontSize: 13)))).toList(),
+                      (val) {
+                        if (val != null) {
+                          final selected = regionState.provinces.firstWhere((p) => p.id == val);
+                          context.read<RegionCubit>().selectProvince(selected);
+                        }
+                      },
+                      isEnabled: regionState.provinces.isNotEmpty,
+                    ),
+                    // Dropdown Kota
+                    _dropdownRegion<String>(
+                      'Kota/Kabupaten',
+                      regionState.selectedRegency?.id,
+                      regionState.regencies.map((r) => DropdownMenuItem(value: r.id, child: Text(r.name, style: const TextStyle(fontSize: 13)))).toList(),
+                      (val) {
+                        if (val != null) {
+                          final selected = regionState.regencies.firstWhere((r) => r.id == val);
+                          context.read<RegionCubit>().selectRegency(selected);
+                        }
+                      },
+                      isEnabled: regionState.regencies.isNotEmpty,
+                    ),
+                    // Dropdown Kecamatan
+                    _dropdownRegion<String>(
+                      'Kecamatan',
+                      regionState.selectedDistrict?.id,
+                      regionState.districts.map((d) => DropdownMenuItem(value: d.id, child: Text(d.name, style: const TextStyle(fontSize: 13)))).toList(),
+                      (val) {
+                        if (val != null) {
+                          final selected = regionState.districts.firstWhere((d) => d.id == val);
+                          context.read<RegionCubit>().selectDistrict(selected);
+                        }
+                      },
+                      isEnabled: regionState.districts.isNotEmpty,
+                    ),
+                    // Dropdown Desa
+                    _dropdownRegion<String>(
+                      'Desa/Kelurahan',
+                      regionState.selectedSubdistrict?.id,
+                      regionState.subdistricts.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name, style: const TextStyle(fontSize: 13)))).toList(),
+                      (val) {
+                        if (val != null) {
+                          final selected = regionState.subdistricts.firstWhere((s) => s.id == val);
+                          context.read<RegionCubit>().selectSubdistrict(selected);
+                        }
+                      },
+                      isEnabled: regionState.subdistricts.isNotEmpty,
+                    ),
+                  ]);
+                },
+              ),
 
               const SizedBox(height: 24),
             ],
@@ -457,6 +491,26 @@ class _EditProfilTutorPageState extends State<EditProfilTutorPage> {
                 borderRadius: BorderRadius.circular(12),
                 isExpanded: true,
                 items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 13)))).toList(),
+              )),
+        ]));
+  }
+
+  Widget _dropdownRegion<T>(String label, T? value, List<DropdownMenuItem<T>> items, ValueChanged<T?> onChanged, {bool isEnabled = true}) {
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _label(label),
+          Opacity(
+              opacity: isEnabled ? 1 : 0.45,
+              child: DropdownButtonFormField<T>(
+                value: value,
+                onChanged: isEnabled ? onChanged : null,
+                decoration: _inputDeco(hint: 'Pilih $label'),
+                icon: const Icon(Icons.keyboard_arrow_up_rounded, color: AppColors.textSecondary),
+                dropdownColor: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                isExpanded: true,
+                items: items,
               )),
         ]));
   }

@@ -84,8 +84,13 @@ class _ProfilTutorPageState extends State<ProfilTutorPage> {
                   _FieldView('Nomor Rekening', tutor.accountNumber ?? '-'),
                 ];
 
+                final addr = tutor.homeAddress;
+                final formattedAddress = addr != null
+                    ? '${addr.subdistrict}, ${addr.district}, ${addr.regency}, ${addr.province}'
+                    : '-';
+
                 final detailAlamat = [
-                  _FieldView('Alamat Rumah', tutor.homeAddress ?? '-'),
+                  _FieldView('Alamat Lengkap', formattedAddress),
                 ];
 
                 return RefreshIndicator(
