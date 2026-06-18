@@ -32,7 +32,25 @@ class TutorDashboardRemoteDataSourceImpl implements TutorDashboardRemoteDataSour
 
       final status = responseData['status']?.toString().toLowerCase();
       if (status == 'success' && responseData['data'] != null) {
-        return TutorDashboardModel.fromJson(responseData['data'] as Map<String, dynamic>);
+        final dataMap = responseData['data'] as Map<String, dynamic>;
+
+        // WORKAROUND: Ambil avg_rating dari endpoint review karena API homepage mengembalikan null
+        try {
+          final reviewRes = await dio.get('/tutor/review', queryParameters: {'pagination': 1});
+          if (reviewRes.data is Map) {
+            final reviewData = reviewRes.data as Map<String, dynamic>;
+            if (reviewData['status']?.toString().toLowerCase() == 'success') {
+              final avgRating = reviewData['avg_rating'];
+              if (dataMap['tutor'] != null && dataMap['tutor'] is Map) {
+                dataMap['tutor']['avgRate'] = avgRating;
+              }
+            }
+          }
+        } catch (_) {
+          // Abaikan jika gagal
+        }
+
+        return TutorDashboardModel.fromJson(dataMap);
       }
     }
 

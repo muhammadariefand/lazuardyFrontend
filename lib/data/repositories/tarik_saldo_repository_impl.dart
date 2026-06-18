@@ -23,7 +23,7 @@ class TarikSaldoRepositoryImpl implements TarikSaldoRepository {
         perPage: perPage,
       );
 
-      final itemsData = responseMap['items'] as List<dynamic>? ?? [];
+      final itemsData = responseMap['data'] as List<dynamic>? ?? [];
       final items = itemsData
           .map((item) => PayoutModel.fromJson(item as Map<String, dynamic>))
           .toList();
