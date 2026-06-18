@@ -204,7 +204,7 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       await GoogleSignIn.instance.initialize(
-        serverClientId: '788530458738-qedm5k683i9umsj5j2n4o1r2vt1nelfb.apps.googleusercontent.com',
+        serverClientId: '788530458738-4l1k7t6livdha3m95kbmp1cdqpjd4mmk.apps.googleusercontent.com',
       );
       final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate(scopeHint: ['email', 'profile']);
       
