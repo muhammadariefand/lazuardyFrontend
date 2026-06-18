@@ -2,9 +2,12 @@
 // Welcome/Onboarding — logo+nama, deskripsi, tombol selanjutnya, OAuth
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/core/constants/app_assets.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_state.dart';
 
 class TaglinePage extends StatelessWidget {
   const TaglinePage({super.key});
@@ -17,9 +20,29 @@ class TaglinePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgWhite,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+      body: BlocConsumer<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthSuccess) {
+            // Kita asumsikan default navigasi ke beranda siswa, karena di sini tidak ada pilihan role
+            Navigator.of(context).pushReplacementNamed('/siswa/beranda');
+          }
+          if (state is AuthOAuthRegistrationRequired) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Silakan lengkapi pendaftaran Anda.')),
+            );
+            Navigator.of(context).pushNamed('/login');
+          }
+          if (state is AuthFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.error), backgroundColor: AppColors.errorRed),
+            );
+          }
+        },
+        builder: (context, state) {
+          final isLoading = state is AuthLoading;
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -75,25 +98,30 @@ class TaglinePage extends StatelessWidget {
               const SizedBox(height: 20),
 
               // ── OAuth Buttons ─────────────────────────────────
-              GoogleSignInButton(
-                onPressed: () {
-                  // TODO: Implement Google Sign In
-                },
-              ),
+              if (isLoading)
+                const Center(child: CircularProgressIndicator())
+              else ...[
+                GoogleSignInButton(
+                  onPressed: () {
+                    context.read<AuthCubit>().loginWithGoogle();
+                  },
+                ),
 
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
 
-              FacebookSignInButton(
-                onPressed: () {
-                  // TODO: Implement Facebook Sign In
-                },
-              ),
+                FacebookSignInButton(
+                  onPressed: () {
+                    context.read<AuthCubit>().loginWithFacebook();
+                  },
+                ),
+              ],
 
               const SizedBox(height: 32),
             ],
           ),
         ),
-      ),
-    );
+      );
+    },
+  ));
   }
 }

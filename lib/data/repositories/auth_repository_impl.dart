@@ -155,4 +155,23 @@ class AuthRepositoryImpl implements AuthRepository {
       throw ServerException('Gagal melakukan registrasi orang tua');
     }
   }
+
+  @override
+  Future<Map<String, dynamic>> oauthCallback(String provider, String idToken) async {
+    try {
+      final response = await remoteDataSource.oauthCallback(provider, idToken);
+      
+      // If we got access_token, save it
+      final token = response['access_token'] ?? response['data']?['access_token'];
+      if (token != null && token is String) {
+        await localDataSource.saveUserToken(token);
+      }
+      
+      return response;
+    } on ServerException {
+      rethrow;
+    } catch (e) {
+      throw ServerException('Gagal melakukan otentikasi OAuth');
+    }
+  }
 }

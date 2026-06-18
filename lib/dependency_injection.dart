@@ -41,6 +41,7 @@ import 'package:lazuadry_mobile_fe/domain/usecases/auth/request_otp_usecase.dart
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/reset_password_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_tautkan_akun_anak_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/verify_otp_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/oauth_callback_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/get_dashboard_data_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/get_schedules_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/get_reports_usecase.dart';
@@ -293,6 +294,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => StudentVerifyOtpUsecase(sl()));
   sl.registerLazySingleton(() => StudentResetPasswordUsecase(sl()));
   sl.registerLazySingleton(() => GetStudentReviewsUseCase(sl()));
+  sl.registerLazySingleton(() => OAuthCallbackUsecase(sl()));
 
   // Region/Wilayah Usecases
   sl.registerLazySingleton(() => GetProvincesUseCase(sl()));
@@ -347,6 +349,7 @@ Future<void> initDependencies() async {
     registerOtpEmailAnakUsecase: sl(),
     verifyOtpTautkanAkunAnakUsecase: sl(),
     registerParentUsecase: sl(),
+    oauthCallbackUsecase: sl(),
     ),
   );
 

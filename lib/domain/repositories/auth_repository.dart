@@ -29,4 +29,6 @@ abstract class AuthRepository {
   Future<void> verifyOtpTautkanAkunAnak(String email, String otp);
 
   Future<void> registerParent(String email, String password, String childEmail);
+
+  Future<Map<String, dynamic>> oauthCallback(String provider, String idToken);
 }

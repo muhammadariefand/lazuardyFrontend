@@ -101,6 +101,20 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) _navigateAfterLogin();
+          if (state is AuthOAuthRegistrationRequired) {
+            // Jika backend membalas HTTP 200 tetapi butuh register lanjutan
+            // Kita arahkan ke halaman register sesuai role
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(
+                  content: Text('Silakan lengkapi pendaftaran Anda.'),
+                  backgroundColor: AppColors.primary,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            _navigateToRegister();
+          }
           if (state is AuthFailure) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
@@ -253,9 +267,17 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 24),
                     const OrDivider(),
                     const SizedBox(height: 20),
-                    GoogleSignInButton(onPressed: () {}),
+                    GoogleSignInButton(
+                      onPressed: () {
+                        context.read<AuthCubit>().loginWithGoogle();
+                      },
+                    ),
                     const SizedBox(height: 12),
-                    FacebookSignInButton(onPressed: () {}),
+                    FacebookSignInButton(
+                      onPressed: () {
+                        context.read<AuthCubit>().loginWithFacebook();
+                      },
+                    ),
                     const SizedBox(height: 20),
 
                     // Daftar — HANYA untuk Siswa & Tutor, Orang Tua tidak muncul

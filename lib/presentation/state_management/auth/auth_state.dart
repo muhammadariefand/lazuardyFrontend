@@ -21,3 +21,9 @@ class ResetPasswordSuccess extends AuthState {}
 class RegisterOtpEmailSuccess extends AuthState {}
 class VerifyOtpRegisterEmailSuccess extends AuthState {}
 class RegisterStudentSuccess extends AuthState {}
+
+// State untuk OAuth login jika belum punya akun
+class AuthOAuthRegistrationRequired extends AuthState {
+  final Map<String, dynamic> profileData;
+  AuthOAuthRegistrationRequired(this.profileData);
+}

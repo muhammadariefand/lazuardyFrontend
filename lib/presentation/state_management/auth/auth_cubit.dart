@@ -1,6 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/auth/register_student_request.dart';
 import 'package:lazuadry_mobile_fe/domain/entities/server_exception.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/auth/oauth_callback_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/register_otp_email_anak_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/register_parent_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/request_otp_usecase.dart';
@@ -25,6 +28,7 @@ class AuthCubit extends Cubit<AuthState> {
   final RegisterOtpEmailAnakUsecase registerOtpEmailAnakUsecase;
   final VerifyOtpTautkanAkunAnakUsecase verifyOtpTautkanAkunAnakUsecase;
   final RegisterParentUsecase registerParentUsecase;
+  final OAuthCallbackUsecase oauthCallbackUsecase;
 
   AuthCubit({
     required this.studentRegisterOtpEmailUsecase,
@@ -36,7 +40,8 @@ class AuthCubit extends Cubit<AuthState> {
     required this.studentResetPasswordUsecase,
     required this.registerOtpEmailAnakUsecase,
     required this.verifyOtpTautkanAkunAnakUsecase,
-    required this.registerParentUsecase
+    required this.registerParentUsecase,
+    required this.oauthCallbackUsecase,
   }) : super(AuthInitial());
 
   Future<void> registerOtpEmail(String email) async {
@@ -192,6 +197,62 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthFailure(e.message, errorDetails: e.errors));
     } catch (e) {
       emit(AuthFailure("Terjadi kesalahan yang tidak diketahui"));
+    }
+  }
+
+  Future<void> loginWithGoogle() async {
+    emit(AuthLoading());
+    try {
+      await GoogleSignIn.instance.initialize(
+        serverClientId: '788530458738-qedm5k683i9umsj5j2n4o1r2vt1nelfb.apps.googleusercontent.com',
+      );
+      final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate(scopeHint: ['email', 'profile']);
+      
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      
+      if (idToken == null) {
+        emit(AuthFailure("Gagal mendapatkan token Google"));
+        return;
+      }
+      
+      final response = await oauthCallbackUsecase.execute('google', idToken);
+      _handleOAuthResponse(response);
+    } catch (e) {
+      if (e is GoogleSignInException && e.code == GoogleSignInExceptionCode.canceled) {
+        emit(AuthInitial()); // User cancelled login
+        return;
+      }
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  Future<void> loginWithFacebook() async {
+    emit(AuthLoading());
+    try {
+      final LoginResult result = await FacebookAuth.instance.login();
+      if (result.status == LoginStatus.success) {
+        final AccessToken accessToken = result.accessToken!;
+        final response = await oauthCallbackUsecase.execute('facebook', accessToken.tokenString);
+        _handleOAuthResponse(response);
+      } else if (result.status == LoginStatus.cancelled) {
+        emit(AuthInitial());
+      } else {
+        emit(AuthFailure(result.message ?? "Gagal login dengan Facebook"));
+      }
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  void _handleOAuthResponse(Map<String, dynamic> response) {
+    final token = response['access_token'] ?? response['data']?['access_token'];
+    if (token != null && token is String) {
+      emit(AuthSuccess());
+    } else {
+      // User is not fully registered in the backend, we need more info
+      // e.g. response has user initial profile data
+      emit(AuthOAuthRegistrationRequired(response));
     }
   }
 }

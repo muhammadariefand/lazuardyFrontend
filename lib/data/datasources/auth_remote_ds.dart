@@ -240,4 +240,17 @@ class AuthRemoteDataSource {
       throw ServerException('Terjadi kesalahan yang tidak diketahui.');
     }
   }
+
+  Future<Map<String, dynamic>> oauthCallback(String provider, String idToken) async {
+    try {
+      final response = await client.dio.post(
+        '/auth/$provider/callback',
+        data: {'id_token': idToken},
+      );
+      return response.data;
+    } on DioException catch (e) {
+      _handleDioError(e);
+      rethrow;
+    }
+  }
 }

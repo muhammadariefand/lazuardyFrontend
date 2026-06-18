@@ -4,6 +4,32 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	
+	<!-- Facebook and Google Auth -->
+	<key>FacebookAppID</key>
+	<string>1321430320136077</string>
+	<key>FacebookClientToken</key>
+	<string>a86c15098ff895e91d65ef3ca0d9bdc5</string>
+	<key>FacebookDisplayName</key>
+	<string>Lazuardi App</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb1321430320136077</string>
+				<string>com.googleusercontent.apps.788530458738-qedm5k683i9umsj5j2n4o1r2vt1nelfb</string>
+			</array>
+		</dict>
+	</array>
+	<!-- End Facebook and Google Auth -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
