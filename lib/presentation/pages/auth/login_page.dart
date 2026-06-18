@@ -151,15 +151,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Info banner khusus Orang Tua
-                    if (_selectedRole == RoleEnum.parent) ...[
-                      const _InfoBanner(
-                        message:
-                            'Gunakan email dan password akun anak Anda untuk masuk sebagai orang tua.',
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-
                     // Email
                     const Text('Email', style: AppTextStyles.label),
                     const SizedBox(height: 8),

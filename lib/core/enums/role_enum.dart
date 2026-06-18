@@ -1,6 +1,6 @@
 enum RoleEnum {
   student('student', 'Siswa'),
-  tutor('tutor', 'Tentor'),
+  tutor('tutor', 'Tutor'),
   parent('parent', 'Orang Tua');
 
   final String label;

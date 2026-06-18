@@ -2,8 +2,11 @@
 // Register — email, password, konfirmasi password, ingat saya, OAuth
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_registration/tutor_registration_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_registration/tutor_registration_state.dart';
 
 class RegisterTutorPage extends StatefulWidget {
   const RegisterTutorPage({super.key});
@@ -31,31 +34,56 @@ class _RegisterTutorPageState extends State<RegisterTutorPage> {
     super.dispose();
   }
 
-  void _onRegister() async {
+  void _onRegister() {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isLoading = true);
-
-      // TODO: Panggil register use case / cubit
-      await Future.delayed(const Duration(seconds: 1));
-
-      if (mounted) {
-        setState(() => _isLoading = false);
-        // Navigasi ke halaman detail pribadi
-        Navigator.of(context).pushNamed('/tutor/otp');
-      }
+      context.read<TutorRegistrationCubit>().requestOtp(
+            email: _emailCtrl.text.trim(),
+            password: _passwordCtrl.text,
+          );
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.errorRed,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgWhite,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
+    return BlocListener<TutorRegistrationCubit, TutorRegistrationState>(
+      listener: (context, state) {
+        if (state is TutorRegistrationLoading) {
+          setState(() => _isLoading = true);
+        } else {
+          setState(() => _isLoading = false);
+          if (state is OtpSentSuccess) {
+            Navigator.of(context).pushNamed(
+              '/tutor/otp',
+              arguments: {
+                'email': _emailCtrl.text.trim(),
+                'context': 'register',
+              },
+            );
+          } else if (state is TutorRegistrationError) {
+            _showError(state.message);
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.bgWhite,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Form(
+              key: _formKey,
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
@@ -230,6 +258,6 @@ class _RegisterTutorPageState extends State<RegisterTutorPage> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

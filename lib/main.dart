@@ -54,6 +54,7 @@ import 'package:lazuadry_mobile_fe/presentation/pages/tutor/profil/edit_profil_t
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/profil/profil_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/pages/tutor/menunggu_verifikasi_tutor_page.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_registration/tutor_registration_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/booking_confirmation_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_profile/tutor_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/parent_dashboard/parent_dashboard_cubit.dart';
@@ -247,19 +248,39 @@ class LazuardyApp extends StatelessWidget {
           '/siswa/riwayat-pembayaran': (_) => const RiwayatPembayaranPage(),
 
           // ── Tutor: Register flow ───────────────────────────────
-          '/tutor/register': (_) => const RegisterTutorPage(),
-          '/tutor/detail-pribadi': (_) => const DetailPribadiTutorPage(),
-          '/tutor/detail-alamat': (_) => const DetailAlamatTutorPage(),
-          '/tutor/formulir-pendaftaran': (_) =>
-              const FormulirPendaftaranTutorPage(),
-          '/tutor/formulir-profil': (_) => const FormulirProfilTutorPage(),
+          '/tutor/register': (_) => BlocProvider.value(
+                value: sl<TutorRegistrationCubit>(),
+                child: const RegisterTutorPage(),
+              ),
+          '/tutor/detail-pribadi': (_) => BlocProvider.value(
+                value: sl<TutorRegistrationCubit>(),
+                child: const DetailPribadiTutorPage(),
+              ),
+          '/tutor/detail-alamat': (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider.value(value: sl<TutorRegistrationCubit>()),
+                  BlocProvider(create: (_) => sl<RegionCubit>()),
+                ],
+                child: const DetailAlamatTutorPage(),
+              ),
+          '/tutor/formulir-pendaftaran': (_) => BlocProvider.value(
+                value: sl<TutorRegistrationCubit>(),
+                child: const FormulirPendaftaranTutorPage(),
+              ),
+          '/tutor/formulir-profil': (_) => BlocProvider.value(
+                value: sl<TutorRegistrationCubit>(),
+                child: const FormulirProfilTutorPage(),
+              ),
           '/tutor/menunggu-verifikasi': (_) => const MenungguVerifikasiPage(),
           '/tutor/otp': (ctx) {
             final args =
                 ModalRoute.of(ctx)?.settings.arguments as Map<String, String>?;
-            return OtpVerificationTutorPage(
-              email: args?['email'],
-              context: args?['context'] ?? 'register',
+            return BlocProvider.value(
+              value: sl<TutorRegistrationCubit>(),
+              child: OtpVerificationTutorPage(
+                email: args?['email'],
+                context: args?['context'] ?? 'register',
+              ),
             );
           },
 

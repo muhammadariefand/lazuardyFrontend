@@ -2,9 +2,13 @@
 // Formulir Pendaftaran — chip Jenjang (single),
 // chip Mapel (multi), upload CV/KTP/Ijazah
 
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_registration/tutor_registration_cubit.dart';
 
 class FormulirPendaftaranTutorPage extends StatefulWidget {
   const FormulirPendaftaranTutorPage({super.key});
@@ -31,9 +35,9 @@ class _FormulirPendaftaranTutorPageState
   ];
 
   // ── State Upload Files ─────────────────────────────────────────
-  String? _cvFileName;
-  String? _ktpFileName;
-  String? _ijazahFileName;
+  PlatformFile? _cvFile;
+  PlatformFile? _ktpFile;
+  PlatformFile? _ijazahFile;
 
   bool _isLoading = false;
 
@@ -41,20 +45,24 @@ class _FormulirPendaftaranTutorPageState
   bool get _isValid =>
       _selectedJenjang != null &&
       _selectedMapel.isNotEmpty &&
-      _cvFileName != null &&
-      _ktpFileName != null &&
-      _ijazahFileName != null;
+      _cvFile != null &&
+      _ktpFile != null &&
+      _ijazahFile != null;
 
-  // Simulasi file picker
-  Future<String?> _pickFile(String type) async {
-    // TODO: Gunakan file_picker package
-    // final result = await FilePicker.platform.pickFiles(...)
-    // return result?.files.single.name;
-    await Future.delayed(const Duration(milliseconds: 300));
-    return 'file_$type.${type == 'cv' ? 'pdf' : 'jpg'}';
+  // Simulasi file picker dihapus, menggunakan file_picker yang sesungguhnya
+  Future<PlatformFile?> _pickFile(String type) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: type == 'cv' || type == 'ijazah' ? FileType.custom : FileType.image,
+      allowedExtensions: type == 'cv' || type == 'ijazah' ? ['pdf', 'doc', 'docx'] : null,
+      withData: true,
+    );
+    if (result != null && result.files.isNotEmpty) {
+      return result.files.single;
+    }
+    return null;
   }
 
-  void _onSelanjutnya() async {
+  void _onSelanjutnya() {
     if (!_isValid) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -67,12 +75,13 @@ class _FormulirPendaftaranTutorPageState
       return;
     }
 
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    if (mounted) {
-      setState(() => _isLoading = false);
-      Navigator.of(context).pushNamed('/tutor/formulir-profil');
-    }
+    context.read<TutorRegistrationCubit>().saveDocuments(
+          cv: _cvFile!,
+          idCard: _ktpFile!,
+          certificate: _ijazahFile!,
+        );
+
+    Navigator.of(context).pushNamed('/tutor/formulir-profil');
   }
 
   @override
@@ -129,13 +138,13 @@ class _FormulirPendaftaranTutorPageState
                     _UploadField(
                       hint: 'Upload file PDF/DOC',
                       icon: Icons.description_outlined,
-                      fileName: _cvFileName,
                       onTap: () async {
-                        final name = await _pickFile('cv');
-                        if (name != null) {
-                          setState(() => _cvFileName = name);
+                        final file = await _pickFile('cv');
+                        if (file != null) {
+                          setState(() => _cvFile = file);
                         }
                       },
+                      fileName: _cvFile?.name,
                     ),
 
                     const SizedBox(height: 16),
@@ -146,13 +155,13 @@ class _FormulirPendaftaranTutorPageState
                     _UploadField(
                       hint: 'Upload foto KTP (JPG/PNG)',
                       icon: Icons.badge_outlined,
-                      fileName: _ktpFileName,
                       onTap: () async {
-                        final name = await _pickFile('ktp');
-                        if (name != null) {
-                          setState(() => _ktpFileName = name);
+                        final file = await _pickFile('ktp');
+                        if (file != null) {
+                          setState(() => _ktpFile = file);
                         }
                       },
+                      fileName: _ktpFile?.name,
                     ),
 
                     const SizedBox(height: 16),
@@ -163,13 +172,13 @@ class _FormulirPendaftaranTutorPageState
                     _UploadField(
                       hint: 'Upload foto ijazah terakhir',
                       icon: Icons.school_outlined,
-                      fileName: _ijazahFileName,
                       onTap: () async {
-                        final name = await _pickFile('ijazah');
-                        if (name != null) {
-                          setState(() => _ijazahFileName = name);
+                        final file = await _pickFile('ijazah');
+                        if (file != null) {
+                          setState(() => _ijazahFile = file);
                         }
                       },
+                      fileName: _ijazahFile?.name,
                     ),
 
                     const SizedBox(height: 32),

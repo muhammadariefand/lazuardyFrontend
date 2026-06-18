@@ -15,6 +15,7 @@ import 'package:lazuadry_mobile_fe/data/datasources/schedule_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/report_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/student_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/data/datasources/tutor_dashboard_remote_ds.dart';
+import 'package:lazuadry_mobile_fe/data/datasources/tutor_registration_remote_ds.dart';
 
 // Repositories
 import 'package:lazuadry_mobile_fe/data/repositories/auth_repository_impl.dart';
@@ -31,6 +32,8 @@ import 'package:lazuadry_mobile_fe/domain/repositories/schedule_repository.dart'
 import 'package:lazuadry_mobile_fe/domain/repositories/report_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/student_repository.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/tutor_dashboard_repository.dart';
+import 'package:lazuadry_mobile_fe/data/repositories/tutor_registration_repository_impl.dart';
+import 'package:lazuadry_mobile_fe/domain/repositories/tutor_registration_repository.dart';
 
 // Usecases
 import 'package:lazuadry_mobile_fe/domain/usecases/auth/register_parent_usecase.dart';
@@ -59,6 +62,9 @@ import 'package:lazuadry_mobile_fe/domain/usecases/tutor/update_tutor_biodata_us
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/update_tutor_profile_photo_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/create_presence_usecase.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/siswa/get_student_reviews_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor_registration/get_subject_by_class_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor_registration/register_tutor_usecase.dart';
+import 'package:lazuadry_mobile_fe/domain/usecases/tutor_registration/validate_bank_account_usecase.dart';
 
 import 'package:lazuadry_mobile_fe/data/datasources/package_remote_ds.dart';
 import 'package:lazuadry_mobile_fe/domain/repositories/package_repository.dart';
@@ -95,6 +101,7 @@ import 'package:lazuadry_mobile_fe/presentation/state_management/auth/auth_cubit
 import 'package:lazuadry_mobile_fe/presentation/state_management/student_profile/student_profile_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_dashboard/tutor_dashboard_cubit.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/ulasan_tutor/ulasan_tutor_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_registration/tutor_registration_cubit.dart';
 import 'package:lazuadry_mobile_fe/domain/usecases/tutor/confirm_booking_usecase.dart';
 import 'package:lazuadry_mobile_fe/presentation/state_management/schedule/booking_confirmation_cubit.dart';
 
@@ -197,6 +204,9 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<DashboardRemoteDataSource>(
     () => DashboardRemoteDataSourceImpl(dio: sl()),
   );
+
+  // Tutor Registration Remote Data Source
+  sl.registerLazySingleton(() => TutorRegistrationRemoteDataSource(sl()));
 
   // Remote Data Source untuk Schedule
   sl.registerLazySingleton<ScheduleRemoteDataSource>(
@@ -403,9 +413,21 @@ Future<void> initDependencies() async {
     createPresenceUseCase: sl(),
   ));
 
-  sl.registerFactory(() => ParentProfileCubit(
-    getParentProfileUseCase: sl(),
-  ));
+  sl.registerFactory(
+    () => ParentProfileCubit(
+      getParentProfileUseCase: sl(),
+    ),
+  );
+
+  sl.registerLazySingleton(
+    () => TutorRegistrationCubit(
+      registerOtpEmailUsecase: sl(),
+      verifyOtpRegisterEmailUsecase: sl(),
+      validateBankAccountUseCase: sl(),
+      getSubjectByClassUseCase: sl(),
+      registerTutorUseCase: sl(),
+    ),
+  );
 
   sl.registerFactory(() => TutorDashboardCubit(
     getTutorDashboardUseCase: sl(),
@@ -467,15 +489,20 @@ Future<void> initDependencies() async {
   );
   sl.registerLazySingleton(() => GetPayoutHistoryUseCase(sl()));
   sl.registerLazySingleton(() => TakeMoneyUseCase(sl()));
+
+  // Tutor Registration UseCases
+  sl.registerLazySingleton(() => GetSubjectByClassUseCase(sl()));
+  sl.registerLazySingleton(() => RegisterTutorUseCase(sl()));
+  sl.registerLazySingleton(() => ValidateBankAccountUseCase(sl()));
   sl.registerFactory(() => TarikSaldoCubit(
     getTutorProfileUseCase: sl(),
     getPayoutHistoryUseCase: sl(),
     takeMoneyUseCase: sl(),
   ));
 
-  // Tutor: Profil Mengajar
-  sl.registerLazySingleton<ProfilMengajarRemoteDataSource>(
-    () => ProfilMengajarRemoteDataSourceImpl(dio: sl()),
+  // Tutor Registration Repository
+  sl.registerLazySingleton<TutorRegistrationRepository>(
+    () => TutorRegistrationRepositoryImpl(remoteDataSource: sl()),
   );
   sl.registerLazySingleton<ProfilMengajarRepository>(
     () => ProfilMengajarRepositoryImpl(remoteDataSource: sl()),

@@ -5,8 +5,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_registration/tutor_registration_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_registration/tutor_registration_state.dart';
 
 class OtpVerificationTutorPage extends StatefulWidget {
   /// Email tujuan pengiriman OTP (untuk ditampilkan di deskripsi jika perlu)
@@ -102,7 +105,7 @@ class _OtpVerificationTutorPageState extends State<OtpVerificationTutorPage> {
   }
 
   // ── Verifikasi OTP ───────────────────────────────────────────
-  void _onVerify() async {
+  void _onVerify() {
     if (!_isOtpComplete) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -114,19 +117,11 @@ class _OtpVerificationTutorPageState extends State<OtpVerificationTutorPage> {
       return;
     }
 
-    setState(() => _isLoading = true);
-
-    // TODO: Panggil use case verifikasi OTP
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      setState(() => _isLoading = false);
-      // Navigasi berdasarkan konteks asal
-      if (widget.context == 'forgot_password') {
-        Navigator.of(context).pushNamed('/reset-password');
-      } else {
-        Navigator.of(context).pushNamed('/tutor/detail-pribadi');
-      }
+    if (widget.context == 'forgot_password') {
+       // TODO: verify password reset OTP
+       Navigator.of(context).pushNamed('/reset-password');
+    } else {
+       context.read<TutorRegistrationCubit>().verifyOtp(otp: _otpValue);
     }
   }
 
@@ -151,15 +146,34 @@ class _OtpVerificationTutorPageState extends State<OtpVerificationTutorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgWhite,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
+    return BlocListener<TutorRegistrationCubit, TutorRegistrationState>(
+      listener: (context, state) {
+        if (state is TutorRegistrationLoading) {
+          setState(() => _isLoading = true);
+        } else {
+          setState(() => _isLoading = false);
+          if (state is OtpVerifiedSuccess) {
+            Navigator.of(context).pushNamed('/tutor/detail-pribadi');
+          } else if (state is TutorRegistrationError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.errorRed,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.bgWhite,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
 
               // ── Back button ───────────────────────────────
               IconButton(
@@ -282,7 +296,8 @@ class _OtpVerificationTutorPageState extends State<OtpVerificationTutorPage> {
                   ],
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

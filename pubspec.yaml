@@ -49,6 +49,7 @@ dependencies:
   # Secure storage (untuk simpan JWT token)
   flutter_secure_storage: ^9.0.0
   intl: ^0.20.2
+  http_parser: ^4.1.2
 
 dev_dependencies:
   flutter_test:

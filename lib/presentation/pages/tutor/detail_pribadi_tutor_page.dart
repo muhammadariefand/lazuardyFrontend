@@ -4,8 +4,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_registration/tutor_registration_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_registration/tutor_registration_state.dart';
 
 class DetailPribadiTutorPage extends StatefulWidget {
   const DetailPribadiTutorPage({super.key});
@@ -24,6 +28,7 @@ class _DetailPribadiTutorPageState extends State<DetailPribadiTutorPage> {
 
   String? _selectedJenisKelamin;
   String? _selectedBank;
+  PlatformFile? _profileImage;
   bool _isLoading = false;
 
   static const _jenisKelaminList = ['Laki-laki', 'Perempuan'];
@@ -59,36 +64,88 @@ class _DetailPribadiTutorPageState extends State<DetailPribadiTutorPage> {
     if (picked != null) {
       setState(() {
         _tglLahirCtrl.text =
-            '${picked.day.toString().padLeft(2, '0')}/'
-            '${picked.month.toString().padLeft(2, '0')}/'
-            '${picked.year.toString().substring(2)}';
+            '${picked.year.toString()}-'
+            '${picked.month.toString().padLeft(2, '0')}-'
+            '${picked.day.toString().padLeft(2, '0')}';
       });
     }
   }
 
-  void _onSelanjutnya() async {
+  Future<void> _pickImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        _profileImage = result.files.single;
+      });
+    }
+  }
+
+  void _onSelanjutnya() {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() => _isLoading = true);
-      await Future.delayed(const Duration(seconds: 1));
-      if (mounted) {
-        setState(() => _isLoading = false);
-        Navigator.of(context).pushNamed('/tutor/formulir-pendaftaran');
+      if (_selectedJenisKelamin == null || _selectedBank == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pilih Jenis Kelamin dan Bank terlebih dahulu'),
+            backgroundColor: AppColors.errorRed,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
       }
+      
+      context.read<TutorRegistrationCubit>().validateBank(
+        name: _namaCtrl.text,
+        gender: _selectedJenisKelamin!,
+        dob: _tglLahirCtrl.text,
+        waNumber: _waCtrl.text,
+        bankCode: _selectedBank!,
+        accountNumber: _rekeningCtrl.text,
+        profilePhoto: _profileImage,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgWhite,
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+    return BlocListener<TutorRegistrationCubit, TutorRegistrationState>(
+      listener: (context, state) {
+        if (state is TutorRegistrationLoading) {
+          setState(() => _isLoading = true);
+        } else {
+          setState(() => _isLoading = false);
+          if (state is BankAccountValid) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Nama Pemilik Rekening: ${state.accountHolderName}'),
+                backgroundColor: AppColors.primary,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            Navigator.of(context).pushNamed('/tutor/detail-alamat');
+          } else if (state is TutorRegistrationError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.errorRed,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.bgWhite,
+        body: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -109,6 +166,68 @@ class _DetailPribadiTutorPageState extends State<DetailPribadiTutorPage> {
 
                       const Text('Detail Pribadi',
                           style: AppTextStyles.heading2),
+                      const SizedBox(height: 20),
+
+                      // ── Foto Profil ────────────────────────
+                      _buildLabel('Foto Profil'),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE5E7EB),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt_outlined,
+                                color: Color(0xFF6B7280),
+                                size: 40,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Pilih foto JPG atau PNG maksimal 5 MB',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Color(0xFF9CA3AF),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: _pickImage,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                minimumSize: const Size(0, 0),
+                              ),
+                              child: const Text(
+                                'Unggah Foto',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            if (_profileImage != null) ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                _profileImage!.name,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
                       const SizedBox(height: 20),
 
                       // ── Nama Lengkap ─────────────────────────
@@ -268,8 +387,9 @@ class _DetailPribadiTutorPageState extends State<DetailPribadiTutorPage> {
           ),
         ),
       ),
-    );
+    ));
   }
+
 
   Widget _buildLabel(String text) =>
       Text(text, style: AppTextStyles.label);

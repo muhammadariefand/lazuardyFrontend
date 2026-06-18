@@ -5,8 +5,11 @@
 //        (4) Counter deskripsi berubah merah di 90% limit
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lazuadry_mobile_fe/core/theme/app_theme.dart';
 import 'package:lazuadry_mobile_fe/presentation/widgets/shared_widget.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_registration/tutor_registration_cubit.dart';
+import 'package:lazuadry_mobile_fe/presentation/state_management/tutor_registration/tutor_registration_state.dart';
 
 class FormulirProfilTutorPage extends StatefulWidget {
   const FormulirProfilTutorPage({super.key});
@@ -17,6 +20,8 @@ class FormulirProfilTutorPage extends StatefulWidget {
 }
 
 class _FormulirProfilTutorPageState extends State<FormulirProfilTutorPage> {
+  // ── Kelas & Subject (Dihapus sesuai permintaan) ────────────────
+
   // ── Metode Pembelajaran (single select) ───────────────────────
   String? _selectedMetode;
   static const _metodeList = ['Online', 'Offline'];
@@ -71,8 +76,9 @@ class _FormulirProfilTutorPageState extends State<FormulirProfilTutorPage> {
   }
 
   // ── Validasi & Submit ─────────────────────────────────────────
-  void _onSimpan() async {
-    // FIX 1: Validasi metode (sebelumnya tidak divalidasi)
+  void _onSimpan() {
+
+    // FIX 1: Validasi metode
     if (_selectedMetode == null) {
       _showError('Pilih metode pembelajaran terlebih dahulu');
       return;
@@ -90,18 +96,11 @@ class _FormulirProfilTutorPageState extends State<FormulirProfilTutorPage> {
       return;
     }
 
-    setState(() => _isLoading = true);
-    // TODO: Panggil use case simpan profil tutor
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      setState(() => _isLoading = false);
-      // FIX 4: Route yang benar untuk tutor
-      Navigator.of(context).pushNamed(
-        '/tutor/beranda',
-        arguments: {'context': 'register'},
-      );
-    }
+    context.read<TutorRegistrationCubit>().submitRegistration(
+          learningMethods: [_selectedMetode!],
+          bio: _deskripsiCtrl.text,
+          schedules: _selectedJadwal,
+        );
   }
 
   void _showError(String message) {
@@ -122,12 +121,25 @@ class _FormulirProfilTutorPageState extends State<FormulirProfilTutorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgWhite,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
+    return BlocListener<TutorRegistrationCubit, TutorRegistrationState>(
+      listener: (context, state) {
+        if (state is TutorRegistrationLoading) {
+          setState(() => _isLoading = true);
+        } else {
+          setState(() => _isLoading = false);
+          if (state is TutorRegistrationSuccess) {
+            Navigator.of(context).pushNamedAndRemoveUntil('/tutor/menunggu-verifikasi', (route) => false);
+          } else if (state is TutorRegistrationError) {
+            _showError(state.message);
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.bgWhite,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
@@ -196,7 +208,7 @@ class _FormulirProfilTutorPageState extends State<FormulirProfilTutorPage> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   // ── FIX: Method ini yang sebelumnya TIDAK ADA (root cause error) ──
